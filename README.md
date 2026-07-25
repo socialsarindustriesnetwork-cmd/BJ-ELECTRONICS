@@ -1,32 +1,32 @@
-# BJ Electronics Admin
+# BJ Electronics Commerce Platform
 
-Secure, responsive, production-oriented commerce administration application for BJ Electronics.
+Responsive BJ Electronics storefront and secure administration application.
 
 ## Current foundation
 
+- Public responsive storefront shell at `/`
+- Protected administration dashboard at `/admin`
 - Next.js App Router and strict TypeScript
-- Responsive desktop, tablet, and mobile dashboard
-- Light and dark themes
 - Official BJ Electronics brand assets
+- Light and dark administration themes
 - PostgreSQL-backed email/password authentication
 - Secure password hashing and revocable server-side sessions
 - Role and audit-log scaffolding
-- Protected administration dashboard at `/admin`
-- Canonical production origin `https://www.bjelectronics.shop`
+- Canonical production origin `https://bjelectronics.shop`
 - Hostinger managed Node.js deployment configuration
 - GitHub CI, dependency updates, and production release verification
 
 ## Application routes
 
 ```text
-/             Redirects to /admin
+/             Public BJ Electronics storefront
 /admin        Protected administration dashboard
 /sign-in      Secure administrator sign-in
 /sign-up      Initial owner bootstrap or controlled staff registration
 /health       Runtime, database, and authentication-secret health check
 ```
 
-Unauthenticated requests to `/admin` are redirected to `/sign-in?next=%2Fadmin`. Authentication callbacks only accept local `/admin` destinations.
+Unauthenticated requests to `/admin` are redirected to `/sign-in?next=%2Fadmin`. Authentication callbacks only accept local `/admin` destinations. `www.bjelectronics.shop` and legacy misspelled hostnames permanently redirect to `bjelectronics.shop`.
 
 ## Development
 
@@ -60,8 +60,8 @@ See `docs/AUTHENTICATION.md`.
 The application is prepared for Hostinger managed Node.js Web App hosting from `main`.
 
 ```text
-Canonical URL: https://www.bjelectronics.shop
-Admin URL: https://www.bjelectronics.shop/admin
+Store URL: https://bjelectronics.shop
+Admin URL: https://bjelectronics.shop/admin
 Node.js: 22
 Install: npm install --no-audit --no-fund
 Migration: npm run db:migrate

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Create account",
   description: "Create a secure BJ Electronics administration account.",
   alternates: { canonical: "/sign-up" },
+  robots: { index: false, follow: false, noarchive: true },
 };
 
 export default async function SignUpPage() {

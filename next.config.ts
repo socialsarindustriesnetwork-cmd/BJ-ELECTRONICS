@@ -23,6 +23,11 @@ const securityHeaders = [
   },
 ];
 
+const privateRouteHeaders = [
+  { key: "Cache-Control", value: "private, no-store, max-age=0" },
+  { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
@@ -31,20 +36,20 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        has: [{ type: "host", value: "bjelectronics.shop" }],
-        destination: "https://www.bjelectronics.shop/:path*",
+        has: [{ type: "host", value: "www.bjelectronics.shop" }],
+        destination: "https://bjelectronics.shop/:path*",
         permanent: true,
       },
       {
         source: "/:path*",
         has: [{ type: "host", value: "bjelecteonics.shop" }],
-        destination: "https://www.bjelectronics.shop/:path*",
+        destination: "https://bjelectronics.shop/:path*",
         permanent: true,
       },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.bjelecteonics.shop" }],
-        destination: "https://www.bjelectronics.shop/:path*",
+        destination: "https://bjelectronics.shop/:path*",
         permanent: true,
       },
       {
@@ -67,10 +72,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/admin/:path*",
-        headers: [
-          { key: "Cache-Control", value: "private, no-store, max-age=0" },
-          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
-        ],
+        headers: privateRouteHeaders,
+      },
+      {
+        source: "/sign-in",
+        headers: privateRouteHeaders,
+      },
+      {
+        source: "/sign-up",
+        headers: privateRouteHeaders,
       },
     ];
   },

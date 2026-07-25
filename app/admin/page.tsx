@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Administration dashboard",
   description: "Secure BJ Electronics commerce administration dashboard.",
   alternates: { canonical: "/admin" },
+  robots: { index: false, follow: false, noarchive: true },
   openGraph: { url: "/admin" },
 };
 

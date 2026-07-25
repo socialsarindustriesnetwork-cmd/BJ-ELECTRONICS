@@ -20,9 +20,13 @@ async function verifyRouting() {
     redirect: "manual",
     headers: { "user-agent": "BJ-Electronics-GitHub-Release-Check/1.0" },
   });
-  const rootLocation = rootResponse.headers.get("location") ?? "";
-  if (![301, 302, 303, 307, 308].includes(rootResponse.status) || !rootLocation.includes("/admin")) {
-    throw new Error(`Root route did not redirect to /admin (HTTP ${rootResponse.status}, location ${rootLocation}).`);
+  if (!rootResponse.ok) {
+    throw new Error(`Storefront root is unavailable (HTTP ${rootResponse.status}).`);
+  }
+
+  const rootBody = await rootResponse.text();
+  if (!rootBody.includes("BJ Electronics")) {
+    throw new Error("Storefront root did not render the BJ Electronics public store shell.");
   }
 
   const adminResponse = await fetch(new URL("/admin", canonicalBase), {
@@ -39,7 +43,7 @@ async function verifyRouting() {
     );
   }
 
-  console.log("Production routing is correct: / → /admin → /sign-in.");
+  console.log("Production routing is correct: public store at / and protected dashboard at /admin.");
 }
 
 for (let attempt = 1; attempt <= attempts; attempt += 1) {

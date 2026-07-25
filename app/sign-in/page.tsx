@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Sign in",
   description: "Secure access to the BJ Electronics administration dashboard.",
   alternates: { canonical: "/sign-in" },
+  robots: { index: false, follow: false, noarchive: true },
 };
 
 function safeNextPath(value: string | string[] | undefined): string {

@@ -1,29 +1,29 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.bjelectronics.shop";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://bjelectronics.shop";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: { default: "BJ Electronics Admin", template: "%s | BJ Electronics" },
-  description: "Secure professional commerce operations dashboard for BJ Electronics.",
-  applicationName: "BJ Electronics Admin",
-  alternates: { canonical: "/admin" },
+  title: { default: "BJ Electronics", template: "%s | BJ Electronics" },
+  description: "Official BJ Electronics online store and secure commerce platform.",
+  applicationName: "BJ Electronics",
+  alternates: { canonical: "/" },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [{ url: "/brand/icons/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/brand/icons/app-icon.svg" }],
   },
   robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false, noimageindex: true },
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, noimageindex: false },
   },
   openGraph: {
     type: "website",
-    url: "/admin",
-    title: "BJ Electronics Admin",
-    description: "Secure responsive dashboard for store operations.",
+    url: "/",
+    title: "BJ Electronics",
+    description: "Smart technology, dependable service, and secure shopping.",
     images: [{ url: "/brand/social/og-default.svg", width: 1200, height: 630 }],
   },
 };
