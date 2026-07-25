@@ -17,6 +17,21 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      NODE_ENV: production
+      NEXT_PUBLIC_STORE_URL: https://www.bjelectronics.shop
+      NEXT_PUBLIC_ADMIN_URL: https://admin.bjelectronics.shop
+      NEXT_PUBLIC_APP_URL: https://admin.bjelectronics.shop
+      NEXT_TELEMETRY_DISABLED: 1
+      DATABASE_URL: postgresql://ci_user:ci_password@localhost:5432/bj_electronics_ci
+      DB_POOL_MAX: 10
+      DB_SSL: true
+      DB_SSL_REJECT_UNAUTHORIZED: true
+      REALTIME_POLL_INTERVAL_MS: 1500
+      AUTH_SECRET: ci-only-secret-with-at-least-thirty-two-characters
+      ALLOW_PUBLIC_SIGNUP: false
+      ADMIN_BOOTSTRAP_EMAILS: owner@bjelectronics.shop
+      RELEASE_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +41,15 @@ jobs:
 
       - name: Install locked workspace dependencies
         run: npm ci --no-audit --no-fund
+
+      - name: Validate immutable migration set
+        run: npm run db:validate
+
+      - name: Validate store production environment contract
+        run: npm run validate:store
+
+      - name: Validate admin production environment contract
+        run: npm run validate:admin
 
       - name: Type-check store and admin
         run: npm run typecheck
@@ -38,18 +62,13 @@ jobs:
       - name: Build store and admin
         id: build
         continue-on-error: true
-        env:
-          NEXT_PUBLIC_STORE_URL: https://www.bjelectronics.shop
-          NEXT_PUBLIC_ADMIN_URL: https://admin.bjelectronics.shop
-          NEXT_PUBLIC_APP_URL: https://admin.bjelectronics.shop
-          NEXT_TELEMETRY_DISABLED: 1
         run: npm run build 2>&1 | tee build.log
 
       - name: Upload diagnostics on failure
         if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: monorepo-quality-diagnostics
+          name: phase-1-quality-diagnostics
           path: |
             lint.log
             build.log
