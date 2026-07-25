@@ -10,43 +10,94 @@ if (!storeValue || !adminValue) {
 
 const storeUrl = new URL(storeValue);
 const adminUrl = new URL(adminValue);
+const apexUrl = process.env.APEX_STORE_URL ? new URL(process.env.APEX_STORE_URL) : null;
+const expectedRelease = process.env.EXPECTED_RELEASE_SHA?.trim() || "";
+const requireReleaseMatch = process.env.REQUIRE_RELEASE_MATCH === "true";
 const attempts = Number(process.env.HEALTH_CHECK_ATTEMPTS ?? 12);
 const delayMs = Number(process.env.HEALTH_CHECK_DELAY_MS ?? 10_000);
-const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/2.0" };
+const timeoutMs = Number(process.env.HTTP_REQUEST_TIMEOUT_MS ?? 10_000);
+const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/3.0" };
+
+if (storeUrl.protocol !== "https:" || adminUrl.protocol !== "https:") {
+  console.error("Production store and admin URLs must use HTTPS.");
+  process.exit(1);
+}
+if (storeUrl.origin === adminUrl.origin) {
+  console.error("Store and admin must use isolated origins.");
+  process.exit(1);
+}
+
+async function request(url, init = {}) {
+  return fetch(url, {
+    ...init,
+    signal: AbortSignal.timeout(timeoutMs),
+    headers: { ...headers, ...(init.headers ?? {}) },
+  });
+}
 
 async function responseText(url, init = {}) {
-  const response = await fetch(url, { ...init, headers: { ...headers, ...(init.headers ?? {}) } });
+  const response = await request(url, init);
   const body = await response.text();
   return { response, body };
 }
 
-async function assertHealthy(baseUrl, expectedService) {
-  const { response, body } = await responseText(new URL("/health", baseUrl), {
-    cache: "no-store",
-  });
+function assertHeader(response, name, includes) {
+  const value = response.headers.get(name) ?? "";
+  if (!value.toLowerCase().includes(includes.toLowerCase())) {
+    throw new Error(`${response.url || "response"} is missing ${name}: ${includes}.`);
+  }
+}
+
+function assertRelease(payload, hostname) {
+  const actual = payload.release?.commit ?? "unknown";
+  if (!expectedRelease) return;
+  if (actual === "unknown") {
+    const message = `${hostname} does not expose release commit metadata.`;
+    if (requireReleaseMatch) throw new Error(message);
+    console.warn(message);
+    return;
+  }
+  if (!actual.startsWith(expectedRelease) && !expectedRelease.startsWith(actual)) {
+    throw new Error(`${hostname} serves release ${actual}, expected ${expectedRelease}.`);
+  }
+}
+
+async function assertHealth(baseUrl, path, expectedStatus, expectedService) {
+  const { response, body } = await responseText(new URL(path, baseUrl), { cache: "no-store" });
   let payload;
   try {
     payload = JSON.parse(body);
   } catch {
-    throw new Error(`${baseUrl.hostname} health endpoint did not return JSON.`);
+    throw new Error(`${baseUrl.hostname}${path} did not return JSON.`);
   }
-  if (!response.ok || payload.status !== "healthy" || payload.service !== expectedService) {
+  if (!response.ok || payload.status !== expectedStatus || payload.service !== expectedService) {
     throw new Error(
-      `${baseUrl.hostname} health check failed (HTTP ${response.status}, service ${payload.service ?? "unknown"}).`,
+      `${baseUrl.hostname}${path} failed (HTTP ${response.status}, status ${payload.status ?? "unknown"}).`,
     );
   }
+  assertHeader(response, "cache-control", "no-store");
+  assertRelease(payload, baseUrl.hostname);
+  return payload;
 }
 
 async function verifyStore() {
+  await assertHealth(storeUrl, "/health/live", "alive", "bj-electronics-store");
+  await assertHealth(storeUrl, "/health/ready", "healthy", "bj-electronics-store");
+
   const { response, body } = await responseText(new URL("/", storeUrl), { redirect: "manual" });
   if (!response.ok || !body.includes("BJ Electronics")) {
     throw new Error(`Store root is unavailable or invalid (HTTP ${response.status}).`);
   }
+  assertHeader(response, "strict-transport-security", "max-age=");
+  assertHeader(response, "content-security-policy", "default-src 'self'");
+  assertHeader(response, "x-content-type-options", "nosniff");
 
-  const adminRedirect = await fetch(new URL("/admin", storeUrl), {
-    redirect: "manual",
-    headers,
-  });
+  const setCookie = response.headers.get("set-cookie") ?? "";
+  if (/session|auth/i.test(setCookie)) {
+    throw new Error("Public storefront unexpectedly issued an authentication/session cookie.");
+  }
+
+  const adminRedirect = await request(new URL("/admin", storeUrl), { redirect: "manual" });
   const location = adminRedirect.headers.get("location") ?? "";
   if (![301, 302, 303, 307, 308].includes(adminRedirect.status) || !location.startsWith(adminUrl.origin)) {
     throw new Error(
@@ -54,12 +105,17 @@ async function verifyStore() {
     );
   }
 
-  const catalog = await fetch(new URL("/api/catalog", storeUrl), { headers, cache: "no-store" });
+  const catalog = await request(new URL("/api/catalog", storeUrl), { cache: "no-store" });
   if (!catalog.ok) throw new Error(`Store catalog API failed (HTTP ${catalog.status}).`);
+  const catalogPayload = await catalog.json();
+  if (!Array.isArray(catalogPayload.products)) throw new Error("Store catalog API returned an invalid payload.");
 }
 
 async function verifyAdmin() {
-  const root = await fetch(new URL("/", adminUrl), { redirect: "manual", headers });
+  await assertHealth(adminUrl, "/health/live", "alive", "bj-electronics-admin");
+  await assertHealth(adminUrl, "/health/ready", "healthy", "bj-electronics-admin");
+
+  const root = await request(new URL("/", adminUrl), { redirect: "manual" });
   const location = root.headers.get("location") ?? "";
   if (![301, 302, 303, 307, 308].includes(root.status) || !location.includes("/sign-in")) {
     throw new Error(
@@ -67,30 +123,45 @@ async function verifyAdmin() {
     );
   }
 
-  const signIn = await fetch(new URL("/sign-in", adminUrl), { redirect: "manual", headers });
+  const signIn = await request(new URL("/sign-in", adminUrl), { redirect: "manual" });
   if (!signIn.ok) throw new Error(`Admin sign-in page is unavailable (HTTP ${signIn.status}).`);
-  const cacheControl = signIn.headers.get("cache-control") ?? "";
-  const robots = signIn.headers.get("x-robots-tag") ?? "";
-  if (!cacheControl.includes("no-store") || !robots.includes("noindex")) {
-    throw new Error("Admin security response headers are incomplete.");
+  assertHeader(signIn, "cache-control", "no-store");
+  assertHeader(signIn, "x-robots-tag", "noindex");
+  assertHeader(signIn, "strict-transport-security", "max-age=");
+  assertHeader(signIn, "content-security-policy", "frame-ancestors 'none'");
+  assertHeader(signIn, "cross-origin-resource-policy", "same-origin");
+}
+
+async function verifyApexRedirect() {
+  if (!apexUrl) return;
+  const response = await request(apexUrl, { redirect: "manual" });
+  const location = response.headers.get("location") ?? "";
+  if (![301, 302, 307, 308].includes(response.status) || !location.startsWith(storeUrl.origin)) {
+    throw new Error(`Apex domain did not redirect to the canonical store (HTTP ${response.status}, location ${location}).`);
   }
 }
 
 for (let attempt = 1; attempt <= attempts; attempt += 1) {
   try {
-    await Promise.all([
-      assertHealthy(storeUrl, "bj-electronics-store"),
-      assertHealthy(adminUrl, "bj-electronics-admin"),
-    ]);
-    await verifyStore();
-    await verifyAdmin();
-    console.log(`Store and admin are healthy: ${storeUrl.origin} + ${adminUrl.origin}`);
+    await Promise.all([verifyStore(), verifyAdmin(), verifyApexRedirect()]);
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      event: "production.verification.succeeded",
+      store: storeUrl.origin,
+      admin: adminUrl.origin,
+      expectedRelease: expectedRelease || null,
+    }));
     process.exit(0);
   } catch (error) {
-    console.error(`Attempt ${attempt}:`, error instanceof Error ? error.message : error);
+    console.error(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      event: "production.verification.attempt_failed",
+      attempt,
+      error: error instanceof Error ? error.message : String(error),
+    }));
   }
   if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
-console.error("Store/admin health, separation, or routing verification failed.");
+console.error("Store/admin health, separation, security, or routing verification failed.");
 process.exit(1);
