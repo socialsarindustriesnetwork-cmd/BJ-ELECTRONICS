@@ -1,0 +1,29 @@
+{
+  "brand": "BJ Electronics",
+  "colors": {
+    "blue": "#2E3591",
+    "red": "#EB1D27",
+    "gray": "#5A5C62",
+    "navy": "#080B14"
+  },
+  "logos": {
+    "primary": "/brand/logos/bj-electronics-horizontal.svg",
+    "darkTheme": "/brand/logos/bj-electronics-horizontal-dark.svg",
+    "black": "/brand/logos/bj-electronics-horizontal-black.svg",
+    "white": "/brand/logos/bj-electronics-horizontal-white.svg",
+    "stacked": "/brand/logos/bj-electronics-stacked.svg"
+  },
+  "icons": {
+    "symbol": "/brand/icons/bj-electronics-symbol.svg",
+    "favicon": "/brand/icons/favicon.svg",
+    "appIcon": "/brand/icons/app-icon.svg"
+  },
+  "social": {
+    "avatar": "/brand/social/profile-avatar.svg",
+    "openGraph": "/brand/social/og-default.svg"
+  },
+  "banners": {
+    "light": "/brand/banners/store-banner-light.svg",
+    "dark": "/brand/banners/store-banner-dark.svg"
+  }
+}
