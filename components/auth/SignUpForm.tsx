@@ -53,7 +53,7 @@ export function SignUpForm() {
         return;
       }
 
-      router.replace("/");
+      router.replace("/admin");
       router.refresh();
     } catch {
       setErrors({ form: "The authentication service could not be reached." });
