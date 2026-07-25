@@ -84,14 +84,17 @@ The commerce release adds:
 
 ## Production deployment
 
-Create two Hostinger Node.js Web Apps from the same GitHub repository and `main` branch.
+Create two Hostinger Node.js Web Apps from the same GitHub repository and `main` branch. Keep the application working directory at the repository root so npm workspaces, shared packages, and `package-lock.json` are available.
 
 ### Store deployment
 
 ```text
-Root directory: apps/store
+Repository working directory: /
+Workspace application: apps/store
 Domain: www.bjelectronics.shop
-Build from repository root: npm install && npm run db:migrate && npm run build:store
+Install: npm ci --no-audit --no-fund
+Migration: npm run db:migrate
+Build: npm run build:store
 Start: npm run start:store
 Health: https://www.bjelectronics.shop/health
 ```
@@ -99,9 +102,12 @@ Health: https://www.bjelectronics.shop/health
 ### Admin deployment
 
 ```text
-Root directory: apps/admin
+Repository working directory: /
+Workspace application: apps/admin
 Domain: admin.bjelectronics.shop
-Build from repository root: npm install && npm run db:migrate && npm run build:admin
+Install: npm ci --no-audit --no-fund
+Migration: npm run db:migrate
+Build: npm run build:admin
 Start: npm run start:admin
 Health: https://admin.bjelectronics.shop/health
 ```
