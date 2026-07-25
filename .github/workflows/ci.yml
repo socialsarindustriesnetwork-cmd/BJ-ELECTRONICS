@@ -2,36 +2,56 @@ name: CI
 
 on:
   push:
-    branches: [main, feat/professional-admin-foundation]
+    branches: [main]
   pull_request:
     branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-      - run: npm run typecheck
-      - name: Run lint
+          cache: npm
+
+      - name: Install workspace dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Type-check store and admin
+        run: npm run typecheck
+
+      - name: Lint store and admin
         id: lint
         continue-on-error: true
         run: npm run lint 2>&1 | tee lint.log
-      - name: Run production build
+
+      - name: Build store and admin
         id: build
         continue-on-error: true
+        env:
+          NEXT_PUBLIC_STORE_URL: https://www.bjelectronics.shop
+          NEXT_PUBLIC_ADMIN_URL: https://admin.bjelectronics.shop
+          NEXT_PUBLIC_APP_URL: https://admin.bjelectronics.shop
+          NEXT_TELEMETRY_DISABLED: 1
         run: npm run build 2>&1 | tee build.log
+
       - name: Upload diagnostics on failure
         if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: quality-diagnostics
+          name: monorepo-quality-diagnostics
           path: |
             lint.log
             build.log
+
       - name: Enforce quality gate
         if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         run: exit 1
