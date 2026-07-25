@@ -1,0 +1,76 @@
+.socialSection {
+  display: grid;
+  gap: 18px;
+}
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.providerButton {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid #d8dee9;
+  border-radius: 12px;
+  background: #fff;
+  color: #253047;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.providerButton:hover {
+  border-color: #aeb7cb;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, .08);
+  transform: translateY(-1px);
+}
+
+.providerButton:focus-visible {
+  outline: 3px solid rgba(46, 53, 145, .18);
+  outline-offset: 2px;
+}
+
+.providerButton svg {
+  flex: 0 0 auto;
+}
+
+.divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  color: #8b95a7;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: #e7eaf0;
+}
+
+.divider span {
+  position: relative;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, .98);
+}
+
+@media (max-width: 520px) {
+  .socialGrid {
+    grid-template-columns: 1fr;
+  }
+}
