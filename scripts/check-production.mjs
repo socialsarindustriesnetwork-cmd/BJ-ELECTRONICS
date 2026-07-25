@@ -10,9 +10,37 @@ if (!baseUrl) {
   process.exit(1);
 }
 
-const healthUrl = new URL("/health", baseUrl).toString();
+const canonicalBase = new URL(baseUrl);
+const healthUrl = new URL("/health", canonicalBase).toString();
 const attempts = Number(process.env.HEALTH_CHECK_ATTEMPTS ?? 12);
 const delayMs = Number(process.env.HEALTH_CHECK_DELAY_MS ?? 10_000);
+
+async function verifyRouting() {
+  const rootResponse = await fetch(new URL("/", canonicalBase), {
+    redirect: "manual",
+    headers: { "user-agent": "BJ-Electronics-GitHub-Release-Check/1.0" },
+  });
+  const rootLocation = rootResponse.headers.get("location") ?? "";
+  if (![301, 302, 303, 307, 308].includes(rootResponse.status) || !rootLocation.includes("/admin")) {
+    throw new Error(`Root route did not redirect to /admin (HTTP ${rootResponse.status}, location ${rootLocation}).`);
+  }
+
+  const adminResponse = await fetch(new URL("/admin", canonicalBase), {
+    redirect: "manual",
+    headers: { "user-agent": "BJ-Electronics-GitHub-Release-Check/1.0" },
+  });
+  const adminLocation = adminResponse.headers.get("location") ?? "";
+  if (
+    ![301, 302, 303, 307, 308].includes(adminResponse.status) ||
+    !adminLocation.includes("/sign-in")
+  ) {
+    throw new Error(
+      `Unauthenticated /admin did not redirect to sign-in (HTTP ${adminResponse.status}, location ${adminLocation}).`,
+    );
+  }
+
+  console.log("Production routing is correct: / → /admin → /sign-in.");
+}
 
 for (let attempt = 1; attempt <= attempts; attempt += 1) {
   try {
@@ -22,6 +50,7 @@ for (let attempt = 1; attempt <= attempts; attempt += 1) {
     });
     const body = await response.json();
     if (response.ok && body.status === "healthy") {
+      await verifyRouting();
       console.log(`Production is healthy: ${healthUrl}`);
       process.exit(0);
     }
@@ -32,5 +61,5 @@ for (let attempt = 1; attempt <= attempts; attempt += 1) {
   if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
-console.error(`Production health verification failed: ${healthUrl}`);
+console.error(`Production health or routing verification failed: ${healthUrl}`);
 process.exit(1);
