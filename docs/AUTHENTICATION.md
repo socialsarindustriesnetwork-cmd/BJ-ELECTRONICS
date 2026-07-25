@@ -1,5 +1,22 @@
 # Authentication Architecture
 
+## Protected administration route
+
+The canonical administration dashboard is:
+
+```text
+https://www.bjelectronics.shop/admin
+```
+
+Routing rules:
+
+- `/` redirects to `/admin`.
+- `/admin` is rendered only after a valid server-side session is resolved.
+- Unauthenticated `/admin` requests redirect to `/sign-in?next=%2Fadmin`.
+- Sign-in callback destinations are restricted to local `/admin` paths to prevent open redirects.
+- Authenticated users visiting `/sign-in` or `/sign-up` are returned to `/admin`.
+- Legacy `/dashboard` routes permanently redirect to `/admin`.
+
 ## Implemented controls
 
 - Email/password sign-in and account creation
@@ -15,6 +32,7 @@
 - Protected server-rendered dashboard
 - First-account super administrator bootstrap
 - Configurable public signup
+- No-store and no-index response headers on `/admin`
 
 ## Roles
 
@@ -24,7 +42,7 @@
 - `STAFF`
 - `VIEWER`
 
-The first active account receives `SUPER_ADMIN`. Later public registrations receive `STAFF`. Disable public registration after bootstrap by setting:
+The first active account receives `SUPER_ADMIN`. Later public registrations receive `STAFF`. Disable public registration after bootstrap:
 
 ```env
 ALLOW_PUBLIC_SIGNUP=false
@@ -35,7 +53,7 @@ Future staff onboarding should use invitations created by an authorized administ
 ## Required runtime configuration
 
 ```env
-NEXT_PUBLIC_APP_URL=https://www.bjelecteonics.shop
+NEXT_PUBLIC_APP_URL=https://www.bjelectronics.shop
 AUTH_SECRET=<at-least-32-random-characters>
 DATABASE_URL=postgresql://user:password@host:5432/bj_electronics
 DB_SSL=true
@@ -70,13 +88,14 @@ The migration creates:
 1. Configure the production database and `AUTH_SECRET`.
 2. Run `npm run db:migrate`.
 3. Deploy the application.
-4. Open `/sign-up`.
+4. Open `https://www.bjelectronics.shop/sign-up`.
 5. Create the initial owner account.
-6. Confirm the account receives `SUPER_ADMIN`.
-7. Set `ALLOW_PUBLIC_SIGNUP=false`.
-8. Redeploy or restart the app.
+6. Confirm access to `https://www.bjelectronics.shop/admin`.
+7. Confirm the account receives `SUPER_ADMIN`.
+8. Set `ALLOW_PUBLIC_SIGNUP=false`.
+9. Redeploy or restart the app.
 
-## Security limitations scheduled next
+## Security extensions scheduled next
 
 - Email verification
 - Password reset email delivery
