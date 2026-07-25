@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const repositoryRoot = path.resolve(process.cwd(), "../..");
 
 const securityHeaders = [
   { key: "Cache-Control", value: "private, no-store, max-age=0" },
