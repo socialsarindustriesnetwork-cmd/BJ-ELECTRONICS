@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const repositoryRoot = path.resolve(process.cwd(), "../..");
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -43,26 +42,10 @@ const nextConfig: NextConfig = {
         destination: "https://www.bjelectronics.shop/:path*",
         permanent: true,
       },
-      {
-        source: "/admin",
-        destination: "https://admin.bjelectronics.shop/",
-        permanent: true,
-      },
-      {
-        source: "/admin/:path*",
-        destination: "https://admin.bjelectronics.shop/:path*",
-        permanent: true,
-      },
-      {
-        source: "/sign-in",
-        destination: "https://admin.bjelectronics.shop/sign-in",
-        permanent: true,
-      },
-      {
-        source: "/sign-up",
-        destination: "https://admin.bjelectronics.shop/sign-up",
-        permanent: true,
-      },
+      { source: "/admin", destination: "https://admin.bjelectronics.shop/", permanent: true },
+      { source: "/admin/:path*", destination: "https://admin.bjelectronics.shop/:path*", permanent: true },
+      { source: "/sign-in", destination: "https://admin.bjelectronics.shop/sign-in", permanent: true },
+      { source: "/sign-up", destination: "https://admin.bjelectronics.shop/sign-up", permanent: true },
     ];
   },
   async headers() {
