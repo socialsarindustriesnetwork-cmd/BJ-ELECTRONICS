@@ -7,7 +7,7 @@ import styles from "./auth.module.css";
 
 type FieldErrors = Partial<Record<"email" | "password" | "form", string>>;
 
-export function SignInForm({ nextPath = "/" }: { nextPath?: string }) {
+export function SignInForm({ nextPath = "/admin" }: { nextPath?: string }) {
   const router = useRouter();
   const [fields, setFields] = useState({ email: "", password: "", remember: true });
   const [errors, setErrors] = useState<FieldErrors>({});
