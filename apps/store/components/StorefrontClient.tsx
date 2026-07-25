@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product } from "@bje/database";
+import type { CommerceCart } from "@bje/database/transactions";
 import { BrandLogo } from "@bje/ui";
 
 function money(product: Product): string {
@@ -20,14 +21,6 @@ function productInitials(name: string): string {
     .join("");
 }
 
-function readCart(): Record<string, number> {
-  try {
-    return JSON.parse(localStorage.getItem("bje-cart") ?? "{}") as Record<string, number>;
-  } catch {
-    return {};
-  }
-}
-
 export function StorefrontClient({
   initialProducts,
   latestEventId,
@@ -39,12 +32,26 @@ export function StorefrontClient({
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [query, setQuery] = useState("");
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cart, setCart] = useState<CommerceCart | null>(null);
+  const [cartMessage, setCartMessage] = useState("");
+  const [adding, setAdding] = useState<string | null>(null);
   const [live, setLive] = useState(false);
   const cursor = useRef(latestEventId);
 
   useEffect(() => {
-    setCart(readCart());
+    void fetch("/api/cart", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { cart?: CommerceCart }) => {
+        if (payload.cart) setCart(payload.cart);
+      })
+      .catch(() => undefined);
+
+    const cartListener = (event: Event) => {
+      const count = (event as CustomEvent<number>).detail;
+      setCart((current) => current ? { ...current, itemCount: count } : current);
+    };
+    window.addEventListener("bje:cart", cartListener);
+
     const source = new EventSource(`/api/realtime?after=${cursor.current}`);
     source.onopen = () => setLive(true);
     source.onerror = () => setLive(false);
@@ -63,7 +70,10 @@ export function StorefrontClient({
         })
         .catch(() => undefined);
     });
-    return () => source.close();
+    return () => {
+      window.removeEventListener("bje:cart", cartListener);
+      source.close();
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -74,13 +84,28 @@ export function StorefrontClient({
     );
   }, [products, query]);
 
-  const cartCount = Object.values(cart).reduce((total, quantity) => total + quantity, 0);
-
-  function addToCart(product: Product) {
-    const next = { ...cart, [product.id]: (cart[product.id] ?? 0) + 1 };
-    setCart(next);
-    localStorage.setItem("bje-cart", JSON.stringify(next));
+  async function addToCart(product: Product) {
+    setAdding(product.id);
+    setCartMessage("");
+    try {
+      const currentQuantity = cart?.lines.find((line) => line.productId === product.id)?.quantity ?? 0;
+      const response = await fetch("/api/cart/items", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ productId: product.id, quantity: currentQuantity + 1 }),
+      });
+      const payload = await response.json() as { cart?: CommerceCart; error?: string };
+      if (!response.ok || !payload.cart) throw new Error(payload.error || "Could not add this product.");
+      setCart(payload.cart);
+      setCartMessage(`${product.name} added to cart.`);
+    } catch (error) {
+      setCartMessage(error instanceof Error ? error.message : "Could not add this product.");
+    } finally {
+      setAdding(null);
+    }
   }
+
+  const cartCount = cart?.itemCount ?? 0;
 
   return (
     <div className="store-shell">
@@ -96,9 +121,9 @@ export function StorefrontClient({
           </nav>
           <div className="header-actions">
             <a className="icon-action" href={adminUrl} aria-label="Administration portal">↗</a>
-            <button className="cart-button" type="button" aria-label={`${cartCount} items in cart`}>
+            <Link className="cart-button" href="/cart" aria-label={`${cartCount} items in cart`}>
               Cart <span className="cart-count">{cartCount}</span>
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -119,7 +144,7 @@ export function StorefrontClient({
             <div className="trust-row">
               <span>Secure shopping</span>
               <span>Live inventory</span>
-              <span>Responsive service</span>
+              <span>Transactional checkout</span>
             </div>
           </div>
           <div className="hero-visual" aria-hidden="true">
@@ -127,9 +152,9 @@ export function StorefrontClient({
             <div className="hero-device">
               <small>Connected commerce platform</small>
               <strong>Store and operations, synchronized.</strong>
-              <p>Catalog changes publish to the storefront through a durable realtime event stream.</p>
+              <p>Catalog, inventory, carts, and orders are coordinated through one transactional data layer.</p>
               <div className="device-stats">
-                <span>Fast catalog</span><span>Secure admin</span><span>Live updates</span>
+                <span>Fast catalog</span><span>Secure checkout</span><span>Live updates</span>
               </div>
             </div>
           </div>
@@ -151,6 +176,7 @@ export function StorefrontClient({
             />
             <span className="live-state">{live ? "Live catalog connected" : "Reconnecting live catalog"}</span>
           </div>
+          {cartMessage ? <div className="store-notice" role="status">{cartMessage}</div> : null}
 
           {filtered.length ? (
             <div className="product-grid">
@@ -177,9 +203,9 @@ export function StorefrontClient({
                         className="add-button"
                         type="button"
                         onClick={() => addToCart(product)}
-                        disabled={product.inventoryQuantity < 1}
+                        disabled={product.inventoryQuantity < 1 || adding === product.id}
                       >
-                        {product.inventoryQuantity < 1 ? "Unavailable" : "Add to cart"}
+                        {product.inventoryQuantity < 1 ? "Unavailable" : adding === product.id ? "Adding…" : "Add to cart"}
                       </button>
                     </div>
                   </div>
@@ -198,7 +224,7 @@ export function StorefrontClient({
           <div className="service-grid">
             <article className="service-card"><span className="service-icon">✓</span><h3>Trusted catalog</h3><p>Published products come from one controlled operational source of truth.</p></article>
             <article className="service-card"><span className="service-icon">↻</span><h3>Realtime accuracy</h3><p>Product and inventory changes appear without requiring a full deployment.</p></article>
-            <article className="service-card"><span className="service-icon">▣</span><h3>Responsive by design</h3><p>Optimized navigation and product discovery across desktop, tablet, and mobile.</p></article>
+            <article className="service-card"><span className="service-icon">▣</span><h3>Protected checkout</h3><p>Inventory is locked and revalidated when an order is created.</p></article>
           </div>
         </section>
       </main>
