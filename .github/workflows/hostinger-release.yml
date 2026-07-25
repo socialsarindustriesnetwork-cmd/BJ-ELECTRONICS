@@ -1,0 +1,48 @@
+name: Hostinger Release
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  release:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PRODUCTION_URL: ${{ vars.HOSTINGER_PRODUCTION_URL }}
+      DEPLOY_WEBHOOK_URL: ${{ secrets.HOSTINGER_DEPLOY_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Trigger optional Hostinger deployment webhook
+        run: |
+          if [ -n "$DEPLOY_WEBHOOK_URL" ]; then
+            curl --fail --silent --show-error \
+              --request POST \
+              --header "content-type: application/json" \
+              --data "{\"repository\":\"${GITHUB_REPOSITORY}\",\"ref\":\"main\",\"sha\":\"${GITHUB_SHA}\"}" \
+              "$DEPLOY_WEBHOOK_URL"
+          else
+            echo "No HOSTINGER_DEPLOY_WEBHOOK_URL secret configured; relying on Hostinger Git auto-deploy."
+          fi
+
+      - name: Verify production after deployment
+        run: |
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "HOSTINGER_PRODUCTION_URL repository variable is not configured; skipping smoke test."
+            exit 0
+          fi
+          node scripts/check-production.mjs "$PRODUCTION_URL"
