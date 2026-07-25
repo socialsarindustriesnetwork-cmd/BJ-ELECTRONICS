@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE TABLE IF NOT EXISTS commerce_products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(180) NOT NULL,
