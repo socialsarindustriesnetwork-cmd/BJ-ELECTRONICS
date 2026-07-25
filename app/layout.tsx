@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.bjelecteonics.shop";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.bjelectronics.shop";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: { default: "BJ Electronics Admin", template: "%s | BJ Electronics" },
   description: "Secure professional commerce operations dashboard for BJ Electronics.",
   applicationName: "BJ Electronics Admin",
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/admin" },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [{ url: "/brand/icons/favicon.svg", type: "image/svg+xml" }],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: "/",
+    url: "/admin",
     title: "BJ Electronics Admin",
     description: "Secure responsive dashboard for store operations.",
     images: [{ url: "/brand/social/og-default.svg", width: 1200, height: 630 }],
