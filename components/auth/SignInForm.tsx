@@ -3,11 +3,21 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
 import styles from "./auth.module.css";
 
 type FieldErrors = Partial<Record<"email" | "password" | "form", string>>;
+type ProviderAvailability = { google: boolean; facebook: boolean };
 
-export function SignInForm({ nextPath = "/admin" }: { nextPath?: string }) {
+export function SignInForm({
+  nextPath = "/admin",
+  providers,
+  externalError,
+}: {
+  nextPath?: string;
+  providers: ProviderAvailability;
+  externalError?: string | null;
+}) {
   const router = useRouter();
   const [fields, setFields] = useState({ email: "", password: "", remember: true });
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -44,12 +54,16 @@ export function SignInForm({ nextPath = "/admin" }: { nextPath?: string }) {
     }
   }
 
+  const formError = errors.form ?? externalError;
+
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
-      {errors.form && (
+      <SocialAuthButtons providers={providers} nextPath={nextPath} />
+
+      {formError && (
         <div className={styles.formError} role="alert">
           <span aria-hidden="true">!</span>
-          {errors.form}
+          {formError}
         </div>
       )}
 
@@ -108,7 +122,7 @@ export function SignInForm({ nextPath = "/admin" }: { nextPath?: string }) {
           />
           <span>Keep me signed in</span>
         </label>
-        <span className={styles.mutedLink} title="Password recovery will be enabled with email delivery.">
+        <span className={styles.mutedLink} title="Password recovery requires a configured email delivery provider.">
           Forgot password?
         </span>
       </div>
