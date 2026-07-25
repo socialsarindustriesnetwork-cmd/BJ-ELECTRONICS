@@ -17,7 +17,11 @@
     "lint": "npm run lint --workspace=@bje/store && npm run lint --workspace=@bje/admin",
     "typecheck": "npm run typecheck --workspace=@bje/store && npm run typecheck --workspace=@bje/admin",
     "db:migrate": "node scripts/migrate.mjs",
-    "production:check": "node scripts/check-production.mjs"
+    "db:validate": "node scripts/validate-migrations.mjs",
+    "validate:store": "node scripts/validate-env.mjs --service=store",
+    "validate:admin": "node scripts/validate-env.mjs --service=admin",
+    "production:check": "node scripts/check-production.mjs",
+    "quality": "npm run db:validate && npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
     "bcryptjs": "3.0.2",

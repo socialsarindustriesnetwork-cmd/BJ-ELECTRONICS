@@ -6,6 +6,10 @@ on:
     types: [completed]
   workflow_dispatch:
 
+concurrency:
+  group: bj-electronics-production
+  cancel-in-progress: false
+
 jobs:
   release:
     if: >
@@ -13,22 +17,33 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     permissions:
       contents: read
     env:
       STORE_URL: ${{ vars.HOSTINGER_STORE_URL }}
       ADMIN_URL: ${{ vars.HOSTINGER_ADMIN_URL }}
+      APEX_STORE_URL: ${{ vars.HOSTINGER_APEX_URL }}
       STORE_DEPLOY_WEBHOOK_URL: ${{ secrets.HOSTINGER_STORE_DEPLOY_WEBHOOK_URL }}
       ADMIN_DEPLOY_WEBHOOK_URL: ${{ secrets.HOSTINGER_ADMIN_DEPLOY_WEBHOOK_URL }}
+      EXPECTED_RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      HEALTH_CHECK_ATTEMPTS: 18
+      HEALTH_CHECK_DELAY_MS: 10000
+      HTTP_REQUEST_TIMEOUT_MS: 10000
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Record release candidate
+        run: |
+          echo "Deploying commit $EXPECTED_RELEASE_SHA"
+          git rev-parse HEAD
+          test "$(git rev-parse HEAD)" = "$EXPECTED_RELEASE_SHA"
 
       - name: Trigger optional store deployment webhook
         run: |
@@ -36,7 +51,7 @@ jobs:
             curl --fail --silent --show-error \
               --request POST \
               --header "content-type: application/json" \
-              --data "{\"application\":\"store\",\"repository\":\"${GITHUB_REPOSITORY}\",\"ref\":\"main\",\"sha\":\"${GITHUB_SHA}\"}" \
+              --data "{\"application\":\"store\",\"repository\":\"${GITHUB_REPOSITORY}\",\"ref\":\"main\",\"sha\":\"${EXPECTED_RELEASE_SHA}\"}" \
               "$STORE_DEPLOY_WEBHOOK_URL"
           else
             echo "No store webhook configured; relying on Hostinger Git auto-deploy."
@@ -48,7 +63,7 @@ jobs:
             curl --fail --silent --show-error \
               --request POST \
               --header "content-type: application/json" \
-              --data "{\"application\":\"admin\",\"repository\":\"${GITHUB_REPOSITORY}\",\"ref\":\"main\",\"sha\":\"${GITHUB_SHA}\"}" \
+              --data "{\"application\":\"admin\",\"repository\":\"${GITHUB_REPOSITORY}\",\"ref\":\"main\",\"sha\":\"${EXPECTED_RELEASE_SHA}\"}" \
               "$ADMIN_DEPLOY_WEBHOOK_URL"
           else
             echo "No admin webhook configured; relying on Hostinger Git auto-deploy."
@@ -57,7 +72,7 @@ jobs:
       - name: Verify store and admin production deployments
         run: |
           if [ -z "$STORE_URL" ] || [ -z "$ADMIN_URL" ]; then
-            echo "HOSTINGER_STORE_URL and HOSTINGER_ADMIN_URL must both be configured to run smoke tests."
+            echo "HOSTINGER_STORE_URL and HOSTINGER_ADMIN_URL are not both configured; production verification is unavailable."
             exit 0
           fi
           node scripts/check-production.mjs "$STORE_URL" "$ADMIN_URL"
