@@ -17,7 +17,7 @@ type UserRecord = {
   id: string;
   name: string;
   email: string;
-  password_hash: string;
+  password_hash: string | null;
   role: UserRole;
   status: "ACTIVE" | "SUSPENDED";
 };
@@ -53,7 +53,9 @@ export async function POST(request: Request) {
       );
       const user = users.rows[0];
       const valid =
-        user?.status === "ACTIVE" && (await verifyPassword(password, user.password_hash));
+        user?.status === "ACTIVE" &&
+        Boolean(user.password_hash) &&
+        (await verifyPassword(password, user.password_hash as string));
 
       if (!valid || !user) {
         const error = new Error("Invalid email or password.");
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
         action: "AUTH.SIGN_IN",
         targetType: "SESSION",
         targetId: user.id,
-        metadata: { remember },
+        metadata: { remember, method: "PASSWORD" },
         ip,
       });
 
