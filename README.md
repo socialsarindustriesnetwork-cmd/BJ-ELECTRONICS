@@ -1,32 +1,46 @@
 # BJ Electronics Commerce Platform
 
-Responsive BJ Electronics storefront and secure administration application.
+Production-oriented full-stack monorepo for the public BJ Electronics store and its isolated administration application.
 
-## Current foundation
-
-- Public responsive storefront shell at `/`
-- Protected administration dashboard at `/admin`
-- Next.js App Router and strict TypeScript
-- Official BJ Electronics brand assets
-- Light and dark administration themes
-- PostgreSQL-backed email/password authentication
-- Secure password hashing and revocable server-side sessions
-- Role and audit-log scaffolding
-- Canonical production origin `https://bjelectronics.shop`
-- Hostinger managed Node.js deployment configuration
-- GitHub CI, dependency updates, and production release verification
-
-## Application routes
+## Applications
 
 ```text
-/             Public BJ Electronics storefront
-/admin        Protected administration dashboard
-/sign-in      Secure administrator sign-in
-/sign-up      Initial owner bootstrap or controlled staff registration
-/health       Runtime, database, and authentication-secret health check
+apps/store   Public storefront
+apps/admin   Secure administration portal
 ```
 
-Unauthenticated requests to `/admin` are redirected to `/sign-in?next=%2Fadmin`. Authentication callbacks only accept local `/admin` destinations. `www.bjelectronics.shop` and legacy misspelled hostnames permanently redirect to `bjelectronics.shop`.
+Canonical production domains:
+
+```text
+Store: https://www.bjelectronics.shop
+Admin: https://admin.bjelectronics.shop
+```
+
+`www.bjelectronics.shop-admin` is not a usable public hostname because `.shop-admin` is not a delegated top-level domain. The administration application therefore uses the secure subdomain `admin.bjelectronics.shop`.
+
+## Shared platform packages
+
+```text
+packages/config     Canonical origins and environment configuration
+packages/database   PostgreSQL catalog, inventory, metrics, and event repositories
+packages/realtime   Durable commerce event and server-sent event contracts
+packages/ui         Shared BJ Electronics brand components
+```
+
+## Implemented capabilities
+
+- Responsive public storefront with search, product details, and persistent local cart
+- Isolated responsive administration dashboard
+- Database-backed product and inventory management
+- Draft, active, and archived publication workflows
+- Optimistic product-version protection for concurrent edits
+- Durable commerce event log and server-sent event synchronization
+- PostgreSQL-backed administrator sessions
+- Password, Google/Gmail, and Facebook authentication
+- Role-aware product mutation APIs
+- Connected-account security management
+- Separate health endpoints for both applications
+- GitHub Actions quality gates and dual Hostinger deployment preparation
 
 ## Development
 
@@ -34,10 +48,18 @@ Unauthenticated requests to `/admin` are redirected to `/sign-in?next=%2Fadmin`.
 npm install
 cp .env.example .env.local
 npm run db:migrate
-npm run dev
+npm run dev:store
+npm run dev:admin
 ```
 
-Quality checks:
+Default local applications:
+
+```text
+Store: http://localhost:3000
+Admin: run on a separate port, for example npm run dev:admin -- --port 3001
+```
+
+Quality gates:
 
 ```bash
 npm run typecheck
@@ -45,38 +67,52 @@ npm run lint
 npm run build
 ```
 
-## Authentication bootstrap
+## Database
 
-1. Configure `DATABASE_URL` and a strong `AUTH_SECRET`.
-2. Run `npm run db:migrate`.
-3. Open `/sign-up`.
-4. Create the first account; it becomes `SUPER_ADMIN`.
-5. Set `ALLOW_PUBLIC_SIGNUP=false` after bootstrap.
+Run all idempotent migrations from the repository root:
 
-See `docs/AUTHENTICATION.md`.
+```bash
+npm run db:migrate
+```
+
+The commerce release adds:
+
+- `commerce_products`
+- `commerce_events`
+- Product, inventory, publication, and optimistic-version controls
+- Initial catalog records for deployment verification
 
 ## Production deployment
 
-The application is prepared for Hostinger managed Node.js Web App hosting from `main`.
+Create two Hostinger Node.js Web Apps from the same GitHub repository and `main` branch.
+
+### Store deployment
 
 ```text
-Store URL: https://bjelectronics.shop
-Admin URL: https://bjelectronics.shop/admin
-Node.js: 22
-Install: npm install --no-audit --no-fund
-Migration: npm run db:migrate
-Build: npm run build
-Start: npm run start
-Health: /health
+Root directory: apps/store
+Domain: www.bjelectronics.shop
+Build from repository root: npm install && npm run db:migrate && npm run build:store
+Start: npm run start:store
+Health: https://www.bjelectronics.shop/health
 ```
 
-See `docs/HOSTINGER_GITHUB_INTEGRATION.md`.
+### Admin deployment
+
+```text
+Root directory: apps/admin
+Domain: admin.bjelectronics.shop
+Build from repository root: npm install && npm run db:migrate && npm run build:admin
+Start: npm run start:admin
+Health: https://admin.bjelectronics.shop/health
+```
+
+Both applications use the same PostgreSQL database. Administration mutations create durable events that the storefront consumes through `/api/realtime`.
+
+See `docs/MONOREPO_DEPLOYMENT.md`, `docs/AUTHENTICATION.md`, and `docs/HOSTINGER_GITHUB_INTEGRATION.md`.
 
 ## Brand directories
 
 - Canonical source: `assets/brand/source/`
-- Runtime logos: `public/brand/logos/`
-- App and browser icons: `public/brand/icons/`
-- Social previews: `public/brand/social/`
-- Store and repository banners: `public/brand/banners/`
-- Asset index: `public/brand/brand-assets.json`
+- Legacy runtime assets: `public/brand/`
+- Administration runtime assets: `apps/admin/public/brand/`
+- Shared vector brand component: `packages/ui/src/index.tsx`

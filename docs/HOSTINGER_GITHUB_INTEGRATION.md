@@ -1,130 +1,174 @@
 # Hostinger and GitHub Integration
 
-## Production target
+## Production targets
 
-- Repository: `socialsarindustriesnetwork-cmd/BJ-ELECTRONICS`
-- Production branch: `main`
-- Store URL: `https://bjelectronics.shop`
-- Administration URL: `https://bjelectronics.shop/admin`
-- Account security URL: `https://bjelectronics.shop/admin/security`
-- Runtime: Node.js 22
-- Install: `npm install --no-audit --no-fund`
-- Database migration: `npm run db:migrate`
-- Build: `npm run build`
-- Start: `npm run start`
-- Health endpoint: `/health`
+```text
+Repository: socialsarindustriesnetwork-cmd/BJ-ELECTRONICS
+Branch: main
+Runtime: Node.js 22
+Store: https://www.bjelectronics.shop
+Admin: https://admin.bjelectronics.shop
+```
 
-## Hostinger environment variables
+Deploy two independent Hostinger Node.js Web Apps from the same repository. Both applications use the same PostgreSQL database and deploy automatically from `main`.
 
-Configure these in the Hostinger Web App environment:
+## Store application
+
+```text
+Workspace: apps/store
+Install: npm install --no-audit --no-fund
+Migration: npm run db:migrate
+Build: npm run build:store
+Start: npm run start:store
+Health: https://www.bjelectronics.shop/health
+```
+
+Store environment:
 
 ```env
-NEXT_PUBLIC_APP_URL=https://bjelectronics.shop
+NEXT_PUBLIC_STORE_URL=https://www.bjelectronics.shop
+NEXT_PUBLIC_ADMIN_URL=https://admin.bjelectronics.shop
+NODE_ENV=production
+NEXT_TELEMETRY_DISABLED=1
+DATABASE_URL=<shared-production-postgresql-connection>
+DB_POOL_MAX=10
+DB_SSL=true
+DB_SSL_REJECT_UNAUTHORIZED=true
+REALTIME_POLL_INTERVAL_MS=1500
+```
+
+## Admin application
+
+```text
+Workspace: apps/admin
+Install: npm install --no-audit --no-fund
+Migration: npm run db:migrate
+Build: npm run build:admin
+Start: npm run start:admin
+Health: https://admin.bjelectronics.shop/health
+```
+
+Admin environment:
+
+```env
+NEXT_PUBLIC_APP_URL=https://admin.bjelectronics.shop
+NEXT_PUBLIC_ADMIN_URL=https://admin.bjelectronics.shop
+NEXT_PUBLIC_STORE_URL=https://www.bjelectronics.shop
 NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
 AUTH_SECRET=<generated-secret>
-DATABASE_URL=<production-postgresql-connection>
+DATABASE_URL=<shared-production-postgresql-connection>
 DB_POOL_MAX=10
 DB_SSL=true
 DB_SSL_REJECT_UNAUTHORIZED=true
 ALLOW_PUBLIC_SIGNUP=true
 ADMIN_BOOTSTRAP_EMAILS=owner@bjelectronics.shop
-
-GOOGLE_CLIENT_ID=<google-web-client-id>
-GOOGLE_CLIENT_SECRET=<google-web-client-secret>
-
-FACEBOOK_CLIENT_ID=<meta-app-id>
-FACEBOOK_CLIENT_SECRET=<meta-app-secret>
-FACEBOOK_GRAPH_API_VERSION=<version-configured-in-meta-app>
+GOOGLE_CLIENT_ID=<optional-google-web-client-id>
+GOOGLE_CLIENT_SECRET=<optional-google-client-secret>
+FACEBOOK_CLIENT_ID=<optional-meta-app-id>
+FACEBOOK_CLIENT_SECRET=<optional-meta-app-secret>
+FACEBOOK_GRAPH_API_VERSION=<configured-version>
 ```
 
-Provider variables are optional as complete pairs. The sign-in interface displays only correctly configured providers. After creating the owner and any approved staff accounts, change `ALLOW_PUBLIC_SIGNUP` to `false`.
+After creating approved accounts, set `ALLOW_PUBLIC_SIGNUP=false`.
 
-## Provider callback registration
-
-Register these exact HTTPS callback URLs:
+## OAuth callbacks
 
 ```text
 Google:
-https://bjelectronics.shop/api/auth/oauth/google/callback
+https://admin.bjelectronics.shop/api/auth/oauth/google/callback
 
 Facebook:
-https://bjelectronics.shop/api/auth/oauth/facebook/callback
+https://admin.bjelectronics.shop/api/auth/oauth/facebook/callback
 ```
 
-The scheme, hostname, path, and trailing-slash behavior must match the provider configuration exactly.
+Provider callback configuration must match the exact HTTPS origin and path.
 
-## Domain binding and canonical routing
+## Domain binding
 
-1. Bind `bjelectronics.shop` to the Hostinger Web App.
-2. Set `bjelectronics.shop` as the primary hostname.
-3. Add `www.bjelectronics.shop` as an alias.
-4. Enable SSL for both apex and `www` hostnames.
-5. Redirect `www.bjelectronics.shop` to `https://bjelectronics.shop`.
-6. Bind owned legacy misspelled hostnames as redirecting aliases.
-7. Verify `/` renders the public storefront.
-8. Verify unauthenticated `/admin` redirects to `/sign-in?next=%2Fadmin`.
-9. Verify `/admin/security` requires authentication.
+### Store
 
-The application also enforces canonical-host redirects at the Next.js layer. DNS and Hostinger bindings are still required for requests to reach the application.
+1. Bind `www.bjelectronics.shop` as primary.
+2. Bind `bjelectronics.shop` as a redirecting alias.
+3. Enable SSL for both hostnames.
+4. Redirect the apex hostname to `https://www.bjelectronics.shop`.
+
+### Admin
+
+1. Create the DNS record for `admin.bjelectronics.shop`.
+2. Bind it to the admin Node.js Web App.
+3. Enable SSL.
+4. Optionally bind `www.admin.bjelectronics.shop` as a redirecting alias.
+
+`www.bjelectronics.shop-admin` is not a valid public deployment target because `.shop-admin` is not a delegated top-level domain.
 
 ## Direct Git integration
 
-1. In Hostinger hPanel, open the deployed Web App.
-2. Connect GitHub and select `socialsarindustriesnetwork-cmd/BJ-ELECTRONICS`.
+For each Hostinger Web App:
+
+1. Connect GitHub.
+2. Select `socialsarindustriesnetwork-cmd/BJ-ELECTRONICS`.
 3. Select `main`.
-4. Enable automatic deployment when `main` changes.
-5. Configure Node.js 22 and the commands above.
-6. Add the production environment variables without committing secrets.
-7. Run `npm run db:migrate` before the first OAuth-enabled release.
-8. Deploy, verify `/health`, then test each configured provider.
-9. Create the approved owner and confirm `SUPER_ADMIN` access.
-10. Disable public signup and restart the application.
+4. Enable automatic deployments.
+5. Use Node.js 22.
+6. Configure the app-specific build and start commands.
+7. Add environment variables without committing secrets.
+8. Deploy and verify the application health endpoint.
 
 ## GitHub release automation
 
-The repository includes `.github/workflows/hostinger-release.yml`.
+The repository workflow `.github/workflows/hostinger-release.yml` can trigger and verify both deployments.
 
-Configure the repository variable:
-
-```text
-HOSTINGER_PRODUCTION_URL=https://bjelectronics.shop
-```
-
-When Hostinger supplies a deployment webhook, configure this GitHub Actions secret:
+Repository variables:
 
 ```text
-HOSTINGER_DEPLOY_WEBHOOK_URL=<secret-webhook-url>
+HOSTINGER_STORE_URL=https://www.bjelectronics.shop
+HOSTINGER_ADMIN_URL=https://admin.bjelectronics.shop
 ```
 
-The workflow:
+Optional secrets:
 
-1. Waits for CI to pass on `main`.
-2. Calls the optional deployment webhook.
-3. Otherwise relies on Hostinger Git auto-deploy.
-4. Polls `/health`.
-5. Verifies `/` renders the public store.
-6. Verifies unauthenticated `/admin` redirects to `/sign-in`.
-7. Fails when production health or routing is incorrect.
+```text
+HOSTINGER_STORE_DEPLOY_WEBHOOK_URL=<store-deployment-webhook>
+HOSTINGER_ADMIN_DEPLOY_WEBHOOK_URL=<admin-deployment-webhook>
+```
+
+The release workflow waits for CI, calls each optional webhook, checks both `/health` endpoints, validates the public store, confirms store-to-admin separation, and confirms unauthenticated admin access redirects to sign-in.
 
 Never commit database credentials, `AUTH_SECRET`, OAuth client secrets, or deployment webhooks.
 
-## Expected health response
+## Expected health states
 
-A healthy response requires PostgreSQL connectivity, a valid `AUTH_SECRET`, and no malformed provider configuration:
+Store:
 
 ```json
 {
   "status": "healthy",
+  "service": "bj-electronics-store",
   "checks": {
     "database": "up",
-    "authenticationSecret": "configured",
-    "oauth": {
-      "google": "configured",
-      "facebook": "configured"
-    }
+    "realtime": "enabled"
   }
 }
 ```
 
-A provider may report `disabled` without degrading the application. Facebook reports `misconfigured` when credentials exist but `FACEBOOK_GRAPH_API_VERSION` is invalid or missing.
+Admin:
+
+```json
+{
+  "status": "healthy",
+  "service": "bj-electronics-admin",
+  "checks": {
+    "authenticationDatabase": "up",
+    "commerceDatabase": "up",
+    "authenticationSecret": "configured",
+    "oauth": {
+      "google": "configured",
+      "facebook": "configured"
+    },
+    "realtimePublishing": "enabled"
+  }
+}
+```
+
+OAuth providers may be `disabled` without degrading the admin app. Facebook becomes `misconfigured` when credentials exist but the configured Graph API version is invalid or missing.
