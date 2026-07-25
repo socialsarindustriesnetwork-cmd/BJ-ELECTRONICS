@@ -16,7 +16,7 @@ const requireReleaseMatch = process.env.REQUIRE_RELEASE_MATCH === "true";
 const attempts = Number(process.env.HEALTH_CHECK_ATTEMPTS ?? 12);
 const delayMs = Number(process.env.HEALTH_CHECK_DELAY_MS ?? 10_000);
 const timeoutMs = Number(process.env.HTTP_REQUEST_TIMEOUT_MS ?? 10_000);
-const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/3.0" };
+const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/4.0" };
 
 if (storeUrl.protocol !== "https:" || adminUrl.protocol !== "https:") {
   console.error("Production store and admin URLs must use HTTPS.");
@@ -92,8 +92,8 @@ async function verifyStore() {
   assertHeader(response, "content-security-policy", "default-src 'self'");
   assertHeader(response, "x-content-type-options", "nosniff");
 
-  const setCookie = response.headers.get("set-cookie") ?? "";
-  if (/session|auth/i.test(setCookie)) {
+  const rootCookie = response.headers.get("set-cookie") ?? "";
+  if (/session|auth/i.test(rootCookie)) {
     throw new Error("Public storefront unexpectedly issued an authentication/session cookie.");
   }
 
@@ -109,6 +109,27 @@ async function verifyStore() {
   if (!catalog.ok) throw new Error(`Store catalog API failed (HTTP ${catalog.status}).`);
   const catalogPayload = await catalog.json();
   if (!Array.isArray(catalogPayload.products)) throw new Error("Store catalog API returned an invalid payload.");
+
+  for (const path of ["/cart", "/checkout"]) {
+    const page = await responseText(new URL(path, storeUrl), { redirect: "manual" });
+    if (!page.response.ok || !page.body.includes("BJ Electronics")) {
+      throw new Error(`Store ${path} is unavailable or invalid (HTTP ${page.response.status}).`);
+    }
+  }
+
+  const cartResponse = await request(new URL("/api/cart", storeUrl), { cache: "no-store" });
+  if (!cartResponse.ok) throw new Error(`Store cart API failed (HTTP ${cartResponse.status}).`);
+  const cartPayload = await cartResponse.json();
+  if (!cartPayload.cart || !Array.isArray(cartPayload.cart.lines)) {
+    throw new Error("Store cart API returned an invalid payload.");
+  }
+  assertHeader(cartResponse, "cache-control", "no-store");
+  const cartCookie = cartResponse.headers.get("set-cookie") ?? "";
+  for (const marker of ["bje_cart=", "httponly", "secure", "samesite=lax"]) {
+    if (!cartCookie.toLowerCase().includes(marker)) {
+      throw new Error(`Store cart cookie is missing ${marker}.`);
+    }
+  }
 }
 
 async function verifyAdmin() {
@@ -121,6 +142,14 @@ async function verifyAdmin() {
     throw new Error(
       `Unauthenticated admin root did not redirect to sign-in (HTTP ${root.status}, location ${location}).`,
     );
+  }
+
+  for (const path of ["/products", "/orders"]) {
+    const protectedRoute = await request(new URL(path, adminUrl), { redirect: "manual" });
+    const protectedLocation = protectedRoute.headers.get("location") ?? "";
+    if (![301, 302, 303, 307, 308].includes(protectedRoute.status) || !protectedLocation.includes("/sign-in")) {
+      throw new Error(`Unauthenticated admin ${path} did not redirect to sign-in.`);
+    }
   }
 
   const signIn = await request(new URL("/sign-in", adminUrl), { redirect: "manual" });
@@ -163,5 +192,5 @@ for (let attempt = 1; attempt <= attempts; attempt += 1) {
   if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
-console.error("Store/admin health, separation, security, or routing verification failed.");
+console.error("Store/admin health, transactional commerce, security, or routing verification failed.");
 process.exit(1);
