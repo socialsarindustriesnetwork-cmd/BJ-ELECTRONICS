@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
-import { requireUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const user = await requireUser();
+  const user = await getCurrentUser();
+  if (!user) redirect("/sign-in?next=%2Fadmin");
   return <DashboardClient user={user} />;
 }
