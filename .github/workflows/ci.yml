@@ -16,5 +16,22 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run build
+      - name: Run lint
+        id: lint
+        continue-on-error: true
+        run: npm run lint 2>&1 | tee lint.log
+      - name: Run production build
+        id: build
+        continue-on-error: true
+        run: npm run build 2>&1 | tee build.log
+      - name: Upload diagnostics on failure
+        if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-diagnostics
+          path: |
+            lint.log
+            build.log
+      - name: Enforce quality gate
+        if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: exit 1
