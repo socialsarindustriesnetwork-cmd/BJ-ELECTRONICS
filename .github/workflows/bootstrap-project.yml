@@ -1,0 +1,45 @@
+name: Bootstrap project
+
+on:
+  push:
+    branches:
+      - feat/professional-admin-foundation
+    paths:
+      - ".bootstrap/**"
+      - ".github/workflows/bootstrap-project.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/professional-admin-foundation
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Materialize project files
+        run: node .bootstrap/materialize.mjs
+
+      - name: Commit project foundation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git commit -m "feat: build responsive BJ Electronics admin foundation"
+          git push origin HEAD:feat/professional-admin-foundation
