@@ -52,7 +52,9 @@ jobs:
         run: npm run validate:admin
 
       - name: Type-check store and admin
-        run: npm run typecheck
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck 2>&1 | tee typecheck.log
 
       - name: Lint store and admin
         id: lint
@@ -65,14 +67,15 @@ jobs:
         run: npm run build 2>&1 | tee build.log
 
       - name: Upload diagnostics on failure
-        if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        if: steps.typecheck.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: phase-1-quality-diagnostics
           path: |
+            typecheck.log
             lint.log
             build.log
 
       - name: Enforce quality gate
-        if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        if: steps.typecheck.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         run: exit 1
