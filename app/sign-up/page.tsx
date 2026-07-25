@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { getCurrentUser } from "@/lib/auth";
+import { getOAuthProviderAvailability } from "@/lib/oauth";
 
 export const metadata: Metadata = {
   title: "Create account",
@@ -19,9 +20,9 @@ export default async function SignUpPage() {
     <AuthShell
       eyebrow="Secure onboarding"
       title="Create your account"
-      description="The first registered account becomes the super administrator. Later accounts start with staff access."
+      description="Use email and password, Google, or Facebook. The approved first account becomes the super administrator."
     >
-      <SignUpForm />
+      <SignUpForm providers={getOAuthProviderAvailability()} />
     </AuthShell>
   );
 }

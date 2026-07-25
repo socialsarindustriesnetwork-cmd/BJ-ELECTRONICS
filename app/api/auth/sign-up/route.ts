@@ -57,6 +57,12 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+    if (error instanceof Error && error.name === "BootstrapEmailNotAllowedError") {
+      return NextResponse.json(
+        { error: error.message, fields: { email: error.message } },
+        { status: 403 },
+      );
+    }
     return apiError(error, "Unable to create the account.");
   }
 }

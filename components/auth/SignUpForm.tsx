@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
+import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
 import styles from "./auth.module.css";
 
 type FieldName = "name" | "email" | "password" | "confirmPassword" | "acceptTerms" | "form";
 type FieldErrors = Partial<Record<FieldName, string>>;
+type ProviderAvailability = { google: boolean; facebook: boolean };
 
 function passwordScore(password: string): number {
   return [
@@ -18,7 +20,7 @@ function passwordScore(password: string): number {
   ].filter(Boolean).length;
 }
 
-export function SignUpForm() {
+export function SignUpForm({ providers }: { providers: ProviderAvailability }) {
   const router = useRouter();
   const [fields, setFields] = useState({
     name: "",
@@ -64,6 +66,8 @@ export function SignUpForm() {
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
+      <SocialAuthButtons providers={providers} nextPath="/admin" />
+
       {errors.form && (
         <div className={styles.formError} role="alert">
           <span aria-hidden="true">!</span>
@@ -134,7 +138,7 @@ export function SignUpForm() {
           ))}
         </div>
         <small className={errors.password ? styles.fieldError : styles.helpText}>
-          {errors.password ?? "Use uppercase, lowercase, and a number."}
+          {errors.password ?? "Use uppercase, lowercase, a number, and a symbol."}
         </small>
       </label>
 

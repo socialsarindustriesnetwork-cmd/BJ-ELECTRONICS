@@ -1,0 +1,242 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 64px);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(235, 29, 39, .08), transparent 26rem),
+    radial-gradient(circle at 0% 10%, rgba(46, 53, 145, .1), transparent 30rem),
+    #f5f7fb;
+  color: #101828;
+}
+
+.header {
+  width: min(980px, 100%);
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.header p {
+  margin: 0 0 8px;
+  color: #2e3591;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0 0 10px;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+}
+
+.header span {
+  color: #667085;
+  line-height: 1.6;
+}
+
+.backLink {
+  flex: 0 0 auto;
+  padding: 11px 14px;
+  border: 1px solid #d8dee9;
+  border-radius: 11px;
+  background: #fff;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.success,
+.error {
+  width: min(980px, 100%);
+  margin: 0 auto 18px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.success {
+  border: 1px solid #a9dec0;
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.error {
+  border: 1px solid #f7b7b1;
+  background: #fff0ef;
+  color: #9f2018;
+}
+
+.summaryCard,
+.methodCard,
+.guidance {
+  border: 1px solid #e1e6ef;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 18px 48px rgba(16, 24, 40, .07);
+}
+
+.summaryCard {
+  width: min(980px, 100%);
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 18px;
+}
+
+.shield {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2e3591, #eb1d27);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.summaryCard h2,
+.methodCard h2,
+.guidance h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.summaryCard p,
+.methodCard p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.summaryCard > span,
+.connected,
+.unavailable {
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.summaryCard > span,
+.connected {
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.unavailable {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.methodGrid {
+  width: min(980px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.methodCard {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 19px 20px;
+  border-radius: 16px;
+}
+
+.methodIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #eef0ff;
+  color: #2e3591;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.google {
+  background: #fff3e7;
+  color: #d9482b;
+}
+
+.facebook {
+  background: #eaf2ff;
+  color: #1877f2;
+}
+
+.connectButton,
+.disconnectButton {
+  min-width: 108px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 850;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.connectButton {
+  border: 0;
+  background: #2e3591;
+  color: #fff;
+}
+
+.disconnectButton {
+  border: 1px solid #efc2bf;
+  background: #fff;
+  color: #b42318;
+}
+
+.disconnectButton:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.guidance {
+  width: min(980px, 100%);
+  margin: 18px auto 0;
+  padding: 22px;
+  border-radius: 16px;
+}
+
+.guidance ul {
+  margin: 14px 0 0;
+  padding-left: 20px;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+@media (max-width: 680px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .summaryCard,
+  .methodCard {
+    grid-template-columns: auto 1fr;
+  }
+
+  .summaryCard > span,
+  .methodCard > :last-child {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    text-align: center;
+  }
+}

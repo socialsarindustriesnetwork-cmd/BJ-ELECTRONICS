@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { getCurrentUser } from "@/lib/auth";
+import {
+  getOAuthProviderAvailability,
+  oauthErrorMessage,
+  safeAdminNextPath,
+} from "@/lib/oauth";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -11,28 +16,17 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true },
 };
 
-function safeNextPath(value: string | string[] | undefined): string {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//")) return "/admin";
-  if (candidate.includes("\\") || /[\r\n]/.test(candidate)) return "/admin";
-
-  try {
-    const parsed = new URL(candidate, "https://admin.local");
-    if (parsed.origin !== "https://admin.local") return "/admin";
-    if (parsed.pathname !== "/admin" && !parsed.pathname.startsWith("/admin/")) return "/admin";
-    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
-  } catch {
-    return "/admin";
-  }
-}
-
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string | string[] }>;
+  searchParams: Promise<{
+    next?: string | string[];
+    oauth_error?: string | string[];
+  }>;
 }) {
   const parameters = await searchParams;
-  const nextPath = safeNextPath(parameters.next);
+  const nextValue = Array.isArray(parameters.next) ? parameters.next[0] : parameters.next;
+  const nextPath = safeAdminNextPath(nextValue);
   const user = await getCurrentUser();
   if (user) redirect(nextPath);
 
@@ -40,9 +34,13 @@ export default async function SignInPage({
     <AuthShell
       eyebrow="Administrator access"
       title="Welcome back"
-      description="Sign in to continue to the BJ Electronics operations dashboard."
+      description="Sign in with email, Google, or Facebook to continue to the BJ Electronics operations dashboard."
     >
-      <SignInForm nextPath={nextPath} />
+      <SignInForm
+        nextPath={nextPath}
+        providers={getOAuthProviderAvailability()}
+        externalError={oauthErrorMessage(parameters.oauth_error)}
+      />
     </AuthShell>
   );
 }
