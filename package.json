@@ -1,13 +1,21 @@
 {
-  "name": "bj-electronics-admin",
-  "version": "0.2.0",
+  "name": "bj-electronics-platform",
+  "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "dev:store": "npm run dev --workspace=@bje/store",
+    "dev:admin": "npm run dev --workspace=@bje/admin",
+    "build": "npm run build --workspace=@bje/store && npm run build --workspace=@bje/admin",
+    "build:store": "npm run build --workspace=@bje/store",
+    "build:admin": "npm run build --workspace=@bje/admin",
+    "start:store": "npm run start --workspace=@bje/store",
+    "start:admin": "npm run start --workspace=@bje/admin",
+    "lint": "npm run lint --workspace=@bje/store && npm run lint --workspace=@bje/admin",
+    "typecheck": "npm run typecheck --workspace=@bje/store && npm run typecheck --workspace=@bje/admin",
     "db:migrate": "node scripts/migrate.mjs",
     "production:check": "node scripts/check-production.mjs"
   },
