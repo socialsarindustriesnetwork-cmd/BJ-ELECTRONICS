@@ -9,12 +9,12 @@ This application is prepared for deployment through Hostinger managed Node.js We
 - Framework: Next.js
 - Node.js: 22
 - Install command: `npm install --no-audit --no-fund`
+- Migration command: `npm run db:migrate`
 - Build command: `npm run build`
 - Start command: `npm run start`
 - Health endpoint: `/health`
-- Requested domain: `www.bjelecteonics.shop`
-
-> Confirm the requested spelling before domain binding. It contains `electeonics`, while the brand name is `Electronics`.
+- Canonical domain: `www.bjelectronics.shop`
+- Protected admin route: `/admin`
 
 ## hPanel connection
 
@@ -23,36 +23,46 @@ This application is prepared for deployment through Hostinger managed Node.js We
 3. Authorize Hostinger to access GitHub.
 4. Select `socialsarindustriesnetwork-cmd/BJ-ELECTRONICS`.
 5. Select the `main` branch.
-6. Confirm the framework as **Next.js** and Node.js version **22**.
-7. Use npm as the package manager.
-8. Configure the build command as `npm run build` and the start command as `npm run start` if Hostinger does not detect them automatically.
-9. Add the environment variables below.
-10. Deploy to the Hostinger temporary domain and verify `/health` returns `status: healthy`.
-11. Use **Connect domain** and bind `bjelecteonics.shop`.
-12. Configure `www` as the primary hostname or redirect it to the selected canonical hostname.
-13. Confirm automatic SSL is active for both root and `www` hostnames.
+6. Confirm **Next.js**, Node.js **22**, and npm.
+7. Configure install, migration, build, and start commands.
+8. Add the production environment variables.
+9. Deploy to the temporary Hostinger hostname.
+10. Verify `/health` returns `status: healthy`.
+11. Bind `bjelectronics.shop` and `www.bjelectronics.shop`.
+12. Set `www.bjelectronics.shop` as the canonical hostname.
+13. Enable SSL for both hostnames.
+14. Verify `https://www.bjelectronics.shop/` redirects to `/admin`.
+15. Verify an unauthenticated `/admin` request redirects to `/sign-in`.
 
 ## Production environment variables
 
 ```env
-NEXT_PUBLIC_APP_URL=https://www.bjelecteonics.shop
+NEXT_PUBLIC_APP_URL=https://www.bjelectronics.shop
 NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
+AUTH_SECRET=<generated-secret>
+DATABASE_URL=<production-postgresql-connection>
+DB_POOL_MAX=10
+DB_SSL=true
+DB_SSL_REJECT_UNAUTHORIZED=true
+ALLOW_PUBLIC_SIGNUP=true
 ```
 
-`DATABASE_URL` and `REDIS_URL` are not required for the current interface-only foundation. Add them during the backend implementation phase.
+After creating the first owner account, set `ALLOW_PUBLIC_SIGNUP=false` and restart the app.
 
 ## Verification checklist
 
-- The deployment log completes successfully.
-- The root page loads without client or server errors.
+- Deployment completes successfully.
 - `/health` returns HTTP 200 and `status: healthy`.
+- `/` redirects to `/admin`.
+- `/admin` is never served without a valid session.
+- Unauthenticated `/admin` redirects to `/sign-in?next=%2Fadmin`.
 - Light and dark logos load from `/brand/`.
 - Mobile navigation works at narrow widths.
 - HTTPS works without certificate warnings.
-- The root hostname redirects consistently to the chosen canonical hostname.
-- Hostinger automatic deployment is enabled for new pushes to `main`.
+- `bjelectronics.shop` redirects to `www.bjelectronics.shop`.
+- Hostinger automatic deployment is enabled for updates to `main`.
 
 ## Security note
 
-The current release is a UI foundation using demonstration data. Authentication and role-based authorization are scheduled for the next implementation phase. Do not store real customer, order, payment, or inventory data until those controls are deployed.
+Do not store customer, payment, order, or inventory data until the production database, authentication secret, migration, first-owner bootstrap, and signup lock-down have been completed.
