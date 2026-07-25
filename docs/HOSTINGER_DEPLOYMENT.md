@@ -13,7 +13,7 @@ This application is prepared for deployment through Hostinger managed Node.js We
 - Build command: `npm run build`
 - Start command: `npm run start`
 - Health endpoint: `/health`
-- Canonical domain: `www.bjelectronics.shop`
+- Store domain: `bjelectronics.shop`
 - Protected admin route: `/admin`
 
 ## hPanel connection
@@ -29,15 +29,16 @@ This application is prepared for deployment through Hostinger managed Node.js We
 9. Deploy to the temporary Hostinger hostname.
 10. Verify `/health` returns `status: healthy`.
 11. Bind `bjelectronics.shop` and `www.bjelectronics.shop`.
-12. Set `www.bjelectronics.shop` as the canonical hostname.
-13. Enable SSL for both hostnames.
-14. Verify `https://www.bjelectronics.shop/` redirects to `/admin`.
-15. Verify an unauthenticated `/admin` request redirects to `/sign-in`.
+12. Set `bjelectronics.shop` as the primary hostname.
+13. Configure `www.bjelectronics.shop` to redirect to the apex domain.
+14. Enable SSL for both hostnames.
+15. Verify `https://bjelectronics.shop/` renders the public storefront.
+16. Verify an unauthenticated `/admin` request redirects to `/sign-in`.
 
 ## Production environment variables
 
 ```env
-NEXT_PUBLIC_APP_URL=https://www.bjelectronics.shop
+NEXT_PUBLIC_APP_URL=https://bjelectronics.shop
 NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
 AUTH_SECRET=<generated-secret>
@@ -54,13 +55,13 @@ After creating the first owner account, set `ALLOW_PUBLIC_SIGNUP=false` and rest
 
 - Deployment completes successfully.
 - `/health` returns HTTP 200 and `status: healthy`.
-- `/` redirects to `/admin`.
+- `/` renders the public BJ Electronics storefront.
 - `/admin` is never served without a valid session.
 - Unauthenticated `/admin` redirects to `/sign-in?next=%2Fadmin`.
 - Light and dark logos load from `/brand/`.
-- Mobile navigation works at narrow widths.
+- Mobile storefront and admin navigation work at narrow widths.
 - HTTPS works without certificate warnings.
-- `bjelectronics.shop` redirects to `www.bjelectronics.shop`.
+- `www.bjelectronics.shop` redirects to `bjelectronics.shop`.
 - Hostinger automatic deployment is enabled for updates to `main`.
 
 ## Security note
