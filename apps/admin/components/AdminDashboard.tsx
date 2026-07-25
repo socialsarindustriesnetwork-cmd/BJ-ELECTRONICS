@@ -19,8 +19,13 @@ function price(product: Product): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.priceCents / 100);
 }
 
+function money(cents: number): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+}
+
 const nav = [
   ["Overview", "/", "⌂"],
+  ["Orders & fulfilment", "/orders", "▤"],
   ["Products & inventory", "/products", "▣"],
   ["Account security", "/admin/security", "✓"],
 ] as const;
@@ -29,6 +34,7 @@ export function AdminDashboard({
   user,
   products,
   summary,
+  orderSummary,
   storeUrl,
 }: {
   user: AuthUser;
@@ -39,6 +45,12 @@ export function AdminDashboard({
     lowStockProducts: number;
     inventoryUnits: number;
     latestEventId: number;
+  };
+  orderSummary: {
+    totalOrders: number;
+    pendingOrders: number;
+    processingOrders: number;
+    grossOrderValueCents: number;
   };
   storeUrl: string;
 }) {
@@ -90,21 +102,23 @@ export function AdminDashboard({
 
         <main className="admin-content">
           <section className="admin-heading">
-            <div><p className="eyebrow">Secure commerce command center</p><h2>Welcome back, {user.name.split(" ")[0]}.</h2><p>Manage catalog, inventory, authentication, and storefront publication from one workspace.</p></div>
-            <div className="admin-heading-actions"><Link className="admin-primary" href="/products">Manage products</Link></div>
+            <div><p className="eyebrow">Secure commerce command center</p><h2>Welcome back, {user.name.split(" ")[0]}.</h2><p>Manage orders, fulfilment, catalog, inventory, authentication, and storefront publication from one workspace.</p></div>
+            <div className="admin-heading-actions"><Link className="admin-secondary" href="/products">Products</Link><Link className="admin-primary" href="/orders">Manage orders</Link></div>
           </section>
 
           <section className="sync-strip">
             <span className="sync-icon">↻</span>
-            <div><strong>Store synchronization is active</strong><span>Product and inventory mutations publish durable events to the storefront.</span></div>
+            <div><strong>Transactional synchronization is active</strong><span>Catalog, inventory, cart checkout, and order workflow events share one durable data source.</span></div>
             <span className="sync-badge">Event #{summary.latestEventId}</span>
           </section>
 
-          <section className="metric-grid">
-            <article className="metric-card"><span>Total products</span><strong>{summary.totalProducts}</strong><small>All catalog records</small></article>
-            <article className="metric-card"><span>Published products</span><strong>{summary.activeProducts}</strong><small>Visible on the storefront</small></article>
-            <article className="metric-card"><span>Inventory units</span><strong>{summary.inventoryUnits}</strong><small>Available across active SKUs</small></article>
-            <article className="metric-card"><span>Low stock</span><strong>{summary.lowStockProducts}</strong><small>Five units or fewer</small></article>
+          <section className="metric-grid commerce-metrics">
+            <article className="metric-card"><span>Total products</span><strong>{summary.totalProducts}</strong><small>{summary.activeProducts} published</small></article>
+            <article className="metric-card"><span>Inventory units</span><strong>{summary.inventoryUnits}</strong><small>{summary.lowStockProducts} low-stock SKUs</small></article>
+            <article className="metric-card"><span>Total orders</span><strong>{orderSummary.totalOrders}</strong><small>All transactional records</small></article>
+            <article className="metric-card"><span>Awaiting action</span><strong>{orderSummary.pendingOrders}</strong><small>Pending or confirmed</small></article>
+            <article className="metric-card"><span>In fulfilment</span><strong>{orderSummary.processingOrders}</strong><small>Processing or shipped</small></article>
+            <article className="metric-card"><span>Gross order value</span><strong>{money(orderSummary.grossOrderValueCents)}</strong><small>Excludes cancelled orders</small></article>
           </section>
 
           <section className="admin-grid">
@@ -127,8 +141,9 @@ export function AdminDashboard({
             </article>
 
             <article className="admin-panel">
-              <header className="panel-header"><div><h3>Operational controls</h3><p>Security and publication</p></div></header>
+              <header className="panel-header"><div><h3>Operational controls</h3><p>Transactions, catalog, and security</p></div></header>
               <div className="attention-list">
+                <Link className="attention-item" href="/orders"><span className="attention-mark">▤</span><span><b>Order operations</b><small>Confirm, process, ship, deliver, or cancel orders safely.</small></span><span>→</span></Link>
                 <Link className="attention-item" href="/products"><span className="attention-mark">▣</span><span><b>Catalog manager</b><small>Create, publish, price, and stock products.</small></span><span>→</span></Link>
                 <Link className="attention-item" href="/admin/security"><span className="attention-mark">✓</span><span><b>Account security</b><small>Manage password, Google, and Facebook access.</small></span><span>→</span></Link>
                 <a className="attention-item" href={storeUrl} target="_blank" rel="noreferrer"><span className="attention-mark">↗</span><span><b>Live storefront</b><small>Verify customer-facing updates immediately.</small></span><span>→</span></a>

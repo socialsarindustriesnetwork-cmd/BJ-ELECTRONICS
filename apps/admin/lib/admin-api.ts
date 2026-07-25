@@ -19,15 +19,15 @@ export async function requireCommerceApiUser(): Promise<
 
 export function commerceMutationError(error: unknown): NextResponse {
   if (error instanceof Error) {
-    if (error.name === "ProductNotFoundError") {
+    if (["ProductNotFoundError", "OrderNotFoundError"].includes(error.name)) {
       return NextResponse.json({ error: error.message }, { status: 404 });
     }
-    if (error.name === "ProductVersionConflictError") {
+    if (["ProductVersionConflictError", "OrderTransitionError"].includes(error.name)) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }
     if ("code" in error && error.code === "23505") {
       return NextResponse.json(
-        { error: "A product already uses this SKU or URL slug." },
+        { error: "A record already uses one of these unique values." },
         { status: 409 },
       );
     }

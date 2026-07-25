@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { getAdminUrl } from "@bje/config";
 import "../../../app/globals.css";
 import "./admin.css";
+import "./orders.css";
 
 const adminUrl = getAdminUrl();
 

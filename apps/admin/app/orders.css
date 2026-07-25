@@ -1,0 +1,45 @@
+.commerce-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.admin-heading-actions { display: flex; align-items: center; gap: 9px; }
+.orders-main { width: min(1600px, calc(100% - 36px)); }
+.order-metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.order-metric-grid article { padding: 18px; border: 1px solid var(--admin-line); border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(16,24,40,.045); }
+.order-metric-grid span { color: var(--admin-muted); font-size: 10px; font-weight: 700; }
+.order-metric-grid strong { display: block; margin: 10px 0 4px; font-size: 25px; letter-spacing: -.04em; }
+.order-metric-grid small { color: #8b95a7; font-size: 9px; }
+.orders-card { overflow: hidden; border: 1px solid var(--admin-line); border-radius: 18px; background: #fff; box-shadow: 0 16px 45px rgba(16,24,40,.055); }
+.orders-toolbar { display: grid; grid-template-columns: minmax(240px, 1fr) 190px auto; gap: 12px; align-items: center; padding: 16px; border-bottom: 1px solid var(--admin-line); }
+.orders-toolbar input, .orders-toolbar select { height: 42px; padding: 0 13px; border: 1px solid var(--admin-line); border-radius: 11px; outline: none; background: #fff; color: #101828; }
+.orders-toolbar input:focus, .orders-toolbar select:focus { border-color: var(--admin-brand); box-shadow: 0 0 0 4px rgba(46,53,145,.09); }
+.orders-card > .form-error, .orders-card > .form-success { margin: 14px 16px 0; }
+.orders-table-wrap { overflow-x: auto; }
+.orders-table { min-width: 1180px; }
+.orders-table th, .orders-table td { vertical-align: top; white-space: normal; }
+.orders-table td { min-width: 120px; }
+.orders-table td:first-child { min-width: 115px; }
+.orders-table td:nth-child(2) { min-width: 210px; }
+.orders-table td:last-child { min-width: 190px; }
+.orders-table td strong, .orders-table td small, .orders-table td span { display: block; }
+.orders-table td small { margin-top: 5px; color: var(--admin-muted); font-size: 9px; line-height: 1.55; }
+.order-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.terminal-order { color: var(--admin-muted); font-size: 9px; }
+.status-pill.order-pending { background: #fff7ed; color: var(--admin-warning); }
+.status-pill.order-confirmed, .status-pill.order-processing, .status-pill.order-shipped { background: #eef0ff; color: var(--admin-brand); }
+.status-pill.order-delivered { background: #ecfdf3; color: var(--admin-success); }
+.status-pill.order-cancelled { background: #fff1f0; color: #b42318; }
+.orders-card .empty-state { margin: 16px; }
+
+@media (max-width: 1050px) {
+  .commerce-metrics, .order-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .orders-toolbar { grid-template-columns: 1fr; }
+  .orders-toolbar .sync-badge { grid-column: auto; }
+  .order-metric-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .commerce-metrics, .order-metric-grid { grid-template-columns: 1fr; }
+  .admin-heading-actions { width: 100%; }
+  .admin-heading-actions a { flex: 1; }
+}
