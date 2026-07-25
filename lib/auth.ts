@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { query, withTransaction } from "@/lib/db";
-import { getAuthSecret, isProduction } from "@/lib/env";
+import { getAdminBootstrapEmails, getAuthSecret, isProduction } from "@/lib/env";
 import type { AuthUser, SessionUserRow, UserRole } from "@/lib/auth-types";
 import { privacyHash } from "@/lib/request-security";
 
@@ -23,6 +23,8 @@ function toAuthUser(row: SessionUserRow): AuthUser {
     email: row.email,
     role: row.role,
     status: row.status,
+    avatarUrl: row.avatar_url,
+    emailVerified: Boolean(row.email_verified_at),
     createdAt: row.created_at.toISOString(),
     lastLoginAt: row.last_login_at?.toISOString() ?? null,
   };
@@ -74,6 +76,7 @@ export async function createSession(
 ): Promise<{ token: string; expiresAt: Date }> {
   const token = createSessionToken();
   const expiresAt = sessionExpiry(remember);
+  await client.query("DELETE FROM auth_sessions WHERE expires_at <= NOW()");
   await client.query(
     `INSERT INTO auth_sessions
       (id, user_id, token_hash, expires_at, user_agent, ip_hash)
@@ -104,6 +107,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
        u.email,
        u.role,
        u.status,
+       u.avatar_url,
+       u.email_verified_at,
        u.created_at,
        u.last_login_at
      FROM auth_sessions s
@@ -119,10 +124,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   if (!row) return null;
 
   if (Date.now() - row.session_last_seen_at.getTime() > 5 * 60 * 1000) {
-    await query(
-      "UPDATE auth_sessions SET last_seen_at = NOW() WHERE id = $1",
-      [row.session_id],
-    );
+    await query("UPDATE auth_sessions SET last_seen_at = NOW() WHERE id = $1", [row.session_id]);
   }
 
   return toAuthUser(row);
@@ -130,7 +132,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
 export async function requireUser(): Promise<AuthUser> {
   const user = await getCurrentUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/sign-in?next=%2Fadmin");
   return user;
 }
 
@@ -140,8 +142,23 @@ export function hasRole(user: AuthUser, allowed: readonly UserRole[]): boolean {
 
 export async function requireRole(allowed: readonly UserRole[]): Promise<AuthUser> {
   const user = await requireUser();
-  if (!hasRole(user, allowed)) redirect("/?access=denied");
+  if (!hasRole(user, allowed)) redirect("/admin?access=denied");
   return user;
+}
+
+export async function resolveRoleForNewUser(client: PoolClient, email: string): Promise<UserRole> {
+  const countResult = await client.query<{ count: string }>(
+    "SELECT COUNT(*)::text AS count FROM auth_users WHERE status = 'ACTIVE'",
+  );
+  if (Number(countResult.rows[0]?.count ?? 0) > 0) return "STAFF";
+
+  const allowlist = getAdminBootstrapEmails();
+  if (allowlist.length > 0 && !allowlist.includes(email.trim().toLowerCase())) {
+    const error = new Error("This email is not authorized to bootstrap the administrator account.");
+    error.name = "BootstrapEmailNotAllowedError";
+    throw error;
+  }
+  return "SUPER_ADMIN";
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -232,20 +249,20 @@ export async function createRegisteredUser(input: {
 }): Promise<{ user: AuthUser; token: string; expiresAt: Date }> {
   return withTransaction(async (client) => {
     await client.query("SELECT pg_advisory_xact_lock(78315294)");
-    const existing = await client.query<{ id: string }>(
-      "SELECT id FROM auth_users WHERE LOWER(email) = LOWER($1) LIMIT 1",
+    const existing = await client.query<{ id: string; password_hash: string | null }>(
+      "SELECT id, password_hash FROM auth_users WHERE LOWER(email) = LOWER($1) LIMIT 1",
       [input.email],
     );
     if (existing.rowCount) {
-      const error = new Error("An account already exists for this email.");
+      const message = existing.rows[0]?.password_hash
+        ? "An account already exists for this email."
+        : "This email is already connected to a social sign-in provider.";
+      const error = new Error(message);
       error.name = "DuplicateAccountError";
       throw error;
     }
 
-    const countResult = await client.query<{ count: string }>(
-      "SELECT COUNT(*)::text AS count FROM auth_users WHERE status = 'ACTIVE'",
-    );
-    const role: UserRole = Number(countResult.rows[0]?.count ?? 0) === 0 ? "SUPER_ADMIN" : "STAFF";
+    const role = await resolveRoleForNewUser(client, input.email);
     const userId = randomUUID();
     const passwordHash = await hashPassword(input.password);
     const inserted = await client.query<{
@@ -254,13 +271,15 @@ export async function createRegisteredUser(input: {
       email: string;
       role: UserRole;
       status: "ACTIVE" | "SUSPENDED";
+      avatar_url: string | null;
+      email_verified_at: Date | null;
       created_at: Date;
       last_login_at: Date | null;
     }>(
       `INSERT INTO auth_users
         (id, name, email, password_hash, role, status, last_login_at)
        VALUES ($1, $2, $3, $4, $5, 'ACTIVE', NOW())
-       RETURNING id, name, email, role, status, created_at, last_login_at`,
+       RETURNING id, name, email, role, status, avatar_url, email_verified_at, created_at, last_login_at`,
       [userId, input.name, input.email, passwordHash, role],
     );
 
@@ -273,7 +292,7 @@ export async function createRegisteredUser(input: {
       action: "AUTH.SIGN_UP",
       targetType: "USER",
       targetId: userId,
-      metadata: { role },
+      metadata: { role, method: "PASSWORD" },
       ip: input.ip,
     });
 
@@ -285,6 +304,8 @@ export async function createRegisteredUser(input: {
         email: userRow.email,
         role: userRow.role,
         status: userRow.status,
+        avatarUrl: userRow.avatar_url,
+        emailVerified: Boolean(userRow.email_verified_at),
         createdAt: userRow.created_at.toISOString(),
         lastLoginAt: userRow.last_login_at?.toISOString() ?? null,
       },
