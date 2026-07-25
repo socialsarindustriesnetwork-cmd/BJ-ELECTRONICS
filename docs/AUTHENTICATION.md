@@ -5,17 +5,18 @@
 The canonical administration dashboard is:
 
 ```text
-https://www.bjelectronics.shop/admin
+https://bjelectronics.shop/admin
 ```
 
 Routing rules:
 
-- `/` redirects to `/admin`.
+- `/` is the public BJ Electronics storefront.
 - `/admin` is rendered only after a valid server-side session is resolved.
 - Unauthenticated `/admin` requests redirect to `/sign-in?next=%2Fadmin`.
 - Sign-in callback destinations are restricted to local `/admin` paths to prevent open redirects.
 - Authenticated users visiting `/sign-in` or `/sign-up` are returned to `/admin`.
 - Legacy `/dashboard` routes permanently redirect to `/admin`.
+- `www.bjelectronics.shop` permanently redirects to the apex domain.
 
 ## Implemented controls
 
@@ -32,7 +33,7 @@ Routing rules:
 - Protected server-rendered dashboard
 - First-account super administrator bootstrap
 - Configurable public signup
-- No-store and no-index response headers on `/admin`
+- No-store and no-index response headers on `/admin`, `/sign-in`, and `/sign-up`
 
 ## Roles
 
@@ -53,7 +54,7 @@ Future staff onboarding should use invitations created by an authorized administ
 ## Required runtime configuration
 
 ```env
-NEXT_PUBLIC_APP_URL=https://www.bjelectronics.shop
+NEXT_PUBLIC_APP_URL=https://bjelectronics.shop
 AUTH_SECRET=<at-least-32-random-characters>
 DATABASE_URL=postgresql://user:password@host:5432/bj_electronics
 DB_SSL=true
@@ -88,9 +89,9 @@ The migration creates:
 1. Configure the production database and `AUTH_SECRET`.
 2. Run `npm run db:migrate`.
 3. Deploy the application.
-4. Open `https://www.bjelectronics.shop/sign-up`.
+4. Open `https://bjelectronics.shop/sign-up`.
 5. Create the initial owner account.
-6. Confirm access to `https://www.bjelectronics.shop/admin`.
+6. Confirm access to `https://bjelectronics.shop/admin`.
 7. Confirm the account receives `SUPER_ADMIN`.
 8. Set `ALLOW_PUBLIC_SIGNUP=false`.
 9. Redeploy or restart the app.
