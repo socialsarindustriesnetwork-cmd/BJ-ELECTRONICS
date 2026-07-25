@@ -24,6 +24,13 @@ jobs:
       - name: Install workspace dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Capture resolved workspace lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: resolved-workspace-lockfile
+          path: package-lock.json
+          retention-days: 1
+
       - name: Type-check store and admin
         run: npm run typecheck
 
