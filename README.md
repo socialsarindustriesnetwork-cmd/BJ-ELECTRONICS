@@ -1,23 +1,26 @@
 # BJ Electronics Admin
 
-Responsive, production-oriented commerce administration dashboard for BJ Electronics.
+Secure, responsive, production-oriented commerce administration application for BJ Electronics.
 
-## Foundation included
+## Current foundation
 
 - Next.js App Router and strict TypeScript
-- Desktop, tablet, and mobile dashboard layouts
+- Responsive desktop, tablet, and mobile dashboard
 - Light and dark themes
-- Store KPIs, revenue visualization, recent orders, operational alerts, and low-stock monitoring
-- Official BJ Electronics brand source plus web, icon, social, and banner variants
-- PWA metadata
-- Standalone deployment output
-- GitHub Actions quality checks
-- Hostinger managed Node.js deployment configuration and health endpoint
+- Official BJ Electronics brand assets
+- PostgreSQL-backed email/password authentication
+- Secure password hashing and revocable server-side sessions
+- Role and audit-log scaffolding
+- Protected administration dashboard
+- Hostinger managed Node.js deployment configuration
+- GitHub CI, dependency updates, and production release verification
 
 ## Development
 
 ```bash
 npm install
+cp .env.example .env.local
+npm run db:migrate
 npm run dev
 ```
 
@@ -29,11 +32,30 @@ npm run lint
 npm run build
 ```
 
+## Authentication bootstrap
+
+1. Configure `DATABASE_URL` and a strong `AUTH_SECRET`.
+2. Run `npm run db:migrate`.
+3. Open `/sign-up`.
+4. Create the first account; it becomes `SUPER_ADMIN`.
+5. Set `ALLOW_PUBLIC_SIGNUP=false` after bootstrap.
+
+See `docs/AUTHENTICATION.md`.
+
 ## Production deployment
 
-The application is prepared for Hostinger managed Node.js Web App hosting from the `main` branch. Use Node.js 22, `npm run build`, and `npm run start`. Verify the deployment through `/health` before connecting the custom domain.
+The application is prepared for Hostinger managed Node.js Web App hosting from `main`.
 
-See `docs/HOSTINGER_DEPLOYMENT.md` for the GitHub authorization, build configuration, environment variables, domain binding, SSL, and verification checklist.
+```text
+Node.js: 22
+Install: npm install --no-audit --no-fund
+Migration: npm run db:migrate
+Build: npm run build
+Start: npm run start
+Health: /health
+```
+
+See `docs/HOSTINGER_GITHUB_INTEGRATION.md`.
 
 ## Brand directories
 
@@ -44,4 +66,4 @@ See `docs/HOSTINGER_DEPLOYMENT.md` for the GitHub authorization, build configura
 - Store and repository banners: `public/brand/banners/`
 - Asset index: `public/brand/brand-assets.json`
 
-See `docs/BRANDING.md` and `docs/DEVELOPMENT_ROADMAP.md`.
+The requested production hostname is currently configured as `www.bjelecteonics.shop`. Confirm the spelling before final domain binding.
