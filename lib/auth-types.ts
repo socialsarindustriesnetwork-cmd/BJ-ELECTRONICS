@@ -7,6 +7,8 @@ export type AuthUser = {
   email: string;
   role: UserRole;
   status: "ACTIVE" | "SUSPENDED";
+  avatarUrl: string | null;
+  emailVerified: boolean;
   createdAt: string;
   lastLoginAt: string | null;
 };
@@ -20,6 +22,8 @@ export type SessionUserRow = {
   email: string;
   role: UserRole;
   status: "ACTIVE" | "SUSPENDED";
+  avatar_url: string | null;
+  email_verified_at: Date | null;
   created_at: Date;
   last_login_at: Date | null;
 };
