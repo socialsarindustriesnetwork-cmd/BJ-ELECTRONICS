@@ -1,69 +1,96 @@
 import process from "node:process";
 
-const baseUrl =
-  process.argv[2] ||
-  process.env.HOSTINGER_PRODUCTION_URL ||
-  process.env.NEXT_PUBLIC_APP_URL;
+const storeValue = process.argv[2] || process.env.HOSTINGER_STORE_URL;
+const adminValue = process.argv[3] || process.env.HOSTINGER_ADMIN_URL;
 
-if (!baseUrl) {
-  console.error("Provide a production URL as an argument or environment variable.");
+if (!storeValue || !adminValue) {
+  console.error("Provide both store and admin production URLs.");
   process.exit(1);
 }
 
-const canonicalBase = new URL(baseUrl);
-const healthUrl = new URL("/health", canonicalBase).toString();
+const storeUrl = new URL(storeValue);
+const adminUrl = new URL(adminValue);
 const attempts = Number(process.env.HEALTH_CHECK_ATTEMPTS ?? 12);
 const delayMs = Number(process.env.HEALTH_CHECK_DELAY_MS ?? 10_000);
+const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/2.0" };
 
-async function verifyRouting() {
-  const rootResponse = await fetch(new URL("/", canonicalBase), {
-    redirect: "manual",
-    headers: { "user-agent": "BJ-Electronics-GitHub-Release-Check/1.0" },
+async function responseText(url, init = {}) {
+  const response = await fetch(url, { ...init, headers: { ...headers, ...(init.headers ?? {}) } });
+  const body = await response.text();
+  return { response, body };
+}
+
+async function assertHealthy(baseUrl, expectedService) {
+  const { response, body } = await responseText(new URL("/health", baseUrl), {
+    cache: "no-store",
   });
-  if (!rootResponse.ok) {
-    throw new Error(`Storefront root is unavailable (HTTP ${rootResponse.status}).`);
+  let payload;
+  try {
+    payload = JSON.parse(body);
+  } catch {
+    throw new Error(`${baseUrl.hostname} health endpoint did not return JSON.`);
   }
-
-  const rootBody = await rootResponse.text();
-  if (!rootBody.includes("BJ Electronics")) {
-    throw new Error("Storefront root did not render the BJ Electronics public store shell.");
-  }
-
-  const adminResponse = await fetch(new URL("/admin", canonicalBase), {
-    redirect: "manual",
-    headers: { "user-agent": "BJ-Electronics-GitHub-Release-Check/1.0" },
-  });
-  const adminLocation = adminResponse.headers.get("location") ?? "";
-  if (
-    ![301, 302, 303, 307, 308].includes(adminResponse.status) ||
-    !adminLocation.includes("/sign-in")
-  ) {
+  if (!response.ok || payload.status !== "healthy" || payload.service !== expectedService) {
     throw new Error(
-      `Unauthenticated /admin did not redirect to sign-in (HTTP ${adminResponse.status}, location ${adminLocation}).`,
+      `${baseUrl.hostname} health check failed (HTTP ${response.status}, service ${payload.service ?? "unknown"}).`,
+    );
+  }
+}
+
+async function verifyStore() {
+  const { response, body } = await responseText(new URL("/", storeUrl), { redirect: "manual" });
+  if (!response.ok || !body.includes("BJ Electronics")) {
+    throw new Error(`Store root is unavailable or invalid (HTTP ${response.status}).`);
+  }
+
+  const adminRedirect = await fetch(new URL("/admin", storeUrl), {
+    redirect: "manual",
+    headers,
+  });
+  const location = adminRedirect.headers.get("location") ?? "";
+  if (![301, 302, 303, 307, 308].includes(adminRedirect.status) || !location.startsWith(adminUrl.origin)) {
+    throw new Error(
+      `Store /admin did not redirect to the isolated admin domain (HTTP ${adminRedirect.status}, location ${location}).`,
     );
   }
 
-  console.log("Production routing is correct: public store at / and protected dashboard at /admin.");
+  const catalog = await fetch(new URL("/api/catalog", storeUrl), { headers, cache: "no-store" });
+  if (!catalog.ok) throw new Error(`Store catalog API failed (HTTP ${catalog.status}).`);
+}
+
+async function verifyAdmin() {
+  const root = await fetch(new URL("/", adminUrl), { redirect: "manual", headers });
+  const location = root.headers.get("location") ?? "";
+  if (![301, 302, 303, 307, 308].includes(root.status) || !location.includes("/sign-in")) {
+    throw new Error(
+      `Unauthenticated admin root did not redirect to sign-in (HTTP ${root.status}, location ${location}).`,
+    );
+  }
+
+  const signIn = await fetch(new URL("/sign-in", adminUrl), { redirect: "manual", headers });
+  if (!signIn.ok) throw new Error(`Admin sign-in page is unavailable (HTTP ${signIn.status}).`);
+  const cacheControl = signIn.headers.get("cache-control") ?? "";
+  const robots = signIn.headers.get("x-robots-tag") ?? "";
+  if (!cacheControl.includes("no-store") || !robots.includes("noindex")) {
+    throw new Error("Admin security response headers are incomplete.");
+  }
 }
 
 for (let attempt = 1; attempt <= attempts; attempt += 1) {
   try {
-    const response = await fetch(healthUrl, {
-      headers: { "user-agent": "BJ-Electronics-GitHub-Release-Check/1.0" },
-      cache: "no-store",
-    });
-    const body = await response.json();
-    if (response.ok && body.status === "healthy") {
-      await verifyRouting();
-      console.log(`Production is healthy: ${healthUrl}`);
-      process.exit(0);
-    }
-    console.error(`Attempt ${attempt}: HTTP ${response.status}`, body);
+    await Promise.all([
+      assertHealthy(storeUrl, "bj-electronics-store"),
+      assertHealthy(adminUrl, "bj-electronics-admin"),
+    ]);
+    await verifyStore();
+    await verifyAdmin();
+    console.log(`Store and admin are healthy: ${storeUrl.origin} + ${adminUrl.origin}`);
+    process.exit(0);
   } catch (error) {
     console.error(`Attempt ${attempt}:`, error instanceof Error ? error.message : error);
   }
   if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
-console.error(`Production health or routing verification failed: ${healthUrl}`);
+console.error("Store/admin health, separation, or routing verification failed.");
 process.exit(1);
