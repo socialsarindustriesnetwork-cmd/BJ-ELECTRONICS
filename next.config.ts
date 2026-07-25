@@ -28,6 +28,11 @@ const privateRouteHeaders = [
   { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
 ];
 
+const authApiHeaders = [
+  ...privateRouteHeaders,
+  { key: "Referrer-Policy", value: "no-referrer" },
+];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
@@ -81,6 +86,10 @@ const nextConfig: NextConfig = {
       {
         source: "/sign-up",
         headers: privateRouteHeaders,
+      },
+      {
+        source: "/api/auth/:path*",
+        headers: authApiHeaders,
       },
     ];
   },
