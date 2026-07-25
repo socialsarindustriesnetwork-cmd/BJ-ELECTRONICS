@@ -4,8 +4,8 @@
 
 - Repository: `socialsarindustriesnetwork-cmd/BJ-ELECTRONICS`
 - Production branch: `main`
-- Canonical origin: `https://www.bjelectronics.shop`
-- Administration URL: `https://www.bjelectronics.shop/admin`
+- Store URL: `https://bjelectronics.shop`
+- Administration URL: `https://bjelectronics.shop/admin`
 - Runtime: Node.js 22
 - Install: `npm install --no-audit --no-fund`
 - Database migration: `npm run db:migrate`
@@ -18,7 +18,7 @@
 Configure these in the Hostinger Web App environment:
 
 ```env
-NEXT_PUBLIC_APP_URL=https://www.bjelectronics.shop
+NEXT_PUBLIC_APP_URL=https://bjelectronics.shop
 NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
 AUTH_SECRET=<generated-secret>
@@ -34,12 +34,13 @@ After creating the initial administrator account, change `ALLOW_PUBLIC_SIGNUP` t
 ## Domain binding and canonical routing
 
 1. Bind `bjelectronics.shop` to the Hostinger Web App.
-2. Add `www.bjelectronics.shop` and select it as the primary hostname.
-3. Enable SSL for both root and `www` hostnames.
-4. Configure the root hostname to redirect to `https://www.bjelectronics.shop`.
-5. When the previous misspelled domain is owned, bind `bjelecteonics.shop` and `www.bjelecteonics.shop` as aliases so the application can permanently redirect them to the corrected hostname.
-6. Verify `/` redirects to `/admin`.
-7. Verify unauthenticated `/admin` redirects to `/sign-in?next=%2Fadmin`.
+2. Set `bjelectronics.shop` as the primary hostname.
+3. Add `www.bjelectronics.shop` as an alias.
+4. Enable SSL for both apex and `www` hostnames.
+5. Redirect `www.bjelectronics.shop` to `https://bjelectronics.shop`.
+6. When the previous misspelled domain is owned, bind `bjelecteonics.shop` and `www.bjelecteonics.shop` as aliases so the application can redirect them safely.
+7. Verify `/` renders the public storefront.
+8. Verify unauthenticated `/admin` redirects to `/sign-in?next=%2Fadmin`.
 
 The application also enforces these canonical-host redirects at the Next.js layer. DNS and Hostinger domain bindings are still required for requests to reach the application.
 
@@ -51,7 +52,7 @@ The application also enforces these canonical-host redirects at the Next.js laye
 4. Enable automatic deployment when `main` changes.
 5. Configure Node.js 22 and the commands above.
 6. Run the authentication migration before starting the first production release.
-7. Connect the custom domain and verify SSL for root and `www`.
+7. Connect the custom domain and verify SSL for apex and `www`.
 
 ## GitHub release automation
 
@@ -60,7 +61,7 @@ The repository includes `.github/workflows/hostinger-release.yml`.
 Configure the GitHub repository variable:
 
 ```text
-HOSTINGER_PRODUCTION_URL=https://www.bjelectronics.shop
+HOSTINGER_PRODUCTION_URL=https://bjelectronics.shop
 ```
 
 When Hostinger supplies a deployment webhook, configure it as this GitHub Actions secret:
@@ -75,7 +76,7 @@ The workflow:
 2. Calls the optional deployment webhook.
 3. Otherwise relies on Hostinger Git auto-deploy.
 4. Polls `/health`.
-5. Verifies `/` redirects to `/admin`.
+5. Verifies `/` renders the public store.
 6. Verifies unauthenticated `/admin` redirects to `/sign-in`.
 7. Fails when production health or routing is incorrect.
 
