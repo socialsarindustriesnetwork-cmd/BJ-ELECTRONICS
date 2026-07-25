@@ -58,9 +58,10 @@ const navigation: { label: string; icon: IconName; badge?: string }[] = [
   { label: "Analytics", icon: "analytics" },
 ];
 
-const adminNavigation: { label: string; icon: IconName }[] = [
+const adminNavigation: { label: string; icon: IconName; href?: string }[] = [
   { label: "Team & roles", icon: "team" },
   { label: "Integrations", icon: "integrations" },
+  { label: "Account security", icon: "shield", href: "/admin/security" },
   { label: "Settings", icon: "settings" },
 ];
 
@@ -182,7 +183,7 @@ export function DashboardClient({ user }: { user: AuthUser }) {
           ))}
           <p className={styles.navLabel}>Administration</p>
           {adminNavigation.map((item) => (
-            <button key={item.label} className={styles.navItem}>
+            <button key={item.label} className={styles.navItem} onClick={() => item.href && router.push(item.href)}>
               <Icon name={item.icon} size={19} /><span>{item.label}</span>
             </button>
           ))}
@@ -194,7 +195,8 @@ export function DashboardClient({ user }: { user: AuthUser }) {
           <button onClick={() => setProfileOpen((value) => !value)} aria-label="Account menu"><Icon name="more" size={18} /></button>
           {profileOpen && (
             <div className={styles.profileMenu}>
-              <div><strong>{user.email}</strong><small>Authenticated session</small></div>
+              <div><strong>{user.email}</strong><small>{user.emailVerified ? "Verified identity" : "Authenticated session"}</small></div>
+              <button onClick={() => router.push("/admin/security")}><Icon name="shield" size={16} />Account security</button>
               <button onClick={signOut} disabled={signingOut}><Icon name="logout" size={16} />{signingOut ? "Signing out..." : "Sign out"}</button>
             </div>
           )}
