@@ -27,11 +27,50 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "bjelectronics.shop" }],
+        destination: "https://www.bjelectronics.shop/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "bjelecteonics.shop" }],
+        destination: "https://www.bjelectronics.shop/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.bjelecteonics.shop" }],
+        destination: "https://www.bjelectronics.shop/:path*",
+        permanent: true,
+      },
+      {
+        source: "/dashboard/:path*",
+        destination: "/admin/:path*",
+        permanent: true,
+      },
+      {
+        source: "/admin/dashboard/:path*",
+        destination: "/admin/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        ],
       },
     ];
   },

@@ -11,9 +11,22 @@ Secure, responsive, production-oriented commerce administration application for 
 - PostgreSQL-backed email/password authentication
 - Secure password hashing and revocable server-side sessions
 - Role and audit-log scaffolding
-- Protected administration dashboard
+- Protected administration dashboard at `/admin`
+- Canonical production origin `https://www.bjelectronics.shop`
 - Hostinger managed Node.js deployment configuration
 - GitHub CI, dependency updates, and production release verification
+
+## Application routes
+
+```text
+/             Redirects to /admin
+/admin        Protected administration dashboard
+/sign-in      Secure administrator sign-in
+/sign-up      Initial owner bootstrap or controlled staff registration
+/health       Runtime, database, and authentication-secret health check
+```
+
+Unauthenticated requests to `/admin` are redirected to `/sign-in?next=%2Fadmin`. Authentication callbacks only accept local `/admin` destinations.
 
 ## Development
 
@@ -47,6 +60,8 @@ See `docs/AUTHENTICATION.md`.
 The application is prepared for Hostinger managed Node.js Web App hosting from `main`.
 
 ```text
+Canonical URL: https://www.bjelectronics.shop
+Admin URL: https://www.bjelectronics.shop/admin
 Node.js: 22
 Install: npm install --no-audit --no-fund
 Migration: npm run db:migrate
@@ -65,5 +80,3 @@ See `docs/HOSTINGER_GITHUB_INTEGRATION.md`.
 - Social previews: `public/brand/social/`
 - Store and repository banners: `public/brand/banners/`
 - Asset index: `public/brand/brand-assets.json`
-
-The requested production hostname is currently configured as `www.bjelecteonics.shop`. Confirm the spelling before final domain binding.
