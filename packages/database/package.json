@@ -1,0 +1,13 @@
+{
+  "name": "@bje/database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@bje/realtime": "1.0.0",
+    "pg": "8.16.3"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
