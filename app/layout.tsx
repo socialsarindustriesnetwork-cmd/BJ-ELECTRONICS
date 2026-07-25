@@ -1,16 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.bjelecteonics.shop";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
   title: { default: "BJ Electronics Admin", template: "%s | BJ Electronics" },
   description: "Professional commerce operations dashboard for BJ Electronics.",
   applicationName: "BJ Electronics Admin",
+  alternates: { canonical: "/" },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [{ url: "/brand/icons/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/brand/icons/app-icon.svg" }],
   },
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
   openGraph: {
+    type: "website",
+    url: "/",
     title: "BJ Electronics Admin",
     description: "A responsive professional dashboard for store operations.",
     images: [{ url: "/brand/social/og-default.svg", width: 1200, height: 630 }],
