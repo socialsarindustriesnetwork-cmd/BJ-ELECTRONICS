@@ -12,6 +12,7 @@ Responsive, production-oriented commerce administration dashboard for BJ Electro
 - PWA metadata
 - Standalone deployment output
 - GitHub Actions quality checks
+- Hostinger managed Node.js deployment configuration and health endpoint
 
 ## Development
 
@@ -27,6 +28,12 @@ npm run typecheck
 npm run lint
 npm run build
 ```
+
+## Production deployment
+
+The application is prepared for Hostinger managed Node.js Web App hosting from the `main` branch. Use Node.js 22, `npm run build`, and `npm run start`. Verify the deployment through `/health` before connecting the custom domain.
+
+See `docs/HOSTINGER_DEPLOYMENT.md` for the GitHub authorization, build configuration, environment variables, domain binding, SSL, and verification checklist.
 
 ## Brand directories
 
