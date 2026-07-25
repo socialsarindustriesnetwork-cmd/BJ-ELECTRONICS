@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -19,26 +19,13 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install workspace dependencies
-        run: npm install --no-audit --no-fund
-
-      - name: Commit resolved lockfile when changed
-        if: github.event_name == 'pull_request'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: resolve monorepo dependency lockfile"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
+      - name: Install locked workspace dependencies
+        run: npm ci --no-audit --no-fund
 
       - name: Type-check store and admin
         run: npm run typecheck
