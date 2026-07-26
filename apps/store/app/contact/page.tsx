@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { getAdminUrl } from "@bje/config";
 import { StoreHeader } from "@/components/StoreHeader";
 import { StoreFooter } from "@/components/StoreFooter";
+import { ContactForm } from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact us",
   description: "Contact BJ Electronics for product, delivery, warranty and business-sales support.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
@@ -30,14 +32,7 @@ export default function ContactPage() {
               <span>◷ Saturday–Thursday · 9:00 AM–6:30 PM</span>
             </div>
           </aside>
-          <form className="contact-form" action="mailto:support@bjelectronics.shop" method="post" encType="text/plain">
-            <label><span>Full name</span><input name="name" autoComplete="name" required /></label>
-            <label><span>Email address</span><input type="email" name="email" autoComplete="email" required /></label>
-            <label><span>Phone number</span><input type="tel" name="phone" autoComplete="tel" /></label>
-            <label><span>Subject</span><input name="subject" required /></label>
-            <label className="full"><span>How can we help?</span><textarea name="message" rows={7} required /></label>
-            <button type="submit">Send support request</button>
-          </form>
+          <ContactForm />
         </section>
       </main>
       <StoreFooter />
