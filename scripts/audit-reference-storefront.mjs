@@ -33,6 +33,11 @@ for (const relativePath of [
   "apps/store/app/track-order.css",
   "apps/store/app/about/page.tsx",
   "apps/store/app/contact/page.tsx",
+  "apps/store/app/faq/page.tsx",
+  "apps/store/app/privacy/page.tsx",
+  "apps/store/app/shipping-returns/page.tsx",
+  "apps/store/app/terms/page.tsx",
+  "apps/store/app/warranty/page.tsx",
   "apps/store/app/track-order/page.tsx",
   "apps/store/components/TrackOrderClient.tsx",
 ]) checkFile(relativePath);
@@ -51,9 +56,24 @@ for (const expected of ["/about", "/contact", "/track-order", "primary-store-nav
   requireText("apps/store/components/StoreHeader.tsx", expected);
 }
 
-for (const expected of ["caravan-newsletter", "Customer care", "Payment & security", "Cash on delivery", "Bank transfer", "/track-order"]) {
-  requireText("apps/store/components/StoreFooter.tsx", expected);
+for (const expected of [
+  "caravan-newsletter",
+  "Customer care",
+  "Payment & security",
+  "Cash on delivery",
+  "Bank transfer",
+  "/track-order",
+  "/faq",
+  "/shipping-returns",
+  "/warranty",
+  "/privacy",
+  "/terms",
+]) requireText("apps/store/components/StoreFooter.tsx", expected);
+
+for (const route of ["/about", "/contact", "/faq", "/shipping-returns", "/warranty", "/privacy", "/terms"]) {
+  requireText("apps/store/app/sitemap.ts", route);
 }
+
 forbidText("apps/store/components/StoreFooter.tsx", "PayPal");
 forbidText("apps/store/components/StoreFooter.tsx", "Apple Pay");
 forbidText("apps/store/components/StoreFooter.tsx", ">VISA<");
