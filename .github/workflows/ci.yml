@@ -44,7 +44,9 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Audit platform configuration and deployment invariants
-        run: npm run audit
+        id: audit
+        continue-on-error: true
+        run: npm run audit 2>&1 | tee audit.log
 
       - name: Validate immutable migration set
         run: npm run db:validate
@@ -71,15 +73,16 @@ jobs:
         run: npm run build 2>&1 | tee build.log
 
       - name: Upload diagnostics on failure
-        if: steps.typecheck.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        if: steps.audit.outcome == 'failure' || steps.typecheck.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: platform-quality-diagnostics
           path: |
+            audit.log
             typecheck.log
             lint.log
             build.log
 
       - name: Enforce quality gate
-        if: steps.typecheck.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        if: steps.audit.outcome == 'failure' || steps.typecheck.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         run: exit 1
