@@ -5,31 +5,22 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CommerceCart } from "@bje/database/transactions";
 import { BrandLogo } from "@bje/ui";
-
-const categories = ["Laptops", "Earphones", "Headphones", "Smart Watches", "Speakers", "Accessories", "Monitors", "Power Banks"];
+import { marketplaceCategories } from "@/lib/marketplace";
 
 export function StoreHeader({ adminUrl }: { adminUrl: string }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [searchCategory, setSearchCategory] = useState("all");
   const [cartCount, setCartCount] = useState(0);
-  const [cartTotal, setCartTotal] = useState(0);
-  const [cartCurrency, setCartCurrency] = useState("USD");
   const [wishlistCount, setWishlistCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [departmentsOpen, setDepartmentsOpen] = useState(false);
 
   useEffect(() => {
-    const loadCart = () => {
-      void fetch("/api/cart", { cache: "no-store" })
-        .then((response) => response.json())
-        .then((payload: { cart?: CommerceCart }) => {
-          setCartCount(payload.cart?.itemCount ?? 0);
-          setCartTotal(payload.cart?.estimatedTotalCents ?? 0);
-          setCartCurrency(payload.cart?.currency ?? "USD");
-        })
-        .catch(() => undefined);
-    };
-
-    loadCart();
+    void fetch("/api/cart", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { cart?: CommerceCart }) => setCartCount(payload.cart?.itemCount ?? 0))
+      .catch(() => undefined);
 
     const readWishlist = () => {
       try {
@@ -41,10 +32,7 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
     };
     readWishlist();
 
-    const cartListener = (event: Event) => {
-      setCartCount((event as CustomEvent<number>).detail ?? 0);
-      loadCart();
-    };
+    const cartListener = (event: Event) => setCartCount((event as CustomEvent<number>).detail ?? 0);
     const wishlistListener = () => readWishlist();
     window.addEventListener("bje:cart", cartListener);
     window.addEventListener("bje:wishlist", wishlistListener);
@@ -56,76 +44,69 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const params = new URLSearchParams();
     const normalized = query.trim();
-    router.push(normalized ? `/categories?q=${encodeURIComponent(normalized)}` : "/categories");
+    if (normalized) params.set("q", normalized);
+    if (searchCategory !== "all") params.set("category", searchCategory);
+    router.push(`/categories${params.size ? `?${params.toString()}` : ""}`);
     setMenuOpen(false);
   }
 
-  const formattedCartTotal = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: cartCurrency,
-  }).format(cartTotal / 100);
-
   return (
     <>
-      <div className="utility-bar caravan-utility">
-        <div className="utility-inner">
-          <div className="utility-contact">
-            <a href="mailto:support@bjelectronics.shop">✉ support@bjelectronics.shop</a>
-            <span>Sat–Thu · 9:00 AM–6:30 PM</span>
-          </div>
-          <div className="utility-links">
-            <Link href="/about">About</Link>
-            <Link href="/contact">Contact</Link>
-            <a href={adminUrl}>Administration</a>
-          </div>
+      <div className="market-announcement">
+        <div className="market-announcement-inner">
+          <span><b>Nationwide delivery</b> across Bangladesh</span>
+          <div><a href="tel:+8800000000000">Hotline: +880 0000-000000</a><Link href="/categories?sort=discount">Latest offers</Link><a href="mailto:support@bjelectronics.shop">Customer care</a></div>
         </div>
       </div>
-
-      <header className="commerce-header caravan-header">
-        <div className="commerce-header-main">
-          <button className="mobile-menu-button" type="button" aria-label="Toggle menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>☰</button>
+      <header className="market-header">
+        <div className="market-header-main">
+          <button className="mobile-menu-button" type="button" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>☰</button>
           <Link className="commerce-logo" href="/" aria-label="BJ Electronics home"><BrandLogo /></Link>
-
-          <form className="header-search caravan-search" onSubmit={submitSearch} role="search">
-            <span aria-hidden="true">⌕</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products, brands and categories…" aria-label="Search products" />
-            <select aria-label="Search category" defaultValue="all">
-              <option value="all">All categories</option>
-              {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+          <form className="market-search" onSubmit={submitSearch} role="search">
+            <select value={searchCategory} onChange={(event) => setSearchCategory(event.target.value)} aria-label="Search department">
+              <option value="all">All departments</option>
+              {marketplaceCategories.map((category) => <option key={category.key} value={category.label}>{category.short}</option>)}
             </select>
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search televisions, refrigerators, phones and more" aria-label="Search products" />
+            <button type="submit" aria-label="Submit search">⌕</button>
           </form>
-
-          <nav className="commerce-actions" aria-label="Account actions">
-            <Link href="/wishlist" className="header-action"><span aria-hidden="true">♡</span><small>Wishlist</small>{wishlistCount > 0 ? <b>{wishlistCount}</b> : null}</Link>
-            <Link href="/cart" className="header-action caravan-cart-action"><span aria-hidden="true">🛒</span><small>{cartCount} item{cartCount === 1 ? "" : "s"}</small><em>{formattedCartTotal}</em>{cartCount > 0 ? <b>{cartCount}</b> : null}</Link>
-            <a href={adminUrl} className="header-action"><span aria-hidden="true">♙</span><small>Profile</small></a>
+          <div className="market-help"><span>Need help?</span><strong>Talk to an expert</strong></div>
+          <nav className="market-actions" aria-label="Shopping actions">
+            <Link href="/wishlist" className="market-action"><span aria-hidden="true">♡</span><small>Wishlist</small>{wishlistCount > 0 ? <b>{wishlistCount}</b> : null}</Link>
+            <Link href="/cart" className="market-action"><span aria-hidden="true">🛒</span><small>Cart</small>{cartCount > 0 ? <b>{cartCount}</b> : null}</Link>
+            <a href={adminUrl} className="market-action"><span aria-hidden="true">♙</span><small>Account</small></a>
           </nav>
         </div>
-
-        <nav className={`primary-store-nav${menuOpen ? " open" : ""}`} aria-label="Primary store navigation">
-          <div className="primary-store-nav-inner">
-            <Link href="/">Home</Link>
-            <Link href="/categories">Shop</Link>
-            <Link href="/about">About us</Link>
-            <Link href="/contact">Contact us</Link>
-            <Link className="primary-nav-deal" href="/categories?sort=discount">Special offers</Link>
-          </div>
-        </nav>
-
-        <nav className={`category-nav caravan-category-nav${menuOpen ? " open" : ""}`} aria-label="Product categories">
-          <div className="category-nav-inner">
-            <Link className="all-category-link" href="/categories">☰ Browse all</Link>
-            {categories.map((category) => <Link key={category} href={`/categories?category=${encodeURIComponent(category)}`}>{category}</Link>)}
+        <nav className={`market-nav${menuOpen ? " open" : ""}`} aria-label="Store departments">
+          <div className="market-nav-inner">
+            <div className="department-menu">
+              <button type="button" aria-expanded={departmentsOpen} onClick={() => setDepartmentsOpen((value) => !value)}>☰ Shop by department <span>⌄</span></button>
+              <div className={`department-panel${departmentsOpen ? " open" : ""}`}>
+                {marketplaceCategories.map((category) => (
+                  <Link href={`/categories?category=${encodeURIComponent(category.label)}`} key={category.key} onClick={() => { setDepartmentsOpen(false); setMenuOpen(false); }}>
+                    <span>{category.icon}</span><div><strong>{category.label}</strong><small>{category.description}</small></div><i>›</i>
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <Link href="/categories?category=TV%20%26%20Entertainment">TV & Entertainment</Link>
+            <Link href="/categories?category=Refrigerators%20%26%20Freezers">Refrigerators</Link>
+            <Link href="/categories?category=Air%20Conditioners">Air Conditioners</Link>
+            <Link href="/categories?category=Washing%20Machines">Washing Machines</Link>
+            <Link href="/categories?category=Kitchen%20Appliances">Kitchen</Link>
+            <Link href="/categories?category=Laptops%20%26%20Computing">Computing</Link>
+            <Link className="nav-deal" href="/categories?sort=discount">Hot deals</Link>
           </div>
         </nav>
       </header>
-
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
         <Link href="/"><span>⌂</span>Home</Link>
-        <Link href="/categories"><span>▦</span>Shop</Link>
+        <Link href="/categories"><span>▦</span>Categories</Link>
+        <Link href="/wishlist"><span>♡</span>Wishlist{wishlistCount > 0 ? <b>{wishlistCount}</b> : null}</Link>
         <Link href="/cart" className="mobile-cart-link"><span>🛒</span>Cart{cartCount > 0 ? <b>{cartCount}</b> : null}</Link>
-        <Link href="/contact"><span>✉</span>Contact</Link>
+        <a href={adminUrl}><span>♙</span>Account</a>
       </nav>
     </>
   );
