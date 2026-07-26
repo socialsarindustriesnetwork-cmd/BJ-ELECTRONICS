@@ -11,6 +11,7 @@ const checks = [];
 const STORE_URL = "https://www.bjelectronics.shop";
 const APEX_URL = "https://bjelectronics.shop";
 const ADMIN_URL = "https://admin.bjelectronics.shop";
+const TYPO_DOMAIN = ["bjelect", "eonics.shop"].join("");
 
 function record(name, passed, detail = "") {
   checks.push({ name, passed, detail });
@@ -166,8 +167,8 @@ for (const target of collectFiles(repositoryRoot)) {
   const relativePath = path.relative(repositoryRoot, target);
   const extension = path.extname(target);
   if (!textExtensions.has(extension) && path.basename(target) !== ".env.example") continue;
-  const content = readFileSync(target, "utf8");
-  if (/bjelecteonics\.shop/i.test(content)) typoMatches.push(relativePath);
+  const content = readFileSync(target, "utf8").toLowerCase();
+  if (content.includes(TYPO_DOMAIN)) typoMatches.push(relativePath);
 }
 record("domain:misspelling-absent", typoMatches.length === 0, typoMatches.join(", "));
 
