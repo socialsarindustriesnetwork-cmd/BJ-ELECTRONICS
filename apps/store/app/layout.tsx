@@ -3,6 +3,7 @@ import { getStoreUrl } from "@bje/config";
 import "./globals.css";
 import "./caravan.css";
 import "./track-order.css";
+import "./full-site.css";
 
 const storeUrl = getStoreUrl();
 
