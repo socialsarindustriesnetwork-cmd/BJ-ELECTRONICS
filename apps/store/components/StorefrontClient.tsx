@@ -7,16 +7,65 @@ import { StoreHeader } from "@/components/StoreHeader";
 import { StoreFooter } from "@/components/StoreFooter";
 import { ProductCard } from "@/components/ProductCard";
 
-const categories = [
-  { name: "Laptops", icon: "▰", description: "Powerful mobile computing" },
-  { name: "Earphones", icon: "◖", description: "Compact wireless audio" },
-  { name: "Headphones", icon: "◉", description: "Immersive personal sound" },
-  { name: "Smart Watches", icon: "▣", description: "Connected daily wellness" },
-  { name: "Speakers", icon: "◼", description: "Room-filling entertainment" },
-  { name: "Accessories", icon: "⌁", description: "Cables, chargers and more" },
-  { name: "Monitors", icon: "▤", description: "Clear productive displays" },
-  { name: "Power Banks", icon: "▥", description: "Power wherever you go" },
+type CategoryDefinition = {
+  name: string;
+  icon: string;
+  description: string;
+  keywords: string[];
+};
+
+const categories: CategoryDefinition[] = [
+  { name: "Laptops", icon: "▰", description: "Powerful mobile computing", keywords: ["laptop", "macbook", "notebook", "thinkpad", "zenbook"] },
+  { name: "Earphones", icon: "◖", description: "Compact wireless audio", keywords: ["earphone", "airpods", "earbud", "buds"] },
+  { name: "Headphones", icon: "◉", description: "Immersive personal sound", keywords: ["headphone", "quietcomfort", "wh-"] },
+  { name: "Smart Watches", icon: "▣", description: "Connected daily wellness", keywords: ["watch", "wearable"] },
+  { name: "Speakers", icon: "◼", description: "Room-filling entertainment", keywords: ["speaker", "soundbar", "charge"] },
+  { name: "Accessories", icon: "⌁", description: "Cables, chargers and more", keywords: ["accessory", "charger", "cable", "powercore", "adapter"] },
+  { name: "Monitors", icon: "▤", description: "Clear productive displays", keywords: ["monitor", "display"] },
+  { name: "Power Banks", icon: "▥", description: "Power wherever you go", keywords: ["power bank", "powerbank", "battery"] },
 ];
+
+const storeBrands = ["Apple", "Samsung", "Sony", "Dell", "HP", "Lenovo", "JBL", "Anker"];
+
+function productText(product: Product): string {
+  return `${product.name} ${product.sku} ${product.description}`.toLowerCase();
+}
+
+function productsForCategory(products: Product[], category: CategoryDefinition, offset: number): Product[] {
+  const matches = products.filter((product) => category.keywords.some((keyword) => productText(product).includes(keyword)));
+  const matchIds = new Set(matches.map((product) => product.id));
+  const fallback = products.filter((product) => !matchIds.has(product.id));
+  const rotated = fallback.length ? [...fallback.slice(offset % fallback.length), ...fallback.slice(0, offset % fallback.length)] : [];
+  return [...matches, ...rotated].slice(0, 5);
+}
+
+function ProductShelf({
+  title,
+  eyebrow,
+  products,
+  href,
+}: {
+  title: string;
+  eyebrow: string;
+  products: Product[];
+  href: string;
+}) {
+  return (
+    <section className="reference-product-shelf retail-section">
+      <div className="retail-section-heading">
+        <div><span>{eyebrow}</span><h2>{title}</h2></div>
+        <Link href={href}>View all</Link>
+      </div>
+      {products.length ? (
+        <div className="horizontal-product-grid reference-shelf-grid">
+          {products.map((product) => <ProductCard compact product={product} key={product.id} />)}
+        </div>
+      ) : (
+        <div className="empty-state">Products will appear here when they are published from the administration portal.</div>
+      )}
+    </section>
+  );
+}
 
 export function StorefrontClient({
   initialProducts,
@@ -53,65 +102,109 @@ export function StorefrontClient({
     return () => source.close();
   }, []);
 
-  const newArrivals = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5), [products]);
-  const featured = useMemo(() => products.slice(0, 10), [products]);
+  const newest = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5), [products]);
+  const deals = useMemo(() => {
+    const discounted = products.filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents);
+    return [...discounted, ...products.filter((product) => !discounted.some((deal) => deal.id === product.id))].slice(0, 5);
+  }, [products]);
+  const categoryShelves = useMemo(
+    () => categories.slice(0, 4).map((category, index) => ({ category, products: productsForCategory(products, category, index * 3) })),
+    [products],
+  );
   const heroProduct = products[0];
+  const secondaryProduct = products[1];
 
   return (
-    <div className="store-shell reference-storefront">
+    <div className="store-shell reference-storefront caravan-reference-storefront">
       <StoreHeader adminUrl={adminUrl} />
       <main>
-        <section className="retail-hero" aria-labelledby="hero-title">
-          <div className="retail-hero-copy">
-            <p className="hero-kicker">Powerful performance. Dependable service.</p>
-            <h1 id="hero-title">Smart technology for a <span>better everyday life.</span></h1>
-            <p>Discover carefully selected laptops, audio, wearables and accessories with live inventory, secure checkout and responsive support.</p>
-            <div className="retail-hero-actions"><Link className="shop-primary" href="/categories">Shop now</Link><a className="shop-secondary" href="mailto:support@bjelectronics.shop">Talk to an expert</a></div>
-            <div className="hero-mini-proof"><span>✓ Live stock</span><span>✓ Secure checkout</span><span>✓ Fast support</span></div>
-          </div>
-          <div className="retail-hero-visual" aria-label={heroProduct ? `Featured product: ${heroProduct.name}` : "Featured laptop collection"}>
-            <div className="hero-glow" />
-            <div className="hero-laptop">
-              <div className="hero-laptop-screen"><i /><i /><i /><span>BJ</span></div>
-              <div className="hero-laptop-base" />
-            </div>
-            <div className="hero-product-label"><small>Featured technology</small><strong>{heroProduct?.name ?? "Premium performance collection"}</strong><Link href={heroProduct ? `/products/${heroProduct.slug}` : "/categories"}>Explore product →</Link></div>
-          </div>
-          <div className="hero-dots" aria-hidden="true"><span className="active" /><span /><span /><span /></div>
-        </section>
-
-        <section className="retail-trust" aria-label="Shopping benefits">
-          <article><span>▱</span><div><strong>Free delivery</strong><small>On qualifying orders</small></div></article>
-          <article><span>♢</span><div><strong>1 year warranty</strong><small>Official product coverage</small></div></article>
-          <article><span>↻</span><div><strong>Easy returns</strong><small>Clear return assistance</small></div></article>
-          <article><span>▣</span><div><strong>Secure payment</strong><small>Protected checkout</small></div></article>
-        </section>
-
-        <section className="retail-section category-section">
-          <div className="retail-section-heading"><div><span>Explore the store</span><h2>Shop by category</h2></div><Link href="/categories">View all</Link></div>
-          <div className="category-tile-grid">
+        <section className="reference-commerce-stage" aria-labelledby="hero-title">
+          <aside className="reference-category-menu" aria-label="Featured categories">
+            <div className="reference-category-title"><span>☰</span><strong>Shop categories</strong></div>
             {categories.map((category) => (
-              <Link className="category-tile" href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
-                <span className="category-tile-icon">{category.icon}</span><strong>{category.name}</strong><small>{category.description}</small>
+              <Link href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
+                <span className="reference-category-icon">{category.icon}</span>
+                <span><strong>{category.name}</strong><small>{category.description}</small></span>
+                <b>›</b>
+              </Link>
+            ))}
+          </aside>
+
+          <section className="reference-main-banner">
+            <div className="reference-banner-copy">
+              <p className="hero-kicker">BJ Electronics official online store</p>
+              <h1 id="hero-title">Quality technology.<br /><span>Trusted shopping.</span></h1>
+              <p>Shop dependable laptops, audio, wearables and accessories with live inventory, secure checkout and professional after-sales support.</p>
+              <div className="retail-hero-actions">
+                <Link className="shop-primary" href="/categories">Explore products</Link>
+                <Link className="shop-secondary" href={heroProduct ? `/products/${heroProduct.slug}` : "/categories"}>View featured item</Link>
+              </div>
+              <div className="reference-live-pill"><i className={live ? "online" : ""} />{live ? "Catalog connected" : "Connecting live catalog"}</div>
+            </div>
+            <div className="reference-banner-device" aria-label={heroProduct ? `Featured product ${heroProduct.name}` : "Featured electronics collection"}>
+              <div className="reference-device-screen"><span>BJ</span><i /><i /><i /></div>
+              <div className="reference-device-base" />
+              <div className="reference-featured-label"><small>Featured</small><strong>{heroProduct?.name ?? "Premium technology collection"}</strong></div>
+            </div>
+          </section>
+
+          <div className="reference-side-offers">
+            <Link className="reference-mini-offer offer-blue" href="/categories?sort=discount">
+              <span>Special offers</span><strong>Smart savings on selected products</strong><small>View current deals →</small>
+            </Link>
+            <Link className="reference-mini-offer offer-red" href={secondaryProduct ? `/products/${secondaryProduct.slug}` : "/categories?sort=newest"}>
+              <span>New arrival</span><strong>{secondaryProduct?.name ?? "Latest technology, ready to explore"}</strong><small>Shop the collection →</small>
+            </Link>
+          </div>
+        </section>
+
+        <section className="reference-benefit-strip" aria-label="Shopping benefits">
+          <article><span>🚚</span><div><strong>Nationwide delivery</strong><small>Reliable order fulfilment</small></div></article>
+          <article><span>♢</span><div><strong>Official warranty</strong><small>Clear product coverage</small></div></article>
+          <article><span>↻</span><div><strong>Return assistance</strong><small>Professional support process</small></div></article>
+          <article><span>▣</span><div><strong>Secure checkout</strong><small>Protected cart and ordering</small></div></article>
+        </section>
+
+        <section className="retail-section reference-featured-categories">
+          <div className="retail-section-heading"><div><span>Browse faster</span><h2>Featured categories</h2></div><Link href="/categories">All categories</Link></div>
+          <div className="reference-category-card-grid">
+            {categories.map((category) => (
+              <Link href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
+                <span>{category.icon}</span><strong>{category.name}</strong><small>{category.description}</small>
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="retail-section">
-          <div className="retail-section-heading"><div><span>Fresh technology</span><h2>New arrivals</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/categories?sort=newest">View all</Link></div></div>
-          {newArrivals.length ? <div className="horizontal-product-grid">{newArrivals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Products will appear here as soon as the catalog is published.</div>}
+        <ProductShelf title="Best deals" eyebrow="Limited-time value" products={deals} href="/categories?sort=discount" />
+        <ProductShelf title="New arrivals" eyebrow="Fresh technology" products={newest} href="/categories?sort=newest" />
+
+        {categoryShelves.map(({ category, products: shelfProducts }) => (
+          <ProductShelf
+            key={category.name}
+            title={category.name}
+            eyebrow={`Recommended ${category.name.toLowerCase()}`}
+            products={shelfProducts}
+            href={`/categories?category=${encodeURIComponent(category.name)}`}
+          />
+        ))}
+
+        <section className="reference-brand-strip retail-section" aria-label="Popular brands">
+          <div className="retail-section-heading"><div><span>Trusted names</span><h2>Shop popular brands</h2></div><Link href="/categories">Browse products</Link></div>
+          <div className="reference-brand-grid">{storeBrands.map((brand) => <span key={brand}>{brand}</span>)}</div>
         </section>
 
-        <section className="retail-section featured-section">
-          <div className="retail-section-heading"><div><span>Customer favourites</span><h2>Featured products</h2></div><Link href="/categories">View all</Link></div>
-          {featured.length ? <div className="featured-product-grid">{featured.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">No featured products are currently available.</div>}
+        <section className="reference-quality-promise">
+          <div>
+            <span className="promise-badge">BJ</span>
+            <div><p className="hero-kicker">Quality, trust and customer care</p><h2>Technology selected for a better everyday life.</h2><p>Every published product is managed through one operational catalog, with inventory revalidated before order confirmation and support available throughout the buying journey.</p></div>
+          </div>
+          <ul><li>✓ Controlled product catalog</li><li>✓ Live inventory updates</li><li>✓ Secure transactional ordering</li><li>✓ Dedicated customer support</li></ul>
         </section>
 
-        <section className="promotion-grid">
-          <article className="promotion-card promo-a"><div><span>Up to 25% off</span><h2>Premium headphones</h2><p>Focused sound for work, travel and everyday listening.</p><Link href="/categories?category=Headphones">Shop headphones</Link></div><div className="promo-headphones" aria-hidden="true"><span /><i /><i /></div></article>
-          <article className="promotion-card promo-b"><div><span>Connected lifestyle</span><h2>Smart watches</h2><p>Track, connect and achieve more throughout your day.</p><Link href="/categories?category=Smart%20Watches">Shop smart watches</Link></div><div className="promo-watch" aria-hidden="true"><span><i /></span></div></article>
-          <article className="promotion-card promo-c"><div><span>Power anywhere</span><h2>Essential accessories</h2><p>Reliable charging, connectivity and protection.</p><Link href="/categories?category=Accessories">Shop accessories</Link></div><div className="promo-power" aria-hidden="true"><span /><i /></div></article>
+        <section className="reference-order-support">
+          <div><span>Need help choosing?</span><h2>Talk with BJ Electronics before you order.</h2><p>Send your requirements, preferred model and budget. Our support team will help you find the right option from the live catalog.</p></div>
+          <div className="reference-support-actions"><a className="shop-primary" href="mailto:support@bjelectronics.shop?subject=Product%20selection%20support">Email product support</a><Link className="shop-secondary" href="/categories">Continue shopping</Link></div>
         </section>
       </main>
       <StoreFooter />
