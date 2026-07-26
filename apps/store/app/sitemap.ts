@@ -5,6 +5,7 @@ import { listPublishedProducts } from "@bje/database";
 const staticRoutes = [
   ["", "daily", 1],
   ["/categories", "daily", 0.9],
+  ["/track-order", "monthly", 0.7],
   ["/about", "monthly", 0.6],
   ["/contact", "monthly", 0.6],
   ["/faq", "monthly", 0.6],
