@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { getStoreUrl } from "@bje/config";
 import "./globals.css";
 import "./caravan.css";
+import "./caravan-full.css";
 import "./track-order.css";
 
 const storeUrl = getStoreUrl();
