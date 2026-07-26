@@ -1,91 +1,97 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { CommerceCart } from "@bje/database/transactions";
 import { BrandLogo } from "@bje/ui";
 
-const categories = ["Laptops", "Earphones", "Headphones", "Smart Watches", "Speakers", "Accessories", "Monitors", "Power Banks"];
+function money(cents: number, currency: string): string {
+  return new Intl.NumberFormat("en-BD", {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
 
 export function StoreHeader({ adminUrl }: { adminUrl: string }) {
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const [cart, setCart] = useState<CommerceCart | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    void fetch("/api/cart", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((payload: { cart?: CommerceCart }) => setCartCount(payload.cart?.itemCount ?? 0))
-      .catch(() => undefined);
-
-    const readWishlist = () => {
-      try {
-        const value = JSON.parse(localStorage.getItem("bje-wishlist") ?? "[]") as unknown;
-        setWishlistCount(Array.isArray(value) ? value.length : 0);
-      } catch {
-        setWishlistCount(0);
-      }
+    const refreshCart = () => {
+      void fetch("/api/cart", { cache: "no-store" })
+        .then((response) => response.json())
+        .then((payload: { cart?: CommerceCart }) => setCart(payload.cart ?? null))
+        .catch(() => undefined);
     };
-    readWishlist();
 
-    const cartListener = (event: Event) => setCartCount((event as CustomEvent<number>).detail ?? 0);
-    const wishlistListener = () => readWishlist();
+    refreshCart();
+    const cartListener = () => refreshCart();
     window.addEventListener("bje:cart", cartListener);
-    window.addEventListener("bje:wishlist", wishlistListener);
-    return () => {
-      window.removeEventListener("bje:cart", cartListener);
-      window.removeEventListener("bje:wishlist", wishlistListener);
-    };
+    return () => window.removeEventListener("bje:cart", cartListener);
   }, []);
 
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const normalized = query.trim();
-    router.push(normalized ? `/categories?q=${encodeURIComponent(normalized)}` : "/categories");
-  }
+  const itemCount = cart?.itemCount ?? 0;
+  const total = cart ? money(cart.estimatedTotalCents, cart.currency) : "৳0";
 
   return (
     <>
-      <div className="utility-bar">
-        <div className="utility-inner">
-          <span>Free delivery on qualifying orders</span>
-          <div><a href="mailto:support@bjelectronics.shop">Support</a><span>Secure shopping</span><a href={adminUrl}>Admin portal</a></div>
+      <div className="caravan-utility">
+        <div className="caravan-utility-inner">
+          <div className="caravan-contact-strip">
+            <a href="mailto:support@bjelectronics.shop">✉ support@bjelectronics.shop</a>
+            <span>◷ Sat–Thu: 9:00–18:30</span>
+            <span>⌖ Delivery across Bangladesh</span>
+          </div>
+          <div className="caravan-social-strip" aria-label="Store services">
+            <Link href="/contact">Support</Link>
+            <Link href="/policies/shipping">Delivery</Link>
+            <a href={adminUrl}>Account</a>
+          </div>
         </div>
       </div>
-      <header className="commerce-header">
-        <div className="commerce-header-main">
-          <button className="mobile-menu-button" type="button" aria-label="Toggle menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>☰</button>
-          <Link className="commerce-logo" href="/" aria-label="BJ Electronics home"><BrandLogo /></Link>
-          <form className="header-search" onSubmit={submitSearch} role="search">
-            <span aria-hidden="true">⌕</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products, brands and more…" aria-label="Search products" />
-            <select aria-label="Search category" defaultValue="all">
-              <option value="all">All categories</option>
-              {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-            </select>
-          </form>
-          <nav className="commerce-actions" aria-label="Account actions">
-            <Link href="/wishlist" className="header-action"><span aria-hidden="true">♡</span><small>Wishlist</small>{wishlistCount > 0 ? <b>{wishlistCount}</b> : null}</Link>
-            <Link href="/cart" className="header-action"><span aria-hidden="true">🛒</span><small>Cart</small>{cartCount > 0 ? <b>{cartCount}</b> : null}</Link>
-            <a href={adminUrl} className="header-action"><span aria-hidden="true">♙</span><small>Profile</small></a>
+
+      <header className="caravan-header">
+        <div className="caravan-header-inner">
+          <button
+            className="caravan-menu-button"
+            type="button"
+            aria-label="Toggle store menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((value) => !value)}
+          >
+            ☰
+          </button>
+
+          <Link className="caravan-logo" href="/" aria-label="BJ Electronics home">
+            <BrandLogo />
+          </Link>
+
+          <nav className={`caravan-main-nav${menuOpen ? " open" : ""}`} aria-label="Primary navigation">
+            <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link href="/shop" onClick={() => setMenuOpen(false)}>Shop</Link>
+            <Link href="/cart" onClick={() => setMenuOpen(false)}>Cart</Link>
+            <Link href="/about" onClick={() => setMenuOpen(false)}>About Us</Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link>
           </nav>
-        </div>
-        <nav className={`category-nav${menuOpen ? " open" : ""}`} aria-label="Product categories">
-          <div className="category-nav-inner">
-            <Link className="all-category-link" href="/categories">☰ All Categories</Link>
-            {categories.map((category) => <Link key={category} href={`/categories?category=${encodeURIComponent(category)}`}>{category}</Link>)}
-            <Link className="nav-deal" href="/categories?sort=discount">Deals</Link>
+
+          <div className="caravan-cart-summary">
+            <Link href="/wishlist" className="caravan-wishlist" aria-label="Wishlist">♡</Link>
+            <Link href="/cart" aria-label={`${itemCount} items in cart`}>
+              <span className="caravan-cart-icon">🛒</span>
+              <span><strong>{total}</strong><small>{itemCount} Cart</small></span>
+              {itemCount > 0 ? <b>{itemCount}</b> : null}
+            </Link>
           </div>
-        </nav>
+        </div>
       </header>
-      <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+
+      <nav className="caravan-mobile-nav" aria-label="Mobile store navigation">
         <Link href="/"><span>⌂</span>Home</Link>
-        <Link href="/categories"><span>▦</span>Categories</Link>
-        <Link href="/cart" className="mobile-cart-link"><span>🛒</span>Cart{cartCount > 0 ? <b>{cartCount}</b> : null}</Link>
-        <a href={adminUrl}><span>♙</span>Profile</a>
+        <Link href="/shop"><span>▦</span>Shop</Link>
+        <Link href="/cart"><span>🛒</span>Cart{itemCount > 0 ? <b>{itemCount}</b> : null}</Link>
+        <Link href="/contact"><span>✉</span>Contact</Link>
       </nav>
     </>
   );
