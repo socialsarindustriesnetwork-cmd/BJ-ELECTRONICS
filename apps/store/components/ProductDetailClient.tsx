@@ -22,13 +22,34 @@ function wishlistIds(): string[] {
   }
 }
 
+const colors = [
+  { name: "Midnight", className: "navy" },
+  { name: "Silver", className: "silver" },
+  { name: "Space gray", className: "gray" },
+  { name: "Warm gold", className: "gold" },
+];
+
 export function ProductDetailClient({ product, similar, adminUrl }: { product: Product; similar: Product[]; adminUrl: string }) {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState("");
   const [saved, setSaved] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(colors[0]?.name ?? "Standard");
+  const [tab, setTab] = useState<"details" | "delivery" | "support">("details");
+  const [deliveryArea, setDeliveryArea] = useState("Bangladesh");
 
-  useEffect(() => setSaved(wishlistIds().includes(product.id)), [product.id]);
+  useEffect(() => {
+    setSaved(wishlistIds().includes(product.id));
+    const storedArea = localStorage.getItem("bje-delivery-area");
+    if (storedArea) setDeliveryArea(storedArea);
+    try {
+      const current = JSON.parse(localStorage.getItem("bje-recent-products") ?? "[]") as unknown;
+      const ids = Array.isArray(current) ? current.filter((item): item is string => typeof item === "string") : [];
+      localStorage.setItem("bje-recent-products", JSON.stringify([product.id, ...ids.filter((id) => id !== product.id)].slice(0, 12)));
+    } catch {
+      localStorage.setItem("bje-recent-products", JSON.stringify([product.id]));
+    }
+  }, [product.id]);
 
   async function addToCart() {
     setAdding(true);
@@ -64,40 +85,60 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
   const features = [
     product.description,
     `${product.inventoryQuantity} units currently available`,
-    "Official BJ Electronics support",
+    "Official BJ Electronics customer support",
     "Secure transactional checkout",
     "Inventory verified before order confirmation",
   ];
+  const discount = product.compareAtCents && product.compareAtCents > product.priceCents
+    ? Math.round((1 - product.priceCents / product.compareAtCents) * 100)
+    : 0;
 
   return (
-    <div className="store-shell product-detail-shell">
+    <div className="store-shell product-detail-shell marketplace-product-shell">
       <StoreHeader adminUrl={adminUrl} />
-      <main>
+      <main className="marketplace-product-main">
         <nav className="breadcrumbs detail-breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href="/categories">Products</Link><span>›</span><strong>{product.name}</strong></nav>
-        <section className="product-detail-layout">
-          <div className="product-gallery">
+
+        <section className="marketplace-product-grid">
+          <div className="product-gallery marketplace-product-gallery">
             <div className="product-thumbnails"><button className="active" type="button"><ProductArtwork product={product} /></button><button type="button"><ProductArtwork product={product} /></button><button type="button"><span className="detail-mini-badge">BJ</span></button></div>
-            <div className="product-detail-media"><ProductArtwork product={product} priority /><span className="zoom-hint">⌕ Hover to inspect</span></div>
+            <div className="product-detail-media marketplace-product-media"><ProductArtwork product={product} priority />{discount ? <span className="marketplace-discount-badge">-{discount}%</span> : null}<span className="zoom-hint">⌕ Product view</span></div>
+            <div className="gallery-share-row"><button type="button" onClick={toggleWishlist}>{saved ? "♥ Saved" : "♡ Save product"}</button><a href={`mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(`View this product at ${window.location.href}`)}`}>↗ Share</a></div>
           </div>
-          <section className="product-detail-copy">
-            <p className="product-detail-category">BJ Electronics collection</p>
+
+          <section className="product-detail-copy marketplace-product-copy">
+            <p className="product-detail-category">BJ Electronics official catalog</p>
             <h1>{product.name}</h1>
-            <div className="product-rating"><span>4.8</span><b>★★★★★</b><small>(128 reviews)</small><a href="mailto:support@bjelectronics.shop?subject=Question%20about%20product">Ask a question</a></div>
-            <div className="product-price-line"><strong>{money(product.priceCents, product.currency)}</strong>{product.compareAtCents ? <del>{money(product.compareAtCents, product.currency)}</del> : null}<span className={product.inventoryQuantity > 0 ? "in-stock" : "out-stock"}>{product.inventoryQuantity > 0 ? "In stock" : "Out of stock"}</span></div>
-            <p className="product-sku">SKU: {product.sku}</p>
-            <div className="product-options"><span>Color: <strong>Midnight</strong></span><div className="color-options"><button className="active navy" type="button" aria-label="Midnight" /><button className="silver" type="button" aria-label="Silver" /><button className="gray" type="button" aria-label="Space gray" /><button className="gold" type="button" aria-label="Warm gold" /></div></div>
-            <div className="product-features"><strong>Key features</strong><ul>{features.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul></div>
-            <div className="purchase-row"><label>Qty<div className="detail-quantity"><button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button><span>{quantity}</span><button type="button" onClick={() => setQuantity((value) => Math.min(Math.min(20, product.inventoryQuantity), value + 1))}>+</button></div></label><button className="detail-add-cart" type="button" disabled={adding || product.inventoryQuantity < 1} onClick={addToCart}>🛒 {adding ? "Adding…" : "Add to cart"}</button></div>
-            <button className={`detail-wishlist${saved ? " saved" : ""}`} type="button" onClick={toggleWishlist}>{saved ? "♥ Saved to wishlist" : "♡ Add to wishlist"}</button>
-            {message ? <div className="detail-message" role="status">{message}</div> : null}
+            <div className="product-rating marketplace-rating"><span>4.8</span><b>★★★★★</b><small>Customer rating</small><a href="mailto:support@bjelectronics.shop?subject=Question%20about%20product">Ask a question</a></div>
+            <div className="product-price-line marketplace-price-line"><strong>{money(product.priceCents, product.currency)}</strong>{product.compareAtCents ? <del>{money(product.compareAtCents, product.currency)}</del> : null}{discount ? <b>Save {discount}%</b> : null}</div>
+            <div className="marketplace-stock-row"><span className={product.inventoryQuantity > 0 ? "in-stock" : "out-stock"}>{product.inventoryQuantity > 0 ? "● In stock" : "● Out of stock"}</span><small>SKU: {product.sku}</small></div>
+
+            <div className="product-options marketplace-product-options"><span>Color: <strong>{selectedColor}</strong></span><div className="color-options">{colors.map((color) => <button key={color.name} className={`${color.className}${selectedColor === color.name ? " active" : ""}`} type="button" aria-label={color.name} onClick={() => setSelectedColor(color.name)} />)}</div></div>
+            <div className="product-features marketplace-feature-list"><strong>Product highlights</strong><ul>{features.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul></div>
+
+            <div className="marketplace-product-tabs" role="tablist" aria-label="Product information"><button className={tab === "details" ? "active" : ""} type="button" onClick={() => setTab("details")}>Details</button><button className={tab === "delivery" ? "active" : ""} type="button" onClick={() => setTab("delivery")}>Delivery</button><button className={tab === "support" ? "active" : ""} type="button" onClick={() => setTab("support")}>Support</button></div>
+            <div className="marketplace-tab-panel">{tab === "details" ? <p>{product.description}</p> : null}{tab === "delivery" ? <p>Delivery is coordinated to {deliveryArea}. Final timing and any applicable charge are confirmed during order processing.</p> : null}{tab === "support" ? <p>BJ Electronics provides product guidance, order support and warranty coordination. Manufacturer coverage varies by product.</p> : null}</div>
           </section>
+
+          <aside className="marketplace-buy-box">
+            <div className="buy-box-price"><small>Current price</small><strong>{money(product.priceCents, product.currency)}</strong>{product.compareAtCents ? <del>{money(product.compareAtCents, product.currency)}</del> : null}</div>
+            <div className="buy-box-delivery"><span>⌖</span><div><small>Deliver to</small><strong>{deliveryArea}</strong></div><a href="mailto:support@bjelectronics.shop?subject=Delivery%20question">Check</a></div>
+            <div className="buy-box-stock"><strong>{product.inventoryQuantity > 0 ? "Available to order" : "Currently unavailable"}</strong><small>{product.inventoryQuantity > 0 ? `${product.inventoryQuantity} units in live inventory` : "Contact support for availability guidance"}</small></div>
+            <label className="buy-box-quantity">Quantity<div className="detail-quantity"><button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button><span>{quantity}</span><button type="button" onClick={() => setQuantity((value) => Math.min(Math.min(20, product.inventoryQuantity), value + 1))}>+</button></div></label>
+            <button className="buy-box-cart" type="button" disabled={adding || product.inventoryQuantity < 1} onClick={addToCart}>🛒 {adding ? "Adding…" : "Add to cart"}</button>
+            <Link className="buy-box-checkout" href="/cart">View cart & checkout</Link>
+            <button className={`buy-box-wishlist${saved ? " saved" : ""}`} type="button" onClick={toggleWishlist}>{saved ? "♥ Saved to wishlist" : "♡ Add to wishlist"}</button>
+            {message ? <div className="detail-message" role="status">{message}</div> : null}
+            <div className="buy-box-payment"><strong>Payment options</strong><span>Cash on delivery</span><span>Bank transfer</span></div>
+            <div className="buy-box-guarantee"><span>✓</span><div><strong>Secure order creation</strong><small>Price and inventory are validated before confirmation.</small></div></div>
+          </aside>
         </section>
 
-        <section className="detail-service-strip">
-          <article><span>▱</span><div><strong>Free delivery</strong><small>On qualifying orders</small></div></article><article><span>♢</span><div><strong>1 year warranty</strong><small>Official product coverage</small></div></article><article><span>↻</span><div><strong>Easy returns</strong><small>Clear support process</small></div></article><article><span>▣</span><div><strong>Secure checkout</strong><small>Inventory revalidation</small></div></article>
+        <section className="detail-service-strip marketplace-detail-services">
+          <article><span>▱</span><div><strong>Countrywide delivery</strong><small>Coordinated across Bangladesh</small></div></article><article><span>♢</span><div><strong>Warranty support</strong><small>Coverage varies by product</small></div></article><article><span>↻</span><div><strong>Return assistance</strong><small>Clear support process</small></div></article><article><span>▣</span><div><strong>Secure checkout</strong><small>Transactional validation</small></div></article>
         </section>
 
-        {similar.length ? <section className="retail-section similar-section"><div className="retail-section-heading"><div><span>Recommended for you</span><h2>Similar products</h2></div><Link href="/categories">View all</Link></div><div className="horizontal-product-grid">{similar.map((item) => <ProductCard compact product={item} key={item.id} />)}</div></section> : null}
+        {similar.length ? <section className="marketplace-section similar-section"><div className="marketplace-section-heading"><div><span>Recommended for you</span><h2>Similar products</h2></div><Link href="/categories">View all products →</Link></div><div className="marketplace-product-row">{similar.map((item) => <ProductCard compact product={item} key={item.id} />)}</div></section> : null}
       </main>
       <StoreFooter />
     </div>
