@@ -30,6 +30,8 @@ function forbidText(relativePath, forbidden) {
 
 for (const relativePath of [
   "apps/store/app/caravan.css",
+  "apps/store/app/caravan-full.css",
+  "apps/store/app/caravan-reference.css",
   "apps/store/app/track-order.css",
   "apps/store/app/about/page.tsx",
   "apps/store/app/contact/page.tsx",
@@ -39,53 +41,49 @@ for (const relativePath of [
   "apps/store/app/terms/page.tsx",
   "apps/store/app/warranty/page.tsx",
   "apps/store/app/track-order/page.tsx",
+  "apps/store/components/CollectionSection.tsx",
   "apps/store/components/TrackOrderClient.tsx",
 ]) checkFile(relativePath);
 
 for (const expected of [
   "hero-departments",
-  "Popular categories",
-  "New arrivals",
+  "Popular departments",
+  "Top Demand",
+  "TV & Entertainment",
+  "Home Appliances",
+  "Laptops & Computing",
+  "Audio & Headphones",
+  "Today&apos;s best offers",
   "Featured products",
-  "Special offers",
+  "New arrivals",
   "Shop leading brands",
   "store-confidence-section",
 ]) requireText("apps/store/components/StorefrontClient.tsx", expected);
 
-for (const expected of ["/about", "/contact", "/track-order", "primary-store-nav", "caravan-category-nav", "selectedCategory"]) {
-  requireText("apps/store/components/StoreHeader.tsx", expected);
-}
-
-for (const expected of [
-  "caravan-newsletter",
-  "Customer care",
-  "Payment & security",
-  "Cash on delivery",
-  "Bank transfer",
-  "/track-order",
-  "/faq",
-  "/shipping-returns",
-  "/warranty",
-  "/privacy",
-  "/terms",
-]) requireText("apps/store/components/StoreFooter.tsx", expected);
-
-for (const route of ["/about", "/contact", "/faq", "/shipping-returns", "/warranty", "/privacy", "/terms"]) {
-  requireText("apps/store/app/sitemap.ts", route);
-}
+for (const expected of ["/about", "/contact", "/track-order", "primary-store-nav", "caravan-category-nav", "selectedCategory"]) requireText("apps/store/components/StoreHeader.tsx", expected);
+for (const expected of ["caravan-newsletter", "caravan-feedback-banner", "Customer care", "Payment & security", "Cash on delivery", "Bank transfer", "/track-order", "/faq", "/shipping-returns", "/warranty", "/privacy", "/terms"]) requireText("apps/store/components/StoreFooter.tsx", expected);
+for (const route of ["/about", "/contact", "/faq", "/shipping-returns", "/warranty", "/privacy", "/terms"]) requireText("apps/store/app/sitemap.ts", route);
 
 forbidText("apps/store/components/StoreFooter.tsx", "PayPal");
 forbidText("apps/store/components/StoreFooter.tsx", "Apple Pay");
 forbidText("apps/store/components/StoreFooter.tsx", ">VISA<");
 forbidText("apps/store/components/StoreFooter.tsx", ">MC<");
-
 requireText("apps/store/components/TrackOrderClient.tsx", "^[a-f0-9]{64}$");
+requireText("apps/store/components/CollectionSection.tsx", "Load More");
 requireText("apps/store/app/layout.tsx", 'import "./caravan.css"');
+requireText("apps/store/app/layout.tsx", 'import "./caravan-full.css"');
+requireText("apps/store/app/layout.tsx", 'import "./caravan-reference.css"');
 requireText("apps/store/app/layout.tsx", 'import "./track-order.css"');
 requireText("apps/store/app/caravan.css", "@media (max-width: 680px)");
-requireText("apps/store/app/caravan.css", ".caravan-hero-shell");
-requireText("apps/store/app/caravan.css", ".wide-campaign-banner");
-requireText("apps/store/app/track-order.css", "@media (max-width: 680px)");
+requireText("apps/store/app/caravan-full.css", ".full-market-hero");
+requireText("apps/store/app/caravan-reference.css", ".reference-product-row");
+requireText("apps/store/app/caravan-reference.css", ".caravan-feedback-banner");
+
+for (const source of ["apps/store/components/StorefrontClient.tsx", "apps/store/components/StoreHeader.tsx", "apps/store/components/StoreFooter.tsx"]) {
+  forbidText(source, "caravanbd.com");
+  forbidText(source, "01609-608104");
+  forbidText(source, "House 17, Avenue 2, Block C");
+}
 
 if (failures.length) {
   console.error(`\nMarketplace storefront audit failed with ${failures.length} issue(s).`);
