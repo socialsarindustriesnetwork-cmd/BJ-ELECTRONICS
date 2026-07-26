@@ -91,7 +91,7 @@ export function CheckoutClient() {
   if (loading) return <div className="cart-state">Preparing secure checkout…</div>;
   if (!cart) return <div className="cart-state error-state">{error || "Checkout is unavailable."}</div>;
   if (!cart.lines.length) {
-    return <section className="empty-cart"><span>🛒</span><h1>Your cart is empty.</h1><p>Add products before opening checkout.</p><Link className="shop-primary" href="/categories">Browse products</Link></section>;
+    return <section className="empty-cart"><span>🛒</span><h1>Your cart is empty.</h1><p>Add products before opening checkout.</p><Link className="shop-primary" href="/shop">Browse products</Link></section>;
   }
 
   return (
