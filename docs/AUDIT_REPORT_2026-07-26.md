@@ -34,7 +34,7 @@
 - production verifier coverage for health, catalog, cart, authentication routing, and apex redirection;
 - CI and release-workflow fail-closed behavior;
 - dual-application Hostinger commands and documentation;
-- absence of the misspelled `bjelecteonics.shop` domain;
+- absence of the previously supplied misspelled storefront hostname;
 - JavaScript module syntax for deployment and migration scripts.
 
 ## Required live verification
