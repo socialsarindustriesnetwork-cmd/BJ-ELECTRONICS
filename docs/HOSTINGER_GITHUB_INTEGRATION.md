@@ -8,19 +8,22 @@ Branch: main
 Runtime: Node.js 22
 Store: https://www.bjelectronics.shop
 Admin: https://admin.bjelectronics.shop
+Apex redirect: https://bjelectronics.shop -> https://www.bjelectronics.shop
 ```
 
-Deploy two independent Hostinger Node.js Web Apps from the same repository. Both applications use the same PostgreSQL database and deploy automatically from `main`.
+Deploy two independent Hostinger managed Node.js Web Apps from the same repository. Keep each Web App working directory at the repository root so npm workspaces, shared packages, migrations, and `package-lock.json` remain available.
 
 ## Store application
 
 ```text
 Workspace: apps/store
-Install: npm install --no-audit --no-fund
+Install: npm ci --no-audit --no-fund
+Preflight: npm run validate:store
 Migration: npm run db:migrate
 Build: npm run build:store
 Start: npm run start:store
-Health: https://www.bjelectronics.shop/health
+Liveness: https://www.bjelectronics.shop/health/live
+Readiness: https://www.bjelectronics.shop/health/ready
 ```
 
 Store environment:
@@ -35,17 +38,22 @@ DB_POOL_MAX=10
 DB_SSL=true
 DB_SSL_REJECT_UNAUTHORIZED=true
 REALTIME_POLL_INTERVAL_MS=1500
+RELEASE_SHA=<deployed-git-commit>
+RELEASE_VERSION=1.0.0
+RELEASE_DEPLOYED_AT=<ISO-8601-timestamp>
 ```
 
 ## Admin application
 
 ```text
 Workspace: apps/admin
-Install: npm install --no-audit --no-fund
+Install: npm ci --no-audit --no-fund
+Preflight: npm run validate:admin
 Migration: npm run db:migrate
 Build: npm run build:admin
 Start: npm run start:admin
-Health: https://admin.bjelectronics.shop/health
+Liveness: https://admin.bjelectronics.shop/health/live
+Readiness: https://admin.bjelectronics.shop/health/ready
 ```
 
 Admin environment:
@@ -61,25 +69,26 @@ DATABASE_URL=<shared-production-postgresql-connection>
 DB_POOL_MAX=10
 DB_SSL=true
 DB_SSL_REJECT_UNAUTHORIZED=true
+REALTIME_POLL_INTERVAL_MS=1500
 ALLOW_PUBLIC_SIGNUP=true
 ADMIN_BOOTSTRAP_EMAILS=owner@bjelectronics.shop
 GOOGLE_CLIENT_ID=<optional-google-web-client-id>
 GOOGLE_CLIENT_SECRET=<optional-google-client-secret>
 FACEBOOK_CLIENT_ID=<optional-meta-app-id>
 FACEBOOK_CLIENT_SECRET=<optional-meta-app-secret>
-FACEBOOK_GRAPH_API_VERSION=<configured-version>
+FACEBOOK_GRAPH_API_VERSION=<optional-vNN.N>
+RELEASE_SHA=<deployed-git-commit>
+RELEASE_VERSION=1.0.0
+RELEASE_DEPLOYED_AT=<ISO-8601-timestamp>
 ```
 
-After creating approved accounts, set `ALLOW_PUBLIC_SIGNUP=false`.
+After creating approved administrator accounts, set `ALLOW_PUBLIC_SIGNUP=false` and restart the admin Web App.
 
 ## OAuth callbacks
 
 ```text
-Google:
-https://admin.bjelectronics.shop/api/auth/oauth/google/callback
-
-Facebook:
-https://admin.bjelectronics.shop/api/auth/oauth/facebook/callback
+Google: https://admin.bjelectronics.shop/api/auth/oauth/google/callback
+Facebook: https://admin.bjelectronics.shop/api/auth/oauth/facebook/callback
 ```
 
 Provider callback configuration must match the exact HTTPS origin and path.
@@ -91,39 +100,39 @@ Provider callback configuration must match the exact HTTPS origin and path.
 1. Bind `www.bjelectronics.shop` as primary.
 2. Bind `bjelectronics.shop` as a redirecting alias.
 3. Enable SSL for both hostnames.
-4. Redirect the apex hostname to `https://www.bjelectronics.shop`.
+4. Permanently redirect the apex hostname to `https://www.bjelectronics.shop`.
 
 ### Admin
 
 1. Create the DNS record for `admin.bjelectronics.shop`.
-2. Bind it to the admin Node.js Web App.
+2. Bind it only to the admin Node.js Web App.
 3. Enable SSL.
-4. Optionally bind `www.admin.bjelectronics.shop` as a redirecting alias.
-
-`www.bjelectronics.shop-admin` is not a valid public deployment target because `.shop-admin` is not a delegated top-level domain.
+4. Optionally redirect `www.admin.bjelectronics.shop` to `https://admin.bjelectronics.shop`.
 
 ## Direct Git integration
 
 For each Hostinger Web App:
 
-1. Connect GitHub.
+1. Connect GitHub and authorize repository access.
 2. Select `socialsarindustriesnetwork-cmd/BJ-ELECTRONICS`.
 3. Select `main`.
 4. Enable automatic deployments.
-5. Use Node.js 22.
-6. Configure the app-specific build and start commands.
-7. Add environment variables without committing secrets.
-8. Deploy and verify the application health endpoint.
+5. Select Node.js 22.
+6. Keep the working directory at `/`.
+7. Configure the application-specific preflight, migration, build, and start commands.
+8. Add environment variables without committing secrets.
+9. Deploy and verify both liveness and readiness endpoints.
 
 ## GitHub release automation
 
-The repository workflow `.github/workflows/hostinger-release.yml` can trigger and verify both deployments.
+The workflow `.github/workflows/hostinger-release.yml` verifies both deployments after CI succeeds on `main`.
 
-Repository variables:
+Required repository variables:
 
 ```text
 HOSTINGER_STORE_URL=https://www.bjelectronics.shop
 HOSTINGER_ADMIN_URL=https://admin.bjelectronics.shop
+HOSTINGER_APEX_URL=https://bjelectronics.shop
 ```
 
 Optional secrets:
@@ -133,13 +142,22 @@ HOSTINGER_STORE_DEPLOY_WEBHOOK_URL=<store-deployment-webhook>
 HOSTINGER_ADMIN_DEPLOY_WEBHOOK_URL=<admin-deployment-webhook>
 ```
 
-The release workflow waits for CI, calls each optional webhook, checks both `/health` endpoints, validates the public store, confirms store-to-admin separation, and confirms unauthenticated admin access redirects to sign-in.
+The release workflow fails when required targets are absent or do not match the canonical domains. It waits for deployment, checks liveness and readiness, validates the deployed release SHA, verifies the public storefront and cart, confirms storefront-to-admin separation, tests unauthenticated admin routing, checks security headers, and confirms the apex redirect.
 
 Never commit database credentials, `AUTH_SECRET`, OAuth client secrets, or deployment webhooks.
 
 ## Expected health states
 
-Store:
+Store liveness:
+
+```json
+{
+  "status": "alive",
+  "service": "bj-electronics-store"
+}
+```
+
+Store readiness:
 
 ```json
 {
@@ -152,7 +170,16 @@ Store:
 }
 ```
 
-Admin:
+Admin liveness:
+
+```json
+{
+  "status": "alive",
+  "service": "bj-electronics-admin"
+}
+```
+
+Admin readiness:
 
 ```json
 {
@@ -162,13 +189,9 @@ Admin:
     "authenticationDatabase": "up",
     "commerceDatabase": "up",
     "authenticationSecret": "configured",
-    "oauth": {
-      "google": "configured",
-      "facebook": "configured"
-    },
     "realtimePublishing": "enabled"
   }
 }
 ```
 
-OAuth providers may be `disabled` without degrading the admin app. Facebook becomes `misconfigured` when credentials exist but the configured Graph API version is invalid or missing.
+OAuth providers may be disabled without degrading the admin application. A configured provider must pass its production validation contract.
