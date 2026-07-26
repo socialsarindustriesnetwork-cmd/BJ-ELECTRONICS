@@ -137,11 +137,17 @@ for (const relativePath of [
   "apps/store/app/wishlist/page.tsx",
   "apps/store/app/cart/page.tsx",
   "apps/store/app/checkout/page.tsx",
+  "apps/store/app/track-order/page.tsx",
   "apps/store/app/robots.ts",
   "apps/store/app/sitemap.ts",
   "apps/store/app/manifest.ts",
+  "apps/store/app/marketplace.css",
+  "apps/store/app/marketplace-header.css",
+  "apps/store/app/marketplace-footer.css",
   "apps/store/components/StoreHeader.tsx",
   "apps/store/components/StoreFooter.tsx",
+  "apps/store/components/MarketplaceHome.tsx",
+  "apps/store/components/TrackOrderClient.tsx",
   "apps/store/components/ProductArtwork.tsx",
   "apps/store/components/ProductCard.tsx",
   "apps/store/components/CatalogListingClient.tsx",
@@ -150,22 +156,37 @@ for (const relativePath of [
   "apps/store/public/brand/icons/favicon.svg",
   "apps/store/public/brand/icons/app-icon.svg",
   "apps/store/public/brand/social/og-store.svg",
+  "docs/REFERENCE-CARAVAN.md",
 ]) {
   record(`storefront:${relativePath}`, existsSync(absolute(relativePath)));
 }
 
-requireText("apps/store/components/StorefrontClient.tsx", "retail-hero", "storefront includes responsive retail hero");
-requireText("apps/store/components/StorefrontClient.tsx", "Shop by category", "storefront includes category navigation");
-requireText("apps/store/components/StorefrontClient.tsx", "New arrivals", "storefront includes new arrivals");
-requireText("apps/store/components/StorefrontClient.tsx", "Featured products", "storefront includes featured products");
+requireText("apps/store/components/StorefrontClient.tsx", "MarketplaceHome", "storefront composes marketplace homepage");
+requireText("apps/store/components/MarketplaceHome.tsx", "marketplace-hero", "marketplace includes campaign hero");
+requireText("apps/store/components/MarketplaceHome.tsx", "Shop popular categories", "marketplace includes category discovery");
+requireText("apps/store/components/MarketplaceHome.tsx", "Deal zone", "marketplace includes catalog-backed deal zone");
+requireText("apps/store/components/MarketplaceHome.tsx", "Popular brands & collections", "marketplace includes brand discovery");
+requireText("apps/store/components/MarketplaceHome.tsx", "New arrivals", "marketplace includes new arrivals");
+requireText("apps/store/components/MarketplaceHome.tsx", "Featured products", "marketplace includes featured products");
+requireText("apps/store/components/MarketplaceHome.tsx", "/track-order", "marketplace exposes order tracking");
+forbidText("apps/store/components/MarketplaceHome.tsx", "Caravan", "runtime marketplace preserves BJ Electronics branding");
 requireText("apps/store/components/StoreHeader.tsx", "/wishlist", "storefront header exposes wishlist");
 requireText("apps/store/components/StoreHeader.tsx", "/cart", "storefront header exposes transactional cart");
+requireText("apps/store/components/StoreHeader.tsx", "/track-order", "storefront header exposes order tracking");
+requireText("apps/store/components/StoreHeader.tsx", "selectedCategory", "storefront search supports category selection");
+requireText("apps/store/components/StoreFooter.tsx", "Cash on delivery", "footer exposes supported cash payment method");
+requireText("apps/store/components/StoreFooter.tsx", "Bank transfer", "footer exposes supported transfer payment method");
+forbidText("apps/store/components/StoreFooter.tsx", "PayPal", "footer excludes unsupported PayPal claim");
+forbidText("apps/store/components/StoreFooter.tsx", "Apple Pay", "footer excludes unsupported Apple Pay claim");
+requireText("apps/store/components/TrackOrderClient.tsx", "^[a-f0-9]{64}$", "order tracking requires private token");
 requireText("apps/store/components/CatalogListingClient.tsx", "Price range", "catalog includes price filtering");
 requireText("apps/store/components/CatalogListingClient.tsx", "Availability", "catalog includes availability filtering");
 requireText("apps/store/components/ProductDetailClient.tsx", "Add to cart", "product details include purchase action");
 requireText("apps/store/components/ProductDetailClient.tsx", "Similar products", "product details include recommendations");
 requireText("apps/store/app/globals.css", "@media (max-width: 680px)", "storefront includes mobile breakpoint");
 requireText("apps/store/app/globals.css", ".mobile-bottom-nav", "storefront includes mobile navigation");
+requireText("apps/store/app/marketplace.css", "@media (max-width: 680px)", "marketplace includes mobile breakpoint");
+requireText("apps/store/app/marketplace.css", ".marketplace-product-row", "marketplace includes dense product merchandising");
 requireText("apps/store/app/layout.tsx", "/manifest.webmanifest", "storefront metadata exposes PWA manifest");
 requireText("apps/store/app/layout.tsx", "/brand/social/og-store.svg", "storefront metadata exposes social preview");
 
