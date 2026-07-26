@@ -73,7 +73,7 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
     <div className="store-shell product-detail-shell">
       <StoreHeader adminUrl={adminUrl} />
       <main>
-        <nav className="breadcrumbs detail-breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href="/categories">Products</Link><span>›</span><strong>{product.name}</strong></nav>
+        <nav className="breadcrumbs detail-breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href="/shop">Shop</Link><span>›</span><strong>{product.name}</strong></nav>
         <section className="product-detail-layout">
           <div className="product-gallery">
             <div className="product-thumbnails"><button className="active" type="button"><ProductArtwork product={product} /></button><button type="button"><ProductArtwork product={product} /></button><button type="button"><span className="detail-mini-badge">BJ</span></button></div>
@@ -82,7 +82,7 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
           <section className="product-detail-copy">
             <p className="product-detail-category">BJ Electronics collection</p>
             <h1>{product.name}</h1>
-            <div className="product-rating"><span>4.8</span><b>★★★★★</b><small>(128 reviews)</small><a href="mailto:support@bjelectronics.shop?subject=Question%20about%20product">Ask a question</a></div>
+            <div className="product-rating"><span>4.8</span><b>★★★★★</b><small>(128 reviews)</small><Link href={`/contact?topic=${encodeURIComponent(`Question about ${product.name}`)}`}>Ask a question</Link></div>
             <div className="product-price-line"><strong>{money(product.priceCents, product.currency)}</strong>{product.compareAtCents ? <del>{money(product.compareAtCents, product.currency)}</del> : null}<span className={product.inventoryQuantity > 0 ? "in-stock" : "out-stock"}>{product.inventoryQuantity > 0 ? "In stock" : "Out of stock"}</span></div>
             <p className="product-sku">SKU: {product.sku}</p>
             <div className="product-options"><span>Color: <strong>Midnight</strong></span><div className="color-options"><button className="active navy" type="button" aria-label="Midnight" /><button className="silver" type="button" aria-label="Silver" /><button className="gray" type="button" aria-label="Space gray" /><button className="gold" type="button" aria-label="Warm gold" /></div></div>
@@ -97,7 +97,7 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
           <article><span>▱</span><div><strong>Free delivery</strong><small>On qualifying orders</small></div></article><article><span>♢</span><div><strong>1 year warranty</strong><small>Official product coverage</small></div></article><article><span>↻</span><div><strong>Easy returns</strong><small>Clear support process</small></div></article><article><span>▣</span><div><strong>Secure checkout</strong><small>Inventory revalidation</small></div></article>
         </section>
 
-        {similar.length ? <section className="retail-section similar-section"><div className="retail-section-heading"><div><span>Recommended for you</span><h2>Similar products</h2></div><Link href="/categories">View all</Link></div><div className="horizontal-product-grid">{similar.map((item) => <ProductCard compact product={item} key={item.id} />)}</div></section> : null}
+        {similar.length ? <section className="retail-section similar-section"><div className="retail-section-heading"><div><span>Recommended for you</span><h2>Similar products</h2></div><Link href="/shop">View all</Link></div><div className="horizontal-product-grid">{similar.map((item) => <ProductCard compact product={item} key={item.id} />)}</div></section> : null}
       </main>
       <StoreFooter />
     </div>
