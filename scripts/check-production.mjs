@@ -16,7 +16,7 @@ const requireReleaseMatch = process.env.REQUIRE_RELEASE_MATCH === "true";
 const attempts = Number(process.env.HEALTH_CHECK_ATTEMPTS ?? 12);
 const delayMs = Number(process.env.HEALTH_CHECK_DELAY_MS ?? 10_000);
 const timeoutMs = Number(process.env.HTTP_REQUEST_TIMEOUT_MS ?? 10_000);
-const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/4.0" };
+const headers = { "user-agent": "BJ-Electronics-GitHub-Release-Check/5.0" };
 
 if (storeUrl.protocol !== "https:" || adminUrl.protocol !== "https:") {
   console.error("Production store and admin URLs must use HTTPS.");
@@ -80,13 +80,21 @@ async function assertHealth(baseUrl, path, expectedStatus, expectedService) {
   return payload;
 }
 
+async function assertStorePage(path, marker) {
+  const page = await responseText(new URL(path, storeUrl), { redirect: "manual" });
+  if (!page.response.ok || !page.body.includes("BJ Electronics") || !page.body.includes(marker)) {
+    throw new Error(`Store ${path} is unavailable or missing ${marker} (HTTP ${page.response.status}).`);
+  }
+  return page.response;
+}
+
 async function verifyStore() {
   await assertHealth(storeUrl, "/health/live", "alive", "bj-electronics-store");
   await assertHealth(storeUrl, "/health/ready", "healthy", "bj-electronics-store");
 
   const { response, body } = await responseText(new URL("/", storeUrl), { redirect: "manual" });
-  if (!response.ok || !body.includes("BJ Electronics")) {
-    throw new Error(`Store root is unavailable or invalid (HTTP ${response.status}).`);
+  if (!response.ok || !body.includes("BJ Electronics") || !body.includes("Top demand")) {
+    throw new Error(`Store root is unavailable or missing merchandising content (HTTP ${response.status}).`);
   }
   assertHeader(response, "strict-transport-security", "max-age=");
   assertHeader(response, "content-security-policy", "default-src 'self'");
@@ -110,11 +118,30 @@ async function verifyStore() {
   const catalogPayload = await catalog.json();
   if (!Array.isArray(catalogPayload.products)) throw new Error("Store catalog API returned an invalid payload.");
 
-  for (const path of ["/cart", "/checkout"]) {
-    const page = await responseText(new URL(path, storeUrl), { redirect: "manual" });
-    if (!page.response.ok || !page.body.includes("BJ Electronics")) {
-      throw new Error(`Store ${path} is unavailable or invalid (HTTP ${page.response.status}).`);
-    }
+  for (const [path, marker] of [
+    ["/shop", "All electronics"],
+    ["/about", "Technology selected with care"],
+    ["/contact", "Send a message"],
+    ["/policies/shipping", "Shipping & delivery"],
+    ["/policies/returns", "Return policy"],
+    ["/policies/refunds", "Refund policy"],
+    ["/policies/privacy", "Privacy policy"],
+    ["/policies/terms", "Terms & conditions"],
+    ["/cart", "Shopping cart"],
+    ["/checkout", "Secure checkout"],
+  ]) {
+    await assertStorePage(path, marker);
+  }
+
+  const legacyCategories = await request(new URL("/categories?category=Laptops", storeUrl), { redirect: "manual" });
+  const legacyLocation = legacyCategories.headers.get("location") ?? "";
+  if (![301, 302, 303, 307, 308].includes(legacyCategories.status) || !legacyLocation.includes("/shop?category=Laptops")) {
+    throw new Error(`Legacy categories route did not redirect to the canonical shop (HTTP ${legacyCategories.status}).`);
+  }
+
+  const sitemap = await responseText(new URL("/sitemap.xml", storeUrl), { cache: "no-store" });
+  if (!sitemap.response.ok || !sitemap.body.includes(`${storeUrl.origin}/shop`) || !sitemap.body.includes(`${storeUrl.origin}/contact`)) {
+    throw new Error(`Store sitemap is unavailable or incomplete (HTTP ${sitemap.response.status}).`);
   }
 
   const cartResponse = await request(new URL("/api/cart", storeUrl), { cache: "no-store" });
@@ -192,5 +219,5 @@ for (let attempt = 1; attempt <= attempts; attempt += 1) {
   if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
-console.error("Store/admin health, transactional commerce, security, or routing verification failed.");
+console.error("Store/admin health, commerce routes, security, or release verification failed.");
 process.exit(1);
