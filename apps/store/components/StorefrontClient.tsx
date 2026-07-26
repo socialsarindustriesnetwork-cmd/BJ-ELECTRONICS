@@ -77,10 +77,6 @@ export function StorefrontClient({
     return () => window.clearInterval(timer);
   }, []);
 
-  const newest = useMemo(
-    () => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [products],
-  );
   const topDemand = useMemo(
     () => [...products].sort((a, b) => (b.inventoryQuantity + (b.compareAtCents ? 4 : 0)) - (a.inventoryQuantity + (a.compareAtCents ? 4 : 0))),
     [products],
@@ -118,8 +114,8 @@ export function StorefrontClient({
       action: "Browse top demand",
       href: "#top-demand",
     },
-  ];
-  const slide = slides[activeSlide];
+  ] as const;
+  const slide = slides[activeSlide] ?? slides[0];
 
   return (
     <div className="store-shell caravan-reference-storefront">
