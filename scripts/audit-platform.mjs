@@ -137,11 +137,17 @@ for (const relativePath of [
   "apps/store/app/wishlist/page.tsx",
   "apps/store/app/cart/page.tsx",
   "apps/store/app/checkout/page.tsx",
+  "apps/store/app/about/page.tsx",
+  "apps/store/app/contact/page.tsx",
+  "apps/store/app/shipping-returns/page.tsx",
+  "apps/store/app/terms/page.tsx",
   "apps/store/app/robots.ts",
   "apps/store/app/sitemap.ts",
   "apps/store/app/manifest.ts",
+  "apps/store/app/caravan-reference.css",
   "apps/store/components/StoreHeader.tsx",
   "apps/store/components/StoreFooter.tsx",
+  "apps/store/components/StaticPageShell.tsx",
   "apps/store/components/ProductArtwork.tsx",
   "apps/store/components/ProductCard.tsx",
   "apps/store/components/CatalogListingClient.tsx",
@@ -154,20 +160,26 @@ for (const relativePath of [
   record(`storefront:${relativePath}`, existsSync(absolute(relativePath)));
 }
 
-requireText("apps/store/components/StorefrontClient.tsx", "retail-hero", "storefront includes responsive retail hero");
-requireText("apps/store/components/StorefrontClient.tsx", "Shop by category", "storefront includes category navigation");
-requireText("apps/store/components/StorefrontClient.tsx", "New arrivals", "storefront includes new arrivals");
-requireText("apps/store/components/StorefrontClient.tsx", "Featured products", "storefront includes featured products");
+requireText("apps/store/components/StorefrontClient.tsx", "caravan-hero", "storefront includes reference-inspired hero slider");
+requireText("apps/store/components/StorefrontClient.tsx", "Top Demand", "storefront includes high-demand product shelf");
+requireText("apps/store/components/StorefrontClient.tsx", "Laptops & Computing", "storefront includes curated category collections");
+requireText("apps/store/components/StorefrontClient.tsx", "Why BJ Electronics", "storefront includes service and trust narrative");
 requireText("apps/store/components/StoreHeader.tsx", "/wishlist", "storefront header exposes wishlist");
 requireText("apps/store/components/StoreHeader.tsx", "/cart", "storefront header exposes transactional cart");
+requireText("apps/store/components/StoreHeader.tsx", "/about", "storefront header exposes about page");
+requireText("apps/store/components/StoreHeader.tsx", "/contact", "storefront header exposes contact page");
+requireText("apps/store/components/StoreFooter.tsx", "/shipping-returns", "storefront footer exposes service policies");
 requireText("apps/store/components/CatalogListingClient.tsx", "Price range", "catalog includes price filtering");
 requireText("apps/store/components/CatalogListingClient.tsx", "Availability", "catalog includes availability filtering");
 requireText("apps/store/components/ProductDetailClient.tsx", "Add to cart", "product details include purchase action");
 requireText("apps/store/components/ProductDetailClient.tsx", "Similar products", "product details include recommendations");
-requireText("apps/store/app/globals.css", "@media (max-width: 680px)", "storefront includes mobile breakpoint");
-requireText("apps/store/app/globals.css", ".mobile-bottom-nav", "storefront includes mobile navigation");
+requireText("apps/store/app/caravan-reference.css", "@media (max-width: 560px)", "reference storefront includes mobile breakpoint");
+requireText("apps/store/app/caravan-reference.css", ".mobile-bottom-nav", "reference storefront includes mobile navigation");
+requireText("apps/store/app/caravan-reference.css", ".caravan-contact-bar", "reference storefront includes contact utility bar");
+requireText("apps/store/app/layout.tsx", "./caravan-reference.css", "storefront loads reference-inspired design system");
 requireText("apps/store/app/layout.tsx", "/manifest.webmanifest", "storefront metadata exposes PWA manifest");
 requireText("apps/store/app/layout.tsx", "/brand/social/og-store.svg", "storefront metadata exposes social preview");
+requireText("apps/store/app/sitemap.ts", `${originPlaceholder("/about")}`, "sitemap includes about page");
 
 requireText("scripts/check-production.mjs", '"/health/live"');
 requireText("scripts/check-production.mjs", '"/health/ready"');
@@ -232,3 +244,7 @@ if (failures.length > 0) {
 }
 
 console.log(`\nPlatform audit passed ${checks.length} checks.`);
+
+function originPlaceholder(pathname) {
+  return `\${origin}${pathname}`;
+}
