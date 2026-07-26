@@ -130,6 +130,45 @@ for (const relativePath of [
   record(`health-route:${relativePath}`, existsSync(absolute(relativePath)));
 }
 
+for (const relativePath of [
+  "apps/store/app/page.tsx",
+  "apps/store/app/categories/page.tsx",
+  "apps/store/app/products/[slug]/page.tsx",
+  "apps/store/app/wishlist/page.tsx",
+  "apps/store/app/cart/page.tsx",
+  "apps/store/app/checkout/page.tsx",
+  "apps/store/app/robots.ts",
+  "apps/store/app/sitemap.ts",
+  "apps/store/app/manifest.ts",
+  "apps/store/components/StoreHeader.tsx",
+  "apps/store/components/StoreFooter.tsx",
+  "apps/store/components/ProductArtwork.tsx",
+  "apps/store/components/ProductCard.tsx",
+  "apps/store/components/CatalogListingClient.tsx",
+  "apps/store/components/ProductDetailClient.tsx",
+  "apps/store/components/WishlistClient.tsx",
+  "apps/store/public/brand/icons/favicon.svg",
+  "apps/store/public/brand/icons/app-icon.svg",
+  "apps/store/public/brand/social/og-store.svg",
+]) {
+  record(`storefront:${relativePath}`, existsSync(absolute(relativePath)));
+}
+
+requireText("apps/store/components/StorefrontClient.tsx", "retail-hero", "storefront includes responsive retail hero");
+requireText("apps/store/components/StorefrontClient.tsx", "Shop by category", "storefront includes category navigation");
+requireText("apps/store/components/StorefrontClient.tsx", "New arrivals", "storefront includes new arrivals");
+requireText("apps/store/components/StorefrontClient.tsx", "Featured products", "storefront includes featured products");
+requireText("apps/store/components/StoreHeader.tsx", "/wishlist", "storefront header exposes wishlist");
+requireText("apps/store/components/StoreHeader.tsx", "/cart", "storefront header exposes transactional cart");
+requireText("apps/store/components/CatalogListingClient.tsx", "Price range", "catalog includes price filtering");
+requireText("apps/store/components/CatalogListingClient.tsx", "Availability", "catalog includes availability filtering");
+requireText("apps/store/components/ProductDetailClient.tsx", "Add to cart", "product details include purchase action");
+requireText("apps/store/components/ProductDetailClient.tsx", "Similar products", "product details include recommendations");
+requireText("apps/store/app/globals.css", "@media (max-width: 680px)", "storefront includes mobile breakpoint");
+requireText("apps/store/app/globals.css", ".mobile-bottom-nav", "storefront includes mobile navigation");
+requireText("apps/store/app/layout.tsx", "/manifest.webmanifest", "storefront metadata exposes PWA manifest");
+requireText("apps/store/app/layout.tsx", "/brand/social/og-store.svg", "storefront metadata exposes social preview");
+
 requireText("scripts/check-production.mjs", '"/health/live"');
 requireText("scripts/check-production.mjs", '"/health/ready"');
 requireText("scripts/check-production.mjs", '"/api/catalog"');
