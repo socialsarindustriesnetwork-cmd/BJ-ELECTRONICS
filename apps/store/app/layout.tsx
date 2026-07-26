@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { getStoreUrl } from "@bje/config";
 import "./globals.css";
+import "./marketplace.css";
 
 const storeUrl = getStoreUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(storeUrl),
-  title: { default: "BJ Electronics | Smart Tech, Better Life", template: "%s | BJ Electronics" },
-  description: "Shop trusted laptops, audio, wearables, monitors, power and electronics accessories with live inventory and secure checkout.",
+  title: { default: "BJ Electronics | Electronics & Home Appliances", template: "%s | BJ Electronics" },
+  description: "Shop televisions, refrigerators, air conditioners, washing machines, kitchen appliances, mobile devices, computers and audio products with live inventory and secure checkout.",
   applicationName: "BJ Electronics Store",
   manifest: "/manifest.webmanifest",
   alternates: { canonical: "/" },
@@ -20,14 +21,14 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "BJ Electronics",
-    title: "BJ Electronics | Smart Tech, Better Life",
-    description: "Trusted electronics, live inventory, secure checkout and responsive support.",
-    images: [{ url: "/brand/social/og-store.svg", width: 1200, height: 630, alt: "BJ Electronics online store" }],
+    title: "BJ Electronics | Electronics & Home Appliances",
+    description: "A complete electronics and home-appliance marketplace with live inventory, secure checkout and nationwide delivery support.",
+    images: [{ url: "/brand/social/og-store.svg", width: 1200, height: 630, alt: "BJ Electronics online marketplace" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BJ Electronics | Smart Tech, Better Life",
-    description: "Trusted electronics with live inventory and secure checkout.",
+    title: "BJ Electronics | Electronics & Home Appliances",
+    description: "Shop dependable electronics and appliances with live inventory and secure checkout.",
     images: ["/brand/social/og-store.svg"],
   },
 };
@@ -37,7 +38,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e3a8a" },
+    { media: "(prefers-color-scheme: dark)", color: "#173a8f" },
   ],
 };
 
