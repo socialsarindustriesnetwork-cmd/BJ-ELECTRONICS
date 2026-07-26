@@ -3,23 +3,20 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product } from "@bje/database";
-import type { CommerceCart } from "@bje/database/transactions";
-import { BrandLogo } from "@bje/ui";
+import { StoreHeader } from "@/components/StoreHeader";
+import { StoreFooter } from "@/components/StoreFooter";
+import { ProductCard } from "@/components/ProductCard";
 
-function money(product: Product): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: product.currency,
-  }).format(product.priceCents / 100);
-}
-
-function productInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
+const categories = [
+  { name: "Laptops", icon: "▰", description: "Powerful mobile computing" },
+  { name: "Earphones", icon: "◖", description: "Compact wireless audio" },
+  { name: "Headphones", icon: "◉", description: "Immersive personal sound" },
+  { name: "Smart Watches", icon: "▣", description: "Connected daily wellness" },
+  { name: "Speakers", icon: "◼", description: "Room-filling entertainment" },
+  { name: "Accessories", icon: "⌁", description: "Cables, chargers and more" },
+  { name: "Monitors", icon: "▤", description: "Clear productive displays" },
+  { name: "Power Banks", icon: "▥", description: "Power wherever you go" },
+];
 
 export function StorefrontClient({
   initialProducts,
@@ -31,27 +28,10 @@ export function StorefrontClient({
   adminUrl: string;
 }) {
   const [products, setProducts] = useState(initialProducts);
-  const [query, setQuery] = useState("");
-  const [cart, setCart] = useState<CommerceCart | null>(null);
-  const [cartMessage, setCartMessage] = useState("");
-  const [adding, setAdding] = useState<string | null>(null);
   const [live, setLive] = useState(false);
   const cursor = useRef(latestEventId);
 
   useEffect(() => {
-    void fetch("/api/cart", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((payload: { cart?: CommerceCart }) => {
-        if (payload.cart) setCart(payload.cart);
-      })
-      .catch(() => undefined);
-
-    const cartListener = (event: Event) => {
-      const count = (event as CustomEvent<number>).detail;
-      setCart((current) => current ? { ...current, itemCount: count } : current);
-    };
-    window.addEventListener("bje:cart", cartListener);
-
     const source = new EventSource(`/api/realtime?after=${cursor.current}`);
     source.onopen = () => setLive(true);
     source.onerror = () => setLive(false);
@@ -60,7 +40,7 @@ export function StorefrontClient({
         const payload = JSON.parse((event as MessageEvent<string>).data) as { id?: number };
         if (typeof payload.id === "number") cursor.current = payload.id;
       } catch {
-        // The catalog refresh below is authoritative even when an event payload is malformed.
+        // The authoritative catalog request below remains safe when an event is malformed.
       }
       void fetch("/api/catalog", { cache: "no-store" })
         .then((response) => response.json())
@@ -70,171 +50,71 @@ export function StorefrontClient({
         })
         .catch(() => undefined);
     });
-    return () => {
-      window.removeEventListener("bje:cart", cartListener);
-      source.close();
-    };
+    return () => source.close();
   }, []);
 
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return products;
-    return products.filter((product) =>
-      `${product.name} ${product.sku} ${product.description}`.toLowerCase().includes(normalized),
-    );
-  }, [products, query]);
-
-  async function addToCart(product: Product) {
-    setAdding(product.id);
-    setCartMessage("");
-    try {
-      const currentQuantity = cart?.lines.find((line) => line.productId === product.id)?.quantity ?? 0;
-      const response = await fetch("/api/cart/items", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ productId: product.id, quantity: currentQuantity + 1 }),
-      });
-      const payload = await response.json() as { cart?: CommerceCart; error?: string };
-      if (!response.ok || !payload.cart) throw new Error(payload.error || "Could not add this product.");
-      setCart(payload.cart);
-      setCartMessage(`${product.name} added to cart.`);
-    } catch (error) {
-      setCartMessage(error instanceof Error ? error.message : "Could not add this product.");
-    } finally {
-      setAdding(null);
-    }
-  }
-
-  const cartCount = cart?.itemCount ?? 0;
+  const newArrivals = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5), [products]);
+  const featured = useMemo(() => products.slice(0, 10), [products]);
+  const heroProduct = products[0];
 
   return (
-    <div className="store-shell">
-      <header className="store-header">
-        <div className="header-inner">
-          <Link className="brand-link" href="/" aria-label="BJ Electronics home">
-            <BrandLogo />
-          </Link>
-          <nav className="store-nav" aria-label="Store navigation">
-            <a href="#catalog">Products</a>
-            <a href="#services">Why BJ Electronics</a>
-            <a href="mailto:support@bjelectronics.shop">Support</a>
-          </nav>
-          <div className="header-actions">
-            <a className="icon-action" href={adminUrl} aria-label="Administration portal">↗</a>
-            <Link className="cart-button" href="/cart" aria-label={`${cartCount} items in cart`}>
-              Cart <span className="cart-count">{cartCount}</span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <div className="store-shell reference-storefront">
+      <StoreHeader adminUrl={adminUrl} />
       <main>
-        <section className="hero">
-          <div className="hero-copy">
-            <p className="eyebrow">Official BJ Electronics online store</p>
-            <h1>Technology that works <span>beautifully.</span></h1>
-            <p>
-              Discover dependable computing, audio, mobile, and smart-home products in a secure,
-              responsive shopping experience connected directly to live store inventory.
-            </p>
-            <div className="hero-actions">
-              <a className="primary-link" href="#catalog">Shop the collection</a>
-              <a className="secondary-link" href="mailto:support@bjelectronics.shop">Talk to support</a>
-            </div>
-            <div className="trust-row">
-              <span>Secure shopping</span>
-              <span>Live inventory</span>
-              <span>Transactional checkout</span>
-            </div>
+        <section className="retail-hero" aria-labelledby="hero-title">
+          <div className="retail-hero-copy">
+            <p className="hero-kicker">Powerful performance. Dependable service.</p>
+            <h1 id="hero-title">Smart technology for a <span>better everyday life.</span></h1>
+            <p>Discover carefully selected laptops, audio, wearables and accessories with live inventory, secure checkout and responsive support.</p>
+            <div className="retail-hero-actions"><Link className="shop-primary" href="/categories">Shop now</Link><a className="shop-secondary" href="mailto:support@bjelectronics.shop">Talk to an expert</a></div>
+            <div className="hero-mini-proof"><span>✓ Live stock</span><span>✓ Secure checkout</span><span>✓ Fast support</span></div>
           </div>
-          <div className="hero-visual" aria-hidden="true">
-            <div className="hero-orb" />
-            <div className="hero-device">
-              <small>Connected commerce platform</small>
-              <strong>Store and operations, synchronized.</strong>
-              <p>Catalog, inventory, carts, and orders are coordinated through one transactional data layer.</p>
-              <div className="device-stats">
-                <span>Fast catalog</span><span>Secure checkout</span><span>Live updates</span>
-              </div>
+          <div className="retail-hero-visual" aria-label={heroProduct ? `Featured product: ${heroProduct.name}` : "Featured laptop collection"}>
+            <div className="hero-glow" />
+            <div className="hero-laptop">
+              <div className="hero-laptop-screen"><i /><i /><i /><span>BJ</span></div>
+              <div className="hero-laptop-base" />
             </div>
+            <div className="hero-product-label"><small>Featured technology</small><strong>{heroProduct?.name ?? "Premium performance collection"}</strong><Link href={heroProduct ? `/products/${heroProduct.slug}` : "/categories"}>Explore product →</Link></div>
+          </div>
+          <div className="hero-dots" aria-hidden="true"><span className="active" /><span /><span /><span /></div>
+        </section>
+
+        <section className="retail-trust" aria-label="Shopping benefits">
+          <article><span>▱</span><div><strong>Free delivery</strong><small>On qualifying orders</small></div></article>
+          <article><span>♢</span><div><strong>1 year warranty</strong><small>Official product coverage</small></div></article>
+          <article><span>↻</span><div><strong>Easy returns</strong><small>Clear return assistance</small></div></article>
+          <article><span>▣</span><div><strong>Secure payment</strong><small>Protected checkout</small></div></article>
+        </section>
+
+        <section className="retail-section category-section">
+          <div className="retail-section-heading"><div><span>Explore the store</span><h2>Shop by category</h2></div><Link href="/categories">View all</Link></div>
+          <div className="category-tile-grid">
+            {categories.map((category) => (
+              <Link className="category-tile" href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
+                <span className="category-tile-icon">{category.icon}</span><strong>{category.name}</strong><small>{category.description}</small>
+              </Link>
+            ))}
           </div>
         </section>
 
-        <section className="section" id="catalog">
-          <div className="section-heading">
-            <div><p className="eyebrow">Featured catalog</p><h2>Products ready for everyday performance.</h2></div>
-            <p>Availability, pricing, and publication status are controlled from the secure administration application.</p>
-          </div>
-          <div className="catalog-toolbar">
-            <input
-              className="search-box"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search products, SKUs, and categories"
-              aria-label="Search catalog"
-            />
-            <span className="live-state">{live ? "Live catalog connected" : "Reconnecting live catalog"}</span>
-          </div>
-          {cartMessage ? <div className="store-notice" role="status">{cartMessage}</div> : null}
-
-          {filtered.length ? (
-            <div className="product-grid">
-              {filtered.map((product) => (
-                <article className="product-card" key={product.id}>
-                  <Link className="product-visual" href={`/products/${product.slug}`} aria-label={`View ${product.name}`}>
-                    <span className="product-mark">{productInitials(product.name)}</span>
-                  </Link>
-                  <div className="product-copy">
-                    <div className="product-meta">
-                      <span>{product.sku}</span>
-                      <span className={product.inventoryQuantity <= 5 ? "stock-low" : "stock-ok"}>
-                        {product.inventoryQuantity > 0 ? `${product.inventoryQuantity} available` : "Out of stock"}
-                      </span>
-                    </div>
-                    <h3><Link href={`/products/${product.slug}`}>{product.name}</Link></h3>
-                    <p>{product.description}</p>
-                    <div className="product-footer">
-                      <span className="price">
-                        <strong>{money(product)}</strong>
-                        {product.compareAtCents && <del>{new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.compareAtCents / 100)}</del>}
-                      </span>
-                      <button
-                        className="add-button"
-                        type="button"
-                        onClick={() => addToCart(product)}
-                        disabled={product.inventoryQuantity < 1 || adding === product.id}
-                      >
-                        {product.inventoryQuantity < 1 ? "Unavailable" : adding === product.id ? "Adding…" : "Add to cart"}
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">No products match this search.</div>
-          )}
+        <section className="retail-section">
+          <div className="retail-section-heading"><div><span>Fresh technology</span><h2>New arrivals</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/categories?sort=newest">View all</Link></div></div>
+          {newArrivals.length ? <div className="horizontal-product-grid">{newArrivals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Products will appear here as soon as the catalog is published.</div>}
         </section>
 
-        <section className="section" id="services">
-          <div className="section-heading">
-            <div><p className="eyebrow">Built for confidence</p><h2>A professional shopping foundation.</h2></div>
-          </div>
-          <div className="service-grid">
-            <article className="service-card"><span className="service-icon">✓</span><h3>Trusted catalog</h3><p>Published products come from one controlled operational source of truth.</p></article>
-            <article className="service-card"><span className="service-icon">↻</span><h3>Realtime accuracy</h3><p>Product and inventory changes appear without requiring a full deployment.</p></article>
-            <article className="service-card"><span className="service-icon">▣</span><h3>Protected checkout</h3><p>Inventory is locked and revalidated when an order is created.</p></article>
-          </div>
+        <section className="retail-section featured-section">
+          <div className="retail-section-heading"><div><span>Customer favourites</span><h2>Featured products</h2></div><Link href="/categories">View all</Link></div>
+          {featured.length ? <div className="featured-product-grid">{featured.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">No featured products are currently available.</div>}
+        </section>
+
+        <section className="promotion-grid">
+          <article className="promotion-card promo-a"><div><span>Up to 25% off</span><h2>Premium headphones</h2><p>Focused sound for work, travel and everyday listening.</p><Link href="/categories?category=Headphones">Shop headphones</Link></div><div className="promo-headphones" aria-hidden="true"><span /><i /><i /></div></article>
+          <article className="promotion-card promo-b"><div><span>Connected lifestyle</span><h2>Smart watches</h2><p>Track, connect and achieve more throughout your day.</p><Link href="/categories?category=Smart%20Watches">Shop smart watches</Link></div><div className="promo-watch" aria-hidden="true"><span><i /></span></div></article>
+          <article className="promotion-card promo-c"><div><span>Power anywhere</span><h2>Essential accessories</h2><p>Reliable charging, connectivity and protection.</p><Link href="/categories?category=Accessories">Shop accessories</Link></div><div className="promo-power" aria-hidden="true"><span /><i /></div></article>
         </section>
       </main>
-
-      <footer className="store-footer">
-        <div className="footer-inner">
-          <div><BrandLogo inverse /><p>© {new Date().getFullYear()} BJ Electronics. All rights reserved.</p></div>
-          <div className="footer-links"><a href="mailto:support@bjelectronics.shop">Support</a><a href={adminUrl}>Administration</a></div>
-        </div>
-      </footer>
+      <StoreFooter />
     </div>
   );
 }

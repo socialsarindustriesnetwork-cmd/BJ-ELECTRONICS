@@ -1,19 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { BrandLogo } from "@bje/ui";
+import { getAdminUrl } from "@bje/config";
 import { CheckoutClient } from "@/components/CheckoutClient";
+import { StoreHeader } from "@/components/StoreHeader";
+import { StoreFooter } from "@/components/StoreFooter";
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = {
+  title: "Secure checkout",
+  robots: { index: false, follow: false, noarchive: true },
+};
+
 export default function CheckoutPage() {
   return (
-    <div className="checkout-shell">
-      <header className="store-header">
-        <div className="header-inner">
-          <Link className="brand-link" href="/"><BrandLogo /></Link>
-          <div className="checkout-header-note">Secure checkout · Live inventory validation</div>
-        </div>
-      </header>
-      <main className="checkout-main"><CheckoutClient /></main>
+    <div className="store-shell checkout-shell">
+      <StoreHeader adminUrl={getAdminUrl()} />
+      <main className="checkout-main"><nav className="breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href="/cart">Cart</Link><span>›</span><strong>Checkout</strong></nav><CheckoutClient /></main>
+      <StoreFooter />
     </div>
   );
 }
