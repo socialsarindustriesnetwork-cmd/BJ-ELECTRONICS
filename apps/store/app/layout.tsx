@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { getStoreUrl } from "@bje/config";
 import "./globals.css";
+import "./marketplace.css";
 
 const storeUrl = getStoreUrl();
 
