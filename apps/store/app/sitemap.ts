@@ -8,9 +8,12 @@ const staticRoutes = [
   ["/track-order", "monthly", 0.7],
   ["/about", "monthly", 0.6],
   ["/contact", "monthly", 0.6],
+  ["/help", "monthly", 0.7],
   ["/faq", "monthly", 0.6],
   ["/shipping-returns", "monthly", 0.5],
+  ["/returns", "monthly", 0.5],
   ["/warranty", "monthly", 0.5],
+  ["/business", "monthly", 0.6],
   ["/privacy", "yearly", 0.4],
   ["/terms", "yearly", 0.4],
 ] as const;
