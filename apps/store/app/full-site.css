@@ -1,0 +1,217 @@
+/* Full-site marketplace completion layer.
+   Extends the existing original BJ Electronics Caravan-style homepage without
+   copying third-party source code, branding, text, imagery or product data. */
+
+.marketplace-listing-main,
+.marketplace-product-main {
+  width: min(1320px, calc(100% - 34px));
+  margin: 0 auto;
+  padding: 20px 0 76px;
+}
+
+.listing-discovery-banner {
+  position: relative;
+  min-height: 224px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin: 14px 0;
+  padding: 38px 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(115deg, #eef2ff, #fff 58%, #fff1f2);
+  box-shadow: var(--shadow-sm);
+}
+
+.listing-discovery-banner > div:first-child { position: relative; z-index: 2; max-width: 720px; }
+.listing-discovery-banner > div > span { color: var(--accent); font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.listing-discovery-banner h1 { margin: 9px 0; font-size: clamp(36px, 5vw, 58px); line-height: 1; letter-spacing: -.055em; }
+.listing-discovery-banner p { max-width: 650px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+.listing-discovery-art {
+  position: absolute;
+  right: 7%;
+  width: 230px;
+  aspect-ratio: 1.55;
+  display: grid;
+  place-items: center;
+  border: 10px solid #242a38;
+  border-bottom-width: 16px;
+  border-radius: 12px 12px 5px 5px;
+  background: radial-gradient(circle at 30% 30%, #5872ff, #101a55 58%, #080b20);
+  color: #fff;
+  font-size: 40px;
+  font-weight: 950;
+  box-shadow: 0 24px 48px rgba(15,23,42,.25);
+  transform: rotate(-5deg);
+}
+.listing-discovery-art i { position: absolute; left: -9%; bottom: -27px; width: 118%; height: 10px; border-radius: 2px 2px 10px 10px; background: #bbc2cd; }
+.listing-discovery-art b { position: absolute; bottom: -22px; width: 26%; height: 3px; border-radius: 99px; background: #7b8490; }
+
+.listing-category-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  scrollbar-width: thin;
+}
+.listing-category-chips button { flex: 0 0 auto; min-height: 34px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: #485164; font-size: 9px; font-weight: 800; }
+.listing-category-chips button.active,
+.listing-category-chips button:hover { border-color: var(--brand); background: var(--brand); color: #fff; }
+
+.mobile-filter-trigger { display: none; min-height: 43px; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0; border: 0; border-radius: 8px; background: var(--brand); color: #fff; font-size: 11px; font-weight: 900; }
+.mobile-filter-trigger span { min-width: 20px; height: 20px; display: grid; place-items: center; border-radius: 999px; background: var(--accent); font-size: 9px; }
+
+.marketplace-listing-layout { margin-top: 14px; grid-template-columns: 265px minmax(0, 1fr); gap: 14px; }
+.marketplace-filters { border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: var(--shadow-sm); }
+.marketplace-filters .filter-title { min-height: 62px; padding: 0 18px; border-bottom: 1px solid var(--line); }
+.marketplace-filters fieldset,
+.marketplace-filters .filter-search { padding: 18px; border-bottom: 1px solid var(--line); }
+.marketplace-filters fieldset:last-of-type { border-bottom: 0; }
+.marketplace-filters legend,
+.marketplace-filters .filter-search > span { color: #283143; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+.marketplace-filters fieldset label { min-height: 29px; gap: 8px; font-size: 10px; }
+.marketplace-filters fieldset label small { margin-left: auto; color: #8c95a4; }
+.marketplace-filters select,
+.marketplace-filters .filter-search input { width: 100%; height: 40px; margin-top: 9px; padding: 0 11px; border: 1px solid var(--line); border-radius: 7px; outline: none; background: #fff; }
+.marketplace-filters input:focus,
+.marketplace-filters select:focus { border-color: var(--brand-bright); box-shadow: 0 0 0 3px rgba(30,58,138,.08); }
+
+.filter-support-card { margin: 14px; padding: 18px; border-radius: 9px; background: #12265b; color: #fff; }
+.filter-support-card > span { color: #ffadb2; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+.filter-support-card p { color: #bdc7d9; font-size: 10px; line-height: 1.55; }
+.filter-support-card a { color: #fff; font-size: 9px; font-weight: 900; }
+
+.marketplace-listing-results { min-width: 0; }
+.marketplace-results-heading { min-height: 94px; display: flex; align-items: center; padding: 18px 22px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.marketplace-results-heading h2 { margin: 4px 0; font-size: 27px; letter-spacing: -.04em; }
+.marketplace-results-heading > div:first-child > span { color: var(--accent); font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.marketplace-results-heading p { margin: 0; color: var(--muted); font-size: 9px; }
+.marketplace-results-heading .listing-controls { margin-left: auto; }
+.active-filter-summary { min-height: 46px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding: 0 14px; border: 1px solid #c9d3ed; border-radius: 8px; background: #f2f5ff; color: var(--brand); font-size: 9px; font-weight: 850; }
+.active-filter-summary button { border: 0; background: transparent; color: var(--accent); font-size: 9px; font-weight: 900; }
+.marketplace-listing-results .listing-product-grid { margin-top: 10px; gap: 10px; }
+.marketplace-listing-results .listing-product-grid.grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.marketplace-listing-results .listing-product-grid.list .catalog-card { min-height: 230px; display: grid; grid-template-columns: 230px minmax(0, 1fr); }
+.marketplace-listing-results .listing-product-grid.list .catalog-card-media { min-height: 230px; }
+
+.marketplace-product-grid { display: grid; grid-template-columns: minmax(390px, .95fr) minmax(410px, 1.05fr) 300px; gap: 14px; align-items: start; }
+.marketplace-product-gallery,
+.marketplace-product-copy,
+.marketplace-buy-box { border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: var(--shadow-sm); }
+.marketplace-product-gallery { position: sticky; top: 164px; padding: 14px; }
+.marketplace-product-gallery .product-thumbnails { width: 68px; }
+.marketplace-product-media { position: relative; min-height: 470px; border: 0; border-radius: 8px; background: linear-gradient(145deg, #fafbfe, #edf2ff); box-shadow: none; }
+.marketplace-discount-badge { position: absolute; top: 16px; left: 16px; min-width: 50px; height: 27px; display: grid; place-items: center; border-radius: 5px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 900; }
+.gallery-share-row { display: flex; gap: 10px; padding: 13px 4px 0; }
+.gallery-share-row button,
+.gallery-share-row a { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; flex: 1; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #4b5566; font-size: 9px; font-weight: 850; text-decoration: none; }
+
+.marketplace-product-copy { padding: 30px; }
+.marketplace-product-copy h1 { margin: 8px 0 13px; font-size: clamp(30px, 3.4vw, 44px); line-height: 1.04; letter-spacing: -.045em; }
+.marketplace-rating { padding-bottom: 17px; border-bottom: 1px solid var(--line); }
+.marketplace-price-line { display: flex; align-items: center; gap: 10px; margin: 22px 0 6px; }
+.marketplace-price-line > strong { color: var(--brand); font-size: 31px; }
+.marketplace-price-line > del { color: #929baa; font-size: 13px; }
+.marketplace-price-line > b { padding: 5px 8px; border-radius: 5px; background: #fff0f1; color: var(--accent); font-size: 9px; }
+.marketplace-stock-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.marketplace-stock-row span { font-size: 10px; font-weight: 900; }
+.marketplace-stock-row small { color: #858e9e; font-size: 9px; }
+.marketplace-product-options { padding: 21px 0; border-bottom: 1px solid var(--line); }
+.marketplace-feature-list { padding: 21px 0; }
+.marketplace-feature-list li { margin: 7px 0; color: #596274; font-size: 10px; line-height: 1.5; }
+.marketplace-product-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.marketplace-product-tabs button { min-height: 39px; padding: 0 13px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #70798a; font-size: 9px; font-weight: 850; }
+.marketplace-product-tabs button.active { border-bottom-color: var(--brand); color: var(--brand); }
+.marketplace-tab-panel { min-height: 82px; padding: 16px 0 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+.marketplace-tab-panel p { margin: 0; }
+
+.marketplace-buy-box { position: sticky; top: 164px; padding: 22px; }
+.buy-box-price { padding-bottom: 17px; border-bottom: 1px solid var(--line); }
+.buy-box-price small { display: block; color: var(--muted); font-size: 9px; }
+.buy-box-price strong { display: block; margin: 4px 0; color: var(--brand); font-size: 26px; }
+.buy-box-price del { color: #929baa; font-size: 11px; }
+.buy-box-delivery { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 8px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+.buy-box-delivery > span { font-size: 20px; color: var(--brand); }
+.buy-box-delivery > div { display: flex; flex-direction: column; }
+.buy-box-delivery small { color: var(--muted); font-size: 8px; }
+.buy-box-delivery strong { font-size: 10px; }
+.buy-box-delivery a { color: var(--brand); font-size: 8px; font-weight: 900; }
+.buy-box-stock { display: flex; flex-direction: column; gap: 4px; padding: 17px 0; }
+.buy-box-stock strong { color: #087a4b; font-size: 11px; }
+.buy-box-stock small { color: var(--muted); font-size: 8px; }
+.buy-box-quantity { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 8px 0 17px; color: #3f4858; font-size: 9px; font-weight: 850; }
+.buy-box-cart,
+.buy-box-checkout,
+.buy-box-wishlist { width: 100%; min-height: 45px; display: flex; align-items: center; justify-content: center; margin-top: 8px; border-radius: 7px; font-size: 10px; font-weight: 900; text-decoration: none; }
+.buy-box-cart { border: 0; background: var(--brand); color: #fff; }
+.buy-box-checkout { border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+.buy-box-wishlist { border: 1px solid var(--line); background: #fff; color: #414a5b; }
+.buy-box-wishlist.saved { border-color: #f2b9bd; background: #fff1f2; color: var(--accent); }
+.buy-box-payment { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; padding-top: 17px; border-top: 1px solid var(--line); }
+.buy-box-payment strong { font-size: 10px; }
+.buy-box-payment span { color: var(--muted); font-size: 9px; }
+.buy-box-payment span::before { content: "✓"; margin-right: 7px; color: #087a4b; }
+.buy-box-guarantee { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 12px; border-radius: 8px; background: #edf9f2; }
+.buy-box-guarantee > span { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: #087a4b; color: #fff; font-weight: 900; }
+.buy-box-guarantee > div { display: flex; flex-direction: column; }
+.buy-box-guarantee strong { font-size: 9px; }
+.buy-box-guarantee small { color: #5f7368; font-size: 7px; line-height: 1.4; }
+.marketplace-detail-services { width: 100%; margin-top: 14px; }
+
+.support-link-card { color: inherit; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.support-link-card:hover { border-color: #a9baf0; box-shadow: var(--shadow); transform: translateY(-3px); }
+.support-link-card > span,
+.support-link-card > a { display: inline-flex; margin-top: 16px; color: var(--brand); font-size: 9px; font-weight: 900; text-decoration: none; }
+
+.cart-panel,
+.checkout-panel,
+.cart-summary,
+.checkout-summary { border-radius: 10px; box-shadow: var(--shadow-sm); }
+.cart-summary,
+.checkout-summary { border-top: 4px solid var(--brand); }
+.checkout-button { border-radius: 7px; background: var(--brand); }
+
+@media (max-width: 1180px) {
+  .marketplace-listing-results .listing-product-grid.grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .marketplace-product-grid { grid-template-columns: minmax(360px, .9fr) minmax(400px, 1.1fr); }
+  .marketplace-buy-box { position: static; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .buy-box-price,
+  .buy-box-delivery,
+  .buy-box-stock { border: 0; padding: 8px; }
+}
+
+@media (max-width: 900px) {
+  .marketplace-listing-layout { grid-template-columns: 1fr; }
+  .mobile-filter-trigger { display: flex; }
+  .marketplace-filters { display: none; }
+  .marketplace-filters.open { display: block; }
+  .listing-discovery-art { right: 4%; opacity: .3; }
+  .marketplace-listing-results .listing-product-grid.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .marketplace-product-grid { grid-template-columns: 1fr; }
+  .marketplace-product-gallery,
+  .marketplace-buy-box { position: static; }
+  .marketplace-buy-box { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+  .marketplace-listing-main,
+  .marketplace-product-main { width: min(100% - 20px, 1320px); padding-top: 12px; }
+  .listing-discovery-banner { min-height: 255px; padding: 28px 23px; }
+  .listing-discovery-banner h1 { font-size: 42px; }
+  .listing-discovery-art { right: -45px; bottom: 20px; width: 190px; opacity: .18; }
+  .marketplace-results-heading { align-items: flex-start; flex-direction: column; gap: 15px; }
+  .marketplace-results-heading .listing-controls { width: 100%; margin-left: 0; }
+  .marketplace-listing-results .listing-product-grid.grid { grid-template-columns: 1fr; }
+  .marketplace-listing-results .listing-product-grid.list .catalog-card { grid-template-columns: 1fr; }
+  .marketplace-product-copy { padding: 23px 20px; }
+  .marketplace-product-media { min-height: 350px; }
+  .marketplace-product-gallery { padding: 10px; }
+  .marketplace-buy-box { grid-template-columns: 1fr; padding: 20px; }
+  .marketplace-buy-box > * { grid-column: auto !important; }
+  .marketplace-price-line { align-items: flex-start; flex-wrap: wrap; }
+}
