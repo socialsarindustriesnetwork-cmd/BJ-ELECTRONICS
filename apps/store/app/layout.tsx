@@ -4,6 +4,7 @@ import "./globals.css";
 import "./caravan.css";
 import "./caravan-full.css";
 import "./track-order.css";
+import "./full-site.css";
 
 const storeUrl = getStoreUrl();
 
