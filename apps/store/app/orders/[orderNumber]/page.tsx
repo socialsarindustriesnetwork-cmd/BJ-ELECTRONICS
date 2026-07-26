@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getAdminUrl } from "@bje/config";
 import { getOrderByAccess } from "@bje/database/transactions";
-import { BrandLogo } from "@bje/ui";
 import { hashCartToken } from "@/lib/cart-session";
+import { StoreHeader } from "@/components/StoreHeader";
+import { StoreFooter } from "@/components/StoreFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -24,39 +25,22 @@ export default async function OrderConfirmationPage({
   if (!order) notFound();
 
   return (
-    <div className="checkout-shell">
-      <header className="store-header">
-        <div className="header-inner">
-          <Link className="brand-link" href="/"><BrandLogo /></Link>
-          <Link className="secondary-link" href="/">Continue shopping</Link>
-        </div>
-      </header>
+    <div className="store-shell checkout-shell">
+      <StoreHeader adminUrl={getAdminUrl()} />
       <main className="order-confirmation">
+        <nav className="breadcrumbs"><a href="/">Home</a><span>›</span><strong>Order {order.orderNumber}</strong></nav>
         <section className="confirmation-hero">
           <span className="confirmation-mark">✓</span>
           <p className="eyebrow">Order received</p>
           <h1>Thank you, {order.customerName.split(" ")[0]}.</h1>
           <p>Your order <strong>{order.orderNumber}</strong> is securely recorded and inventory has been reserved.</p>
         </section>
-
         <div className="checkout-layout">
           <section className="checkout-panel">
             <div className="panel-title"><h2>Order details</h2><span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span></div>
-            <div className="order-lines">
-              {order.lines?.map((line) => (
-                <div className="order-line" key={line.id}>
-                  <div><strong>{line.productName}</strong><span>{line.sku} · Quantity {line.quantity}</span></div>
-                  <strong>{money(line.lineTotalCents, order.currency)}</strong>
-                </div>
-              ))}
-            </div>
-            <div className="order-totals">
-              <div><span>Subtotal</span><strong>{money(order.subtotalCents, order.currency)}</strong></div>
-              <div><span>Shipping</span><strong>{order.shippingCents ? money(order.shippingCents, order.currency) : "Free"}</strong></div>
-              <div className="order-total"><span>Total</span><strong>{money(order.totalCents, order.currency)}</strong></div>
-            </div>
+            <div className="order-lines">{order.lines?.map((line) => <div className="order-line" key={line.id}><div><strong>{line.productName}</strong><span>{line.sku} · Quantity {line.quantity}</span></div><strong>{money(line.lineTotalCents, order.currency)}</strong></div>)}</div>
+            <div className="order-totals"><div><span>Subtotal</span><strong>{money(order.subtotalCents, order.currency)}</strong></div><div><span>Shipping</span><strong>{order.shippingCents ? money(order.shippingCents, order.currency) : "Free"}</strong></div><div className="order-total"><span>Total</span><strong>{money(order.totalCents, order.currency)}</strong></div></div>
           </section>
-
           <aside className="checkout-summary">
             <h2>Delivery</h2>
             <p><strong>{order.customerName}</strong><br />{order.addressLine1}{order.addressLine2 ? <><br />{order.addressLine2}</> : null}<br />{order.city}{order.region ? `, ${order.region}` : ""}{order.postalCode ? ` ${order.postalCode}` : ""}<br />{order.country}</p>
@@ -68,6 +52,7 @@ export default async function OrderConfirmationPage({
           </aside>
         </div>
       </main>
+      <StoreFooter />
     </div>
   );
 }
