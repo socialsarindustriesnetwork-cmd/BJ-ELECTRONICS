@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminUrl } from "@bje/config";
 import { getOrderByAccess } from "@bje/database/transactions";
@@ -28,7 +29,7 @@ export default async function OrderConfirmationPage({
     <div className="store-shell checkout-shell">
       <StoreHeader adminUrl={getAdminUrl()} />
       <main className="order-confirmation">
-        <nav className="breadcrumbs"><a href="/">Home</a><span>›</span><strong>Order {order.orderNumber}</strong></nav>
+        <nav className="breadcrumbs"><Link href="/">Home</Link><span>›</span><strong>Order {order.orderNumber}</strong></nav>
         <section className="confirmation-hero">
           <span className="confirmation-mark">✓</span>
           <p className="eyebrow">Order received</p>
