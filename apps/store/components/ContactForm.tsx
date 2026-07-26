@@ -1,0 +1,45 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+
+type Fields = {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+};
+
+const initialFields: Fields = { name: "", email: "", phone: "", subject: "", message: "" };
+
+export function ContactForm() {
+  const [fields, setFields] = useState(initialFields);
+
+  function update<K extends keyof Fields>(key: K, value: Fields[K]) {
+    setFields((current) => ({ ...current, [key]: value }));
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const subject = fields.subject.trim() || "BJ Electronics support request";
+    const body = [
+      `Name: ${fields.name}`,
+      `Email: ${fields.email}`,
+      `Phone: ${fields.phone || "Not provided"}`,
+      "",
+      fields.message,
+    ].join("\n");
+    window.location.assign(`mailto:support@bjelectronics.shop?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  }
+
+  return (
+    <form className="contact-form" onSubmit={submit}>
+      <label><span>Full name</span><input value={fields.name} onChange={(event) => update("name", event.target.value)} autoComplete="name" required /></label>
+      <label><span>Email address</span><input value={fields.email} onChange={(event) => update("email", event.target.value)} type="email" autoComplete="email" required /></label>
+      <label><span>Phone number</span><input value={fields.phone} onChange={(event) => update("phone", event.target.value)} type="tel" autoComplete="tel" /></label>
+      <label><span>Subject</span><input value={fields.subject} onChange={(event) => update("subject", event.target.value)} required /></label>
+      <label className="full"><span>How can we help?</span><textarea value={fields.message} onChange={(event) => update("message", event.target.value)} rows={7} required /></label>
+      <button type="submit">Prepare support email</button>
+    </form>
+  );
+}
