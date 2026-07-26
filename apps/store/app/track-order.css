@@ -1,0 +1,90 @@
+.track-order-page {
+  width: min(900px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 56px 0 88px;
+}
+
+.track-order-card {
+  padding: clamp(28px, 5vw, 52px);
+  border: 1px solid #e4e8f0;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(16, 35, 72, .08);
+}
+
+.track-order-card h1 {
+  max-width: 700px;
+  margin: 10px 0 14px;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1;
+  letter-spacing: -.055em;
+}
+
+.track-order-card > p:not(.hero-kicker) {
+  max-width: 720px;
+  margin: 0;
+  color: #667085;
+  line-height: 1.75;
+}
+
+.track-order-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.track-order-form label {
+  display: grid;
+  gap: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.track-order-form input {
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid #dfe3eb;
+  border-radius: 11px;
+  outline: none;
+}
+
+.track-order-form input:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, .09);
+}
+
+.track-order-form button {
+  min-height: 52px;
+  border: 0;
+  border-radius: 11px;
+  background: #1e3a8a;
+  color: #fff;
+  font-weight: 900;
+}
+
+.track-order-form .form-error {
+  margin: 0;
+}
+
+.track-order-note {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f4f6fa;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+@media (max-width: 680px) {
+  .track-order-page {
+    width: min(100% - 20px, 900px);
+    padding: 28px 0 82px;
+  }
+
+  .track-order-card {
+    padding: 26px 20px;
+    border-radius: 18px;
+  }
+}

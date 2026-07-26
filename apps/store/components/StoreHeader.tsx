@@ -11,6 +11,7 @@ const categories = ["Laptops", "Earphones", "Headphones", "Smart Watches", "Spea
 export function StoreHeader({ adminUrl }: { adminUrl: string }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
   const [cartCurrency, setCartCurrency] = useState("USD");
@@ -56,8 +57,12 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const params = new URLSearchParams();
     const normalized = query.trim();
-    router.push(normalized ? `/categories?q=${encodeURIComponent(normalized)}` : "/categories");
+    if (normalized) params.set("q", normalized);
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    const suffix = params.toString();
+    router.push(suffix ? `/categories?${suffix}` : "/categories");
     setMenuOpen(false);
   }
 
@@ -75,6 +80,7 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
             <span>Sat–Thu · 9:00 AM–6:30 PM</span>
           </div>
           <div className="utility-links">
+            <Link href="/track-order">Track order</Link>
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
             <a href={adminUrl}>Administration</a>
@@ -90,7 +96,7 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
           <form className="header-search caravan-search" onSubmit={submitSearch} role="search">
             <span aria-hidden="true">⌕</span>
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products, brands and categories…" aria-label="Search products" />
-            <select aria-label="Search category" defaultValue="all">
+            <select aria-label="Search category" value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
               <option value="all">All categories</option>
               {categories.map((category) => <option key={category} value={category}>{category}</option>)}
             </select>
@@ -105,18 +111,19 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
 
         <nav className={`primary-store-nav${menuOpen ? " open" : ""}`} aria-label="Primary store navigation">
           <div className="primary-store-nav-inner">
-            <Link href="/">Home</Link>
-            <Link href="/categories">Shop</Link>
-            <Link href="/about">About us</Link>
-            <Link href="/contact">Contact us</Link>
-            <Link className="primary-nav-deal" href="/categories?sort=discount">Special offers</Link>
+            <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link href="/categories" onClick={() => setMenuOpen(false)}>Shop</Link>
+            <Link href="/track-order" onClick={() => setMenuOpen(false)}>Track order</Link>
+            <Link href="/about" onClick={() => setMenuOpen(false)}>About us</Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact us</Link>
+            <Link className="primary-nav-deal" href="/categories?sort=discount" onClick={() => setMenuOpen(false)}>Special offers</Link>
           </div>
         </nav>
 
         <nav className={`category-nav caravan-category-nav${menuOpen ? " open" : ""}`} aria-label="Product categories">
           <div className="category-nav-inner">
-            <Link className="all-category-link" href="/categories">☰ Browse all</Link>
-            {categories.map((category) => <Link key={category} href={`/categories?category=${encodeURIComponent(category)}`}>{category}</Link>)}
+            <Link className="all-category-link" href="/categories" onClick={() => setMenuOpen(false)}>☰ Browse all</Link>
+            {categories.map((category) => <Link key={category} href={`/categories?category=${encodeURIComponent(category)}`} onClick={() => setMenuOpen(false)}>{category}</Link>)}
           </div>
         </nav>
       </header>
@@ -125,7 +132,7 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
         <Link href="/"><span>⌂</span>Home</Link>
         <Link href="/categories"><span>▦</span>Shop</Link>
         <Link href="/cart" className="mobile-cart-link"><span>🛒</span>Cart{cartCount > 0 ? <b>{cartCount}</b> : null}</Link>
-        <Link href="/contact"><span>✉</span>Contact</Link>
+        <Link href="/track-order"><span>⌕</span>Track</Link>
       </nav>
     </>
   );
