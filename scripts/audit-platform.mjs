@@ -137,9 +137,16 @@ for (const relativePath of [
   "apps/store/app/wishlist/page.tsx",
   "apps/store/app/cart/page.tsx",
   "apps/store/app/checkout/page.tsx",
+  "apps/store/app/about/page.tsx",
+  "apps/store/app/contact/page.tsx",
+  "apps/store/app/shipping-returns/page.tsx",
+  "apps/store/app/privacy/page.tsx",
+  "apps/store/app/terms/page.tsx",
   "apps/store/app/robots.ts",
   "apps/store/app/sitemap.ts",
   "apps/store/app/manifest.ts",
+  "apps/store/app/caravan.css",
+  "apps/store/app/caravan-full.css",
   "apps/store/components/StoreHeader.tsx",
   "apps/store/components/StoreFooter.tsx",
   "apps/store/components/ProductArtwork.tsx",
@@ -147,6 +154,7 @@ for (const relativePath of [
   "apps/store/components/CatalogListingClient.tsx",
   "apps/store/components/ProductDetailClient.tsx",
   "apps/store/components/WishlistClient.tsx",
+  "apps/store/lib/marketplace.ts",
   "apps/store/public/brand/icons/favicon.svg",
   "apps/store/public/brand/icons/app-icon.svg",
   "apps/store/public/brand/social/og-store.svg",
@@ -154,20 +162,33 @@ for (const relativePath of [
   record(`storefront:${relativePath}`, existsSync(absolute(relativePath)));
 }
 
-requireText("apps/store/components/StorefrontClient.tsx", "retail-hero", "storefront includes responsive retail hero");
-requireText("apps/store/components/StorefrontClient.tsx", "Shop by category", "storefront includes category navigation");
-requireText("apps/store/components/StorefrontClient.tsx", "New arrivals", "storefront includes new arrivals");
+requireText("apps/store/components/StorefrontClient.tsx", "full-market-hero", "storefront includes responsive marketplace hero");
+requireText("apps/store/components/StorefrontClient.tsx", "Shop by department", "storefront includes department navigation");
+requireText("apps/store/components/StorefrontClient.tsx", "Flash sale", "storefront includes flash sale merchandising");
+requireText("apps/store/components/StorefrontClient.tsx", "Popular departments", "storefront includes department discovery");
 requireText("apps/store/components/StorefrontClient.tsx", "Featured products", "storefront includes featured products");
+requireText("apps/store/components/StorefrontClient.tsx", "New arrivals", "storefront includes new arrivals");
+requireText("apps/store/components/StorefrontClient.tsx", "Shop leading brands", "storefront includes brand discovery");
+requireText("apps/store/components/StoreHeader.tsx", "All departments", "storefront search supports departments");
 requireText("apps/store/components/StoreHeader.tsx", "/wishlist", "storefront header exposes wishlist");
 requireText("apps/store/components/StoreHeader.tsx", "/cart", "storefront header exposes transactional cart");
+requireText("apps/store/components/StoreFooter.tsx", "Shipping & returns", "storefront footer connects customer policies");
+requireText("apps/store/components/StoreFooter.tsx", "Payment & security", "storefront footer documents supported checkout");
+requireText("apps/store/components/CatalogListingClient.tsx", "Department", "catalog includes department filtering");
 requireText("apps/store/components/CatalogListingClient.tsx", "Price range", "catalog includes price filtering");
 requireText("apps/store/components/CatalogListingClient.tsx", "Availability", "catalog includes availability filtering");
+requireText("apps/store/components/ProductArtwork.tsx", "device-refrigerator", "product artwork includes refrigeration fallback");
+requireText("apps/store/components/ProductArtwork.tsx", "device-washer", "product artwork includes laundry fallback");
 requireText("apps/store/components/ProductDetailClient.tsx", "Add to cart", "product details include purchase action");
 requireText("apps/store/components/ProductDetailClient.tsx", "Similar products", "product details include recommendations");
-requireText("apps/store/app/globals.css", "@media (max-width: 680px)", "storefront includes mobile breakpoint");
-requireText("apps/store/app/globals.css", ".mobile-bottom-nav", "storefront includes mobile navigation");
+requireText("apps/store/app/caravan-full.css", "@media (max-width: 680px)", "complete marketplace theme includes mobile breakpoint");
+requireText("apps/store/app/caravan-full.css", ".full-mobile-nav", "complete marketplace theme includes mobile navigation");
+requireText("apps/store/app/layout.tsx", "./caravan-full.css", "storefront activates complete marketplace theme");
 requireText("apps/store/app/layout.tsx", "/manifest.webmanifest", "storefront metadata exposes PWA manifest");
 requireText("apps/store/app/layout.tsx", "/brand/social/og-store.svg", "storefront metadata exposes social preview");
+requireText("apps/store/app/sitemap.ts", "/shipping-returns", "sitemap includes customer policy routes");
+requireText("apps/store/app/sitemap.ts", "/privacy", "sitemap includes privacy route");
+requireText("apps/store/app/sitemap.ts", "/terms", "sitemap includes terms route");
 
 requireText("scripts/check-production.mjs", '"/health/live"');
 requireText("scripts/check-production.mjs", '"/health/ready"');
