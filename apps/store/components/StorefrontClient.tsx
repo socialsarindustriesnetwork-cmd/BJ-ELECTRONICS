@@ -63,7 +63,7 @@ export function StorefrontClient({
   }, []);
 
   const newArrivals = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 6), [products]);
-  const bestSellers = useMemo(() => products.slice(0, 8), [products]);
+  const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
   const deals = useMemo(() => products.filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents).slice(0, 6), [products]);
   const heroProduct = products[0];
 
@@ -83,7 +83,7 @@ export function StorefrontClient({
             ))}
           </aside>
 
-          <section className="caravan-main-hero" aria-labelledby="caravan-hero-title">
+          <section className="retail-hero caravan-main-hero" aria-labelledby="caravan-hero-title">
             <div className="caravan-hero-copy">
               <p className="hero-kicker">Original products. Dependable service.</p>
               <h1 id="caravan-hero-title">Technology for every part of your day.</h1>
@@ -133,8 +133,8 @@ export function StorefrontClient({
         </section>
 
         <section className="retail-section caravan-products-section">
-          <div className="retail-section-heading"><div><span>Customer favourites</span><h2>Best sellers</h2></div><Link href="/categories?sort=popular">View all</Link></div>
-          {bestSellers.length ? <div className="featured-product-grid caravan-product-grid">{bestSellers.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Best-selling products will appear here.</div>}
+          <div className="retail-section-heading"><div><span>Customer favourites</span><h2>Featured products</h2></div><Link href="/categories?sort=popular">View all</Link></div>
+          {featuredProducts.length ? <div className="featured-product-grid caravan-product-grid">{featuredProducts.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Featured products will appear here.</div>}
         </section>
 
         <section className="split-campaigns">
