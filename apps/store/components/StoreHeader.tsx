@@ -60,7 +60,8 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
     const parameters = new URLSearchParams();
     if (query.trim()) parameters.set("q", query.trim());
     if (category !== "all") parameters.set("category", category);
-    router.push(parameters.size ? `/categories?${parameters.toString()}` : "/categories");
+    const search = parameters.toString();
+    router.push(search ? `/categories?${search}` : "/categories");
     setMenuOpen(false);
   }
 
@@ -77,11 +78,12 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
           <button className="mobile-menu-button" type="button" aria-label="Toggle menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((value) => !value)}>☰</button>
           <Link className="commerce-logo" href="/" aria-label="BJ Electronics home"><BrandLogo /></Link>
           <nav className={`caravan-main-nav${menuOpen ? " open" : ""}`} aria-label="Main navigation">
-            <Link href="/">Home</Link>
-            <Link href="/categories">Shop</Link>
-            <Link href="/categories?sort=discount">Deals</Link>
-            <Link href="/wishlist">Wishlist{wishlistCount ? <b>{wishlistCount}</b> : null}</Link>
-            <a href="mailto:support@bjelectronics.shop">Contact us</a>
+            <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link href="/categories" onClick={() => setMenuOpen(false)}>Shop</Link>
+            <Link href="/categories?sort=discount" onClick={() => setMenuOpen(false)}>Deals</Link>
+            <Link href="/about" onClick={() => setMenuOpen(false)}>About</Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
+            <Link href="/wishlist" onClick={() => setMenuOpen(false)}>Wishlist{wishlistCount ? <b>{wishlistCount}</b> : null}</Link>
           </nav>
           <div className="caravan-header-actions">
             <a className="caravan-admin-link" href={adminUrl}>Profile</a>
