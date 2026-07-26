@@ -37,9 +37,11 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
   const [selectedColor, setSelectedColor] = useState(colors[0]?.name ?? "Standard");
   const [tab, setTab] = useState<"details" | "delivery" | "support">("details");
   const [deliveryArea, setDeliveryArea] = useState("Bangladesh");
+  const [shareUrl, setShareUrl] = useState(`/products/${product.slug}`);
 
   useEffect(() => {
     setSaved(wishlistIds().includes(product.id));
+    setShareUrl(window.location.href);
     const storedArea = localStorage.getItem("bje-delivery-area");
     if (storedArea) setDeliveryArea(storedArea);
     try {
@@ -92,6 +94,7 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
   const discount = product.compareAtCents && product.compareAtCents > product.priceCents
     ? Math.round((1 - product.priceCents / product.compareAtCents) * 100)
     : 0;
+  const shareHref = `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(`View this product at ${shareUrl}`)}`;
 
   return (
     <div className="store-shell product-detail-shell marketplace-product-shell">
@@ -103,7 +106,7 @@ export function ProductDetailClient({ product, similar, adminUrl }: { product: P
           <div className="product-gallery marketplace-product-gallery">
             <div className="product-thumbnails"><button className="active" type="button"><ProductArtwork product={product} /></button><button type="button"><ProductArtwork product={product} /></button><button type="button"><span className="detail-mini-badge">BJ</span></button></div>
             <div className="product-detail-media marketplace-product-media"><ProductArtwork product={product} priority />{discount ? <span className="marketplace-discount-badge">-{discount}%</span> : null}<span className="zoom-hint">⌕ Product view</span></div>
-            <div className="gallery-share-row"><button type="button" onClick={toggleWishlist}>{saved ? "♥ Saved" : "♡ Save product"}</button><a href={`mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(`View this product at ${window.location.href}`)}`}>↗ Share</a></div>
+            <div className="gallery-share-row"><button type="button" onClick={toggleWishlist}>{saved ? "♥ Saved" : "♡ Save product"}</button><a href={shareHref}>↗ Share</a></div>
           </div>
 
           <section className="product-detail-copy marketplace-product-copy">
