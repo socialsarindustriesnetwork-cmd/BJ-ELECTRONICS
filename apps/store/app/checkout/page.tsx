@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getAdminUrl } from "@bje/config";
 import { CheckoutClient } from "@/components/CheckoutClient";
 import { StoreHeader } from "@/components/StoreHeader";
@@ -15,7 +16,7 @@ export default function CheckoutPage() {
   return (
     <div className="store-shell checkout-shell">
       <StoreHeader adminUrl={getAdminUrl()} />
-      <main className="checkout-main"><nav className="breadcrumbs"><a href="/">Home</a><span>›</span><a href="/cart">Cart</a><span>›</span><strong>Checkout</strong></nav><CheckoutClient /></main>
+      <main className="checkout-main"><nav className="breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href="/cart">Cart</Link><span>›</span><strong>Checkout</strong></nav><CheckoutClient /></main>
       <StoreFooter />
     </div>
   );
