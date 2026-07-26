@@ -140,6 +140,7 @@ for (const relativePath of [
   "apps/store/app/about/page.tsx",
   "apps/store/app/contact/page.tsx",
   "apps/store/app/shipping-returns/page.tsx",
+  "apps/store/app/privacy/page.tsx",
   "apps/store/app/terms/page.tsx",
   "apps/store/app/robots.ts",
   "apps/store/app/sitemap.ts",
@@ -169,6 +170,7 @@ requireText("apps/store/components/StoreHeader.tsx", "/cart", "storefront header
 requireText("apps/store/components/StoreHeader.tsx", "/about", "storefront header exposes about page");
 requireText("apps/store/components/StoreHeader.tsx", "/contact", "storefront header exposes contact page");
 requireText("apps/store/components/StoreFooter.tsx", "/shipping-returns", "storefront footer exposes service policies");
+requireText("apps/store/components/StoreFooter.tsx", "/privacy", "storefront footer exposes privacy policy");
 requireText("apps/store/components/CatalogListingClient.tsx", "Price range", "catalog includes price filtering");
 requireText("apps/store/components/CatalogListingClient.tsx", "Availability", "catalog includes availability filtering");
 requireText("apps/store/components/ProductDetailClient.tsx", "Add to cart", "product details include purchase action");
@@ -179,7 +181,8 @@ requireText("apps/store/app/caravan-reference.css", ".caravan-contact-bar", "ref
 requireText("apps/store/app/layout.tsx", "./caravan-reference.css", "storefront loads reference-inspired design system");
 requireText("apps/store/app/layout.tsx", "/manifest.webmanifest", "storefront metadata exposes PWA manifest");
 requireText("apps/store/app/layout.tsx", "/brand/social/og-store.svg", "storefront metadata exposes social preview");
-requireText("apps/store/app/sitemap.ts", `${originPlaceholder("/about")}`, "sitemap includes about page");
+requireText("apps/store/app/sitemap.ts", originPlaceholder("/about"), "sitemap includes about page");
+requireText("apps/store/app/sitemap.ts", originPlaceholder("/privacy"), "sitemap includes privacy page");
 
 requireText("scripts/check-production.mjs", '"/health/live"');
 requireText("scripts/check-production.mjs", '"/health/ready"');
