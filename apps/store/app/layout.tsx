@@ -3,6 +3,7 @@ import { getStoreUrl } from "@bje/config";
 import "./globals.css";
 import "./marketplace.css";
 import "./marketplace-header.css";
+import "./marketplace-footer.css";
 
 const storeUrl = getStoreUrl();
 
