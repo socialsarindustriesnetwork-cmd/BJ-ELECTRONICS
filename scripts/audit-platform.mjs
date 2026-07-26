@@ -137,11 +137,22 @@ for (const relativePath of [
   "apps/store/app/wishlist/page.tsx",
   "apps/store/app/cart/page.tsx",
   "apps/store/app/checkout/page.tsx",
+  "apps/store/app/about/page.tsx",
+  "apps/store/app/help/page.tsx",
+  "apps/store/app/returns/page.tsx",
+  "apps/store/app/warranty/page.tsx",
+  "apps/store/app/business/page.tsx",
+  "apps/store/app/privacy/page.tsx",
+  "apps/store/app/terms/page.tsx",
   "apps/store/app/robots.ts",
   "apps/store/app/sitemap.ts",
   "apps/store/app/manifest.ts",
+  "apps/store/app/marketplace.css",
+  "apps/store/app/marketplace-pages.css",
   "apps/store/components/StoreHeader.tsx",
   "apps/store/components/StoreFooter.tsx",
+  "apps/store/components/DealCountdown.tsx",
+  "apps/store/components/InfoPageShell.tsx",
   "apps/store/components/ProductArtwork.tsx",
   "apps/store/components/ProductCard.tsx",
   "apps/store/components/CatalogListingClient.tsx",
@@ -154,20 +165,31 @@ for (const relativePath of [
   record(`storefront:${relativePath}`, existsSync(absolute(relativePath)));
 }
 
-requireText("apps/store/components/StorefrontClient.tsx", "retail-hero", "storefront includes responsive retail hero");
-requireText("apps/store/components/StorefrontClient.tsx", "Shop by category", "storefront includes category navigation");
+requireText("apps/store/components/StorefrontClient.tsx", "marketplace-hero-grid", "storefront includes marketplace hero and departments");
+requireText("apps/store/components/StorefrontClient.tsx", "Shop by category", "storefront includes category discovery");
+requireText("apps/store/components/StorefrontClient.tsx", "Today’s featured deals", "storefront includes deal merchandising");
 requireText("apps/store/components/StorefrontClient.tsx", "New arrivals", "storefront includes new arrivals");
-requireText("apps/store/components/StorefrontClient.tsx", "Featured products", "storefront includes featured products");
+requireText("apps/store/components/StorefrontClient.tsx", "Recommended for you", "storefront includes recommendations");
+requireText("apps/store/components/StoreHeader.tsx", "Shop all departments", "storefront header includes department navigation");
 requireText("apps/store/components/StoreHeader.tsx", "/wishlist", "storefront header exposes wishlist");
 requireText("apps/store/components/StoreHeader.tsx", "/cart", "storefront header exposes transactional cart");
+requireText("apps/store/components/StoreFooter.tsx", "/help", "storefront footer exposes help center");
+requireText("apps/store/components/StoreFooter.tsx", "/business", "storefront footer exposes business sales");
+requireText("apps/store/components/CatalogListingClient.tsx", "listing-discovery-banner", "catalog includes marketplace discovery banner");
 requireText("apps/store/components/CatalogListingClient.tsx", "Price range", "catalog includes price filtering");
 requireText("apps/store/components/CatalogListingClient.tsx", "Availability", "catalog includes availability filtering");
+requireText("apps/store/components/ProductDetailClient.tsx", "marketplace-buy-box", "product details include dedicated purchase panel");
 requireText("apps/store/components/ProductDetailClient.tsx", "Add to cart", "product details include purchase action");
 requireText("apps/store/components/ProductDetailClient.tsx", "Similar products", "product details include recommendations");
-requireText("apps/store/app/globals.css", "@media (max-width: 680px)", "storefront includes mobile breakpoint");
-requireText("apps/store/app/globals.css", ".mobile-bottom-nav", "storefront includes mobile navigation");
+requireText("apps/store/app/marketplace.css", ".marketplace-hero-grid", "marketplace stylesheet includes desktop hero layout");
+requireText("apps/store/app/marketplace.css", "@media (max-width: 680px)", "marketplace stylesheet includes mobile breakpoint");
+requireText("apps/store/app/marketplace-pages.css", ".marketplace-product-grid", "secondary stylesheet includes marketplace product layout");
+requireText("apps/store/app/layout.tsx", 'import "./marketplace.css"', "storefront loads marketplace design layer");
+requireText("apps/store/app/layout.tsx", 'import "./marketplace-pages.css"', "storefront loads marketplace page styles");
 requireText("apps/store/app/layout.tsx", "/manifest.webmanifest", "storefront metadata exposes PWA manifest");
 requireText("apps/store/app/layout.tsx", "/brand/social/og-store.svg", "storefront metadata exposes social preview");
+requireText("apps/store/app/sitemap.ts", 'path: "/business"', "sitemap includes business page");
+requireText("apps/store/app/sitemap.ts", 'path: "/privacy"', "sitemap includes privacy page");
 
 requireText("scripts/check-production.mjs", '"/health/live"');
 requireText("scripts/check-production.mjs", '"/health/ready"');
@@ -200,7 +222,7 @@ requireText("docs/HOSTINGER_DEPLOYMENT.md", "/health/live");
 requireText("docs/HOSTINGER_DEPLOYMENT.md", "/health/ready");
 forbidText("docs/HOSTINGER_DEPLOYMENT.md", "Start command: `npm run start`");
 
-const textExtensions = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs", ".json", ".md", ".yml", ".yaml", ".txt"]);
+const textExtensions = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs", ".json", ".md", ".yml", ".yaml", ".txt", ".css", ".svg"]);
 const typoMatches = [];
 for (const target of collectFiles(repositoryRoot)) {
   const relativePath = path.relative(repositoryRoot, target);
@@ -210,6 +232,17 @@ for (const target of collectFiles(repositoryRoot)) {
   if (content.includes(TYPO_DOMAIN)) typoMatches.push(relativePath);
 }
 record("domain:misspelling-absent", typoMatches.length === 0, typoMatches.join(", "));
+
+const storefrontReferenceLeaks = [];
+for (const target of collectFiles(absolute("apps/store"))) {
+  const extension = path.extname(target);
+  if (!textExtensions.has(extension)) continue;
+  const content = readFileSync(target, "utf8").toLowerCase();
+  if (content.includes("caravan.com.bd") || content.includes("caravan branding")) {
+    storefrontReferenceLeaks.push(path.relative(repositoryRoot, target));
+  }
+}
+record("storefront:third-party-branding-absent", storefrontReferenceLeaks.length === 0, storefrontReferenceLeaks.join(", "));
 
 const scriptDirectory = absolute("scripts");
 for (const target of collectFiles(scriptDirectory).filter((file) => file.endsWith(".mjs"))) {
