@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAdminUrl } from "@bje/config";
 import { StoreHeader } from "@/components/StoreHeader";
 import { StoreFooter } from "@/components/StoreFooter";
+import { ContactForm } from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact us",
@@ -33,15 +34,7 @@ export default function ContactPage() {
           <section className="contact-form-panel">
             <h2>Send a message</h2>
             <p>This form opens the customer’s configured email application so the message can be reviewed before sending.</p>
-            <form className="contact-form" action="mailto:support@bjelectronics.shop" method="post" encType="text/plain">
-              <label>First name<input name="firstName" autoComplete="given-name" required /></label>
-              <label>Last name<input name="lastName" autoComplete="family-name" required /></label>
-              <label>Phone number<input name="phone" type="tel" autoComplete="tel" /></label>
-              <label>Email address<input name="email" type="email" autoComplete="email" required /></label>
-              <label className="full">Topic<select name="topic" defaultValue="Product question"><option>Product question</option><option>Order support</option><option>Warranty</option><option>Return or refund</option><option>Business sales</option><option>Website feedback</option></select></label>
-              <label className="full">Message<textarea name="message" required placeholder="Describe the product, order number or support request." /></label>
-              <button type="submit">Prepare email message</button>
-            </form>
+            <ContactForm />
           </section>
         </div>
       </main>
