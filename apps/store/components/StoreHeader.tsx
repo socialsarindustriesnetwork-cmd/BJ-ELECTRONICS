@@ -69,7 +69,7 @@ export function StoreHeader({ adminUrl }: { adminUrl: string }) {
     <>
       <div className="caravan-contact-bar">
         <div className="caravan-contact-inner">
-          <div><a href="tel:+8801600000000">+880 1600-000000</a><a href="mailto:support@bjelectronics.shop">support@bjelectronics.shop</a><span>Sat–Thu: 9:00–18:30</span></div>
+          <div><Link href="/contact">Online customer support</Link><a href="mailto:support@bjelectronics.shop">support@bjelectronics.shop</a><span>Sat–Thu: 9:00–18:30</span></div>
           <div className="caravan-socials"><a href="mailto:support@bjelectronics.shop?subject=Facebook">f</a><a href="mailto:support@bjelectronics.shop?subject=Instagram">◎</a><a href="mailto:support@bjelectronics.shop?subject=WhatsApp">◉</a><a href="mailto:support@bjelectronics.shop?subject=YouTube">▶</a></div>
         </div>
       </div>
