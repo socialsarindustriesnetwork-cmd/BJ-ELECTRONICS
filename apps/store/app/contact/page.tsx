@@ -18,7 +18,7 @@ export default function ContactPage() {
           <h2>Support information</h2>
           <div className="contact-list">
             <div><strong>Email support</strong><a href="mailto:support@bjelectronics.shop">support@bjelectronics.shop</a></div>
-            <div><strong>Telephone</strong><a href="tel:+8801600000000">+880 1600-000000</a></div>
+            <div><strong>Support channel</strong><span>Online enquiries are handled through the official BJ Electronics email address.</span></div>
             <div><strong>Service hours</strong><span>Saturday–Thursday, 9:00–18:30</span></div>
             <div><strong>Service area</strong><span>Online ordering and coordinated delivery across Bangladesh</span></div>
           </div>
@@ -28,7 +28,7 @@ export default function ContactPage() {
           <form className="contact-form" action="mailto:support@bjelectronics.shop" method="post" encType="text/plain">
             <label>Full name<input name="name" autoComplete="name" required /></label>
             <label>Email address<input name="email" type="email" autoComplete="email" required /></label>
-            <label>Phone number<input name="phone" type="tel" autoComplete="tel" /></label>
+            <label>Phone number <small>Optional</small><input name="phone" type="tel" autoComplete="tel" /></label>
             <label>Subject<input name="subject" required /></label>
             <label className="full">Message<textarea name="message" rows={7} required /></label>
             <button className="full" type="submit">Send enquiry</button>
