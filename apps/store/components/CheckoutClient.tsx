@@ -76,11 +76,7 @@ export function CheckoutClient() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(fields),
       });
-      const payload = await response.json() as {
-        redirectUrl?: string;
-        error?: string;
-        fields?: Record<string, string>;
-      };
+      const payload = await response.json() as { redirectUrl?: string; error?: string; fields?: Record<string, string> };
       if (!response.ok || !payload.redirectUrl) {
         setFieldErrors(payload.fields ?? {});
         throw new Error(payload.error || "Checkout could not be completed.");
@@ -95,12 +91,7 @@ export function CheckoutClient() {
   if (loading) return <div className="cart-state">Preparing secure checkout…</div>;
   if (!cart) return <div className="cart-state error-state">{error || "Checkout is unavailable."}</div>;
   if (!cart.lines.length) {
-    return (
-      <section className="empty-cart">
-        <span>▢</span><h1>Your cart is empty.</h1><p>Add products before opening checkout.</p>
-        <Link className="primary-link" href="/#catalog">Browse products</Link>
-      </section>
-    );
+    return <section className="empty-cart"><span>🛒</span><h1>Your cart is empty.</h1><p>Add products before opening checkout.</p><Link className="shop-primary" href="/categories">Browse products</Link></section>;
   }
 
   return (
@@ -108,7 +99,6 @@ export function CheckoutClient() {
       <section className="checkout-panel">
         <div className="panel-title"><div><p className="eyebrow">Secure checkout</p><h1>Delivery and payment</h1></div><Link href="/cart">Edit cart</Link></div>
         {error ? <div className="form-error" role="alert">{error}</div> : null}
-
         <fieldset className="checkout-section">
           <legend>Contact information</legend>
           <div className="field-grid two-column">
@@ -117,7 +107,6 @@ export function CheckoutClient() {
             <label><span>Phone number</span><input type="tel" autoComplete="tel" value={fields.customerPhone} onChange={(event) => update("customerPhone", event.target.value)} required />{fieldErrors.customerPhone ? <small>{fieldErrors.customerPhone}</small> : null}</label>
           </div>
         </fieldset>
-
         <fieldset className="checkout-section">
           <legend>Delivery address</legend>
           <div className="field-grid two-column">
@@ -130,29 +119,17 @@ export function CheckoutClient() {
             <label className="full-field"><span>Delivery note <em>Optional</em></span><textarea rows={3} value={fields.customerNote} onChange={(event) => update("customerNote", event.target.value)} /></label>
           </div>
         </fieldset>
-
         <fieldset className="checkout-section">
           <legend>Payment method</legend>
           <div className="payment-options">
-            <label className={fields.paymentMethod === "CASH_ON_DELIVERY" ? "selected" : ""}>
-              <input type="radio" name="paymentMethod" checked={fields.paymentMethod === "CASH_ON_DELIVERY"} onChange={() => update("paymentMethod", "CASH_ON_DELIVERY")} />
-              <span><strong>Cash on delivery</strong><small>Pay when your order is delivered.</small></span>
-            </label>
-            <label className={fields.paymentMethod === "BANK_TRANSFER" ? "selected" : ""}>
-              <input type="radio" name="paymentMethod" checked={fields.paymentMethod === "BANK_TRANSFER"} onChange={() => update("paymentMethod", "BANK_TRANSFER")} />
-              <span><strong>Bank transfer</strong><small>Transfer instructions are confirmed by the operations team.</small></span>
-            </label>
+            <label className={fields.paymentMethod === "CASH_ON_DELIVERY" ? "selected" : ""}><input type="radio" name="paymentMethod" checked={fields.paymentMethod === "CASH_ON_DELIVERY"} onChange={() => update("paymentMethod", "CASH_ON_DELIVERY")} /><span><strong>Cash on delivery</strong><small>Pay when your order is delivered.</small></span></label>
+            <label className={fields.paymentMethod === "BANK_TRANSFER" ? "selected" : ""}><input type="radio" name="paymentMethod" checked={fields.paymentMethod === "BANK_TRANSFER"} onChange={() => update("paymentMethod", "BANK_TRANSFER")} /><span><strong>Bank transfer</strong><small>Transfer instructions are confirmed by the operations team.</small></span></label>
           </div>
         </fieldset>
       </section>
-
       <aside className="checkout-summary sticky-summary">
         <h2>Order review</h2>
-        <div className="checkout-items">
-          {cart.lines.map((line) => (
-            <div key={line.productId}><span>{line.name}<small>Quantity {line.quantity}</small></span><strong>{money(line.lineTotalCents, cart.currency)}</strong></div>
-          ))}
-        </div>
+        <div className="checkout-items">{cart.lines.map((line) => <div key={line.productId}><span>{line.name}<small>Quantity {line.quantity}</small></span><strong>{money(line.lineTotalCents, cart.currency)}</strong></div>)}</div>
         <div className="summary-divider" />
         <div><span>Subtotal</span><strong>{money(cart.subtotalCents, cart.currency)}</strong></div>
         <div><span>Shipping</span><strong>{cart.estimatedShippingCents ? money(cart.estimatedShippingCents, cart.currency) : "Free"}</strong></div>
