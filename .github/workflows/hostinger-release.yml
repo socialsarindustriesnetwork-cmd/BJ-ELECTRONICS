@@ -27,6 +27,7 @@ jobs:
       STORE_DEPLOY_WEBHOOK_URL: ${{ secrets.HOSTINGER_STORE_DEPLOY_WEBHOOK_URL }}
       ADMIN_DEPLOY_WEBHOOK_URL: ${{ secrets.HOSTINGER_ADMIN_DEPLOY_WEBHOOK_URL }}
       EXPECTED_RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      REQUIRE_RELEASE_MATCH: true
       HEALTH_CHECK_ATTEMPTS: 18
       HEALTH_CHECK_DELAY_MS: 10000
       HTTP_REQUEST_TIMEOUT_MS: 10000
@@ -44,6 +45,16 @@ jobs:
           echo "Deploying commit $EXPECTED_RELEASE_SHA"
           git rev-parse HEAD
           test "$(git rev-parse HEAD)" = "$EXPECTED_RELEASE_SHA"
+
+      - name: Validate canonical production targets
+        run: |
+          if [ -z "$STORE_URL" ] || [ -z "$ADMIN_URL" ] || [ -z "$APEX_STORE_URL" ]; then
+            echo "HOSTINGER_STORE_URL, HOSTINGER_ADMIN_URL, and HOSTINGER_APEX_URL must all be configured as repository variables."
+            exit 1
+          fi
+          test "$STORE_URL" = "https://www.bjelectronics.shop"
+          test "$ADMIN_URL" = "https://admin.bjelectronics.shop"
+          test "$APEX_STORE_URL" = "https://bjelectronics.shop"
 
       - name: Trigger optional store deployment webhook
         run: |
@@ -70,9 +81,4 @@ jobs:
           fi
 
       - name: Verify store and admin production deployments
-        run: |
-          if [ -z "$STORE_URL" ] || [ -z "$ADMIN_URL" ]; then
-            echo "HOSTINGER_STORE_URL and HOSTINGER_ADMIN_URL are not both configured; production verification is unavailable."
-            exit 0
-          fi
-          node scripts/check-production.mjs "$STORE_URL" "$ADMIN_URL"
+        run: node scripts/check-production.mjs "$STORE_URL" "$ADMIN_URL"
