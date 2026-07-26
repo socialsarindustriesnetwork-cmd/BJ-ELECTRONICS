@@ -1,0 +1,11 @@
+:root {
+  --caravan-blue: #123b96;
+  --caravan-blue-deep: #08286d;
+  --caravan-red: #e30613;
+  --caravan-ink: #1f2937;
+  --caravan-muted: #687385;
+  --caravan-line: #e4e8ef;
+  --caravan-soft: #f5f7fa;
+  --caravan-panel: #ffffff;
+  --caravan-shadow: 0 16px 44px rgba(17, 35, 72, .09);
+}
