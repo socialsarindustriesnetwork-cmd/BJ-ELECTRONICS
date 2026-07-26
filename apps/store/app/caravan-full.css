@@ -1,0 +1,96 @@
+/* Complete appliance-marketplace extension using original BJ Electronics branding and components. */
+.full-market-storefront { background: #f5f7fb; }
+.full-market-header .commerce-header-main { grid-template-columns: auto minmax(360px, 1fr) auto; }
+.full-market-search { grid-template-columns: 160px minmax(0, 1fr) 48px; border: 2px solid #173a92; border-radius: 7px; }
+.full-market-search > span { display: none; }
+.full-market-search select { grid-column: 1; grid-row: 1; border-left: 0; border-right: 1px solid var(--line); }
+.full-market-search input { grid-column: 2; grid-row: 1; padding: 0 14px; }
+.full-market-search button { grid-column: 3; grid-row: 1; border: 0; background: #173a92; color: #fff; font-size: 20px; }
+.full-category-nav .category-nav-inner { overflow-x: auto; }
+.full-category-nav a { white-space: nowrap; }
+.full-market-hero { grid-template-columns: 245px minmax(0, 1fr) 245px; }
+.hero-view-all { background: #f9fbff; }
+.full-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.full-category-grid .category-tile { min-height: 142px; }
+.flash-market-section { margin-top: 38px; padding: 25px; border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 12px; background: #fff; }
+.flash-label { display: inline-flex !important; padding: 5px 8px; border-radius: 5px; background: var(--accent); color: #fff !important; }
+.appliance-campaign-banner { background: linear-gradient(112deg, #12265b 0%, #173d9a 55%, #e30613 145%); }
+.full-brand-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.full-confidence-section { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.full-listing-banner { min-height: 150px; display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 18px; padding: 28px 32px; overflow: hidden; border: 1px solid #dce5f4; border-radius: 10px; background: linear-gradient(120deg, #eef4ff, #f8fbff 62%, #fff1f2); }
+.full-listing-banner span { display: block; margin-bottom: 6px; color: #173a92; font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.full-listing-banner h1 { margin: 0; color: #1e293b; font-size: clamp(27px, 4vw, 42px); letter-spacing: -.045em; }
+.full-listing-banner p { margin: 8px 0 0; color: #667085; font-size: 11px; }
+.full-listing-banner > a { min-height: 42px; display: inline-flex; align-items: center; padding: 0 17px; border-radius: 6px; background: #173a92; color: #fff; font-size: 9px; font-weight: 850; text-decoration: none; white-space: nowrap; }
+.full-market-listing-shell .catalog-filters { border-top: 3px solid #173a92; }
+.full-market-listing-shell .catalog-card { border-radius: 9px; }
+
+.artwork-tv, .artwork-refrigerator, .artwork-air-conditioner, .artwork-washer, .artwork-kitchen, .artwork-home-appliance { background: linear-gradient(145deg, #f6f9ff, #eef3fb); }
+.device-tv, .device-refrigerator, .device-air-conditioner, .device-washer, .device-kitchen, .device-home-appliance { position: relative; width: 74%; height: 74%; display: grid; place-items: center; }
+.device-tv .device-screen { width: 92%; aspect-ratio: 16 / 9; overflow: hidden; border: 7px solid #202938; border-radius: 5px; background: linear-gradient(135deg, #071a3e, #1f67d2 52%, #9ac8ff); box-shadow: 0 17px 30px rgba(19,39,78,.22); }
+.device-tv .device-base { width: 28%; height: 8px; margin-top: -6px; border-radius: 50%; background: #252d3b; }
+.device-refrigerator > span { position: relative; width: 45%; height: 92%; overflow: hidden; border: 1px solid #b9c0cb; border-radius: 12px; background: linear-gradient(160deg,#fff,#cfd6df); box-shadow: 0 17px 30px rgba(32,45,68,.18); }
+.device-refrigerator > span::before { content: ""; position: absolute; left: 0; right: 0; top: 38%; height: 2px; background: #aeb7c5; }
+.device-refrigerator i { position: absolute; right: 8px; width: 3px; height: 24%; border-radius: 99px; background: #8d98a8; }
+.device-refrigerator i:first-child { top: 8%; }
+.device-refrigerator i:last-child { top: 48%; }
+.device-refrigerator > b { position: absolute; width: 18%; height: 8px; bottom: 0; border-radius: 99px; background: rgba(32,45,68,.16); filter: blur(4px); }
+.device-air-conditioner > span { position: relative; width: 92%; height: 39%; overflow: hidden; border: 1px solid #cfd6df; border-radius: 16px 16px 8px 8px; background: linear-gradient(#fff,#e7ebf1); box-shadow: 0 16px 30px rgba(32,45,68,.17); }
+.device-air-conditioner > span::after { content: ""; position: absolute; left: 7%; right: 7%; bottom: 12%; height: 7px; border-radius: 99px; background: #b8c1cd; }
+.device-air-conditioner i { position: absolute; bottom: -30px; width: 2px; height: 45px; background: linear-gradient(rgba(23,58,146,.38), transparent); }
+.device-air-conditioner i:nth-child(1) { left: 28%; transform: rotate(8deg); }
+.device-air-conditioner i:nth-child(2) { left: 50%; }
+.device-air-conditioner i:nth-child(3) { right: 28%; transform: rotate(-8deg); }
+.device-washer > span { position: relative; width: 62%; aspect-ratio: .86; display: grid; place-items: center; border: 1px solid #c3cad4; border-radius: 12px; background: linear-gradient(160deg,#fff,#d9dfe7); box-shadow: 0 17px 30px rgba(32,45,68,.18); }
+.device-washer > span::before { content: ""; position: absolute; top: 8%; left: 10%; width: 18%; height: 6px; border-radius: 99px; background: #7f8a9a; }
+.device-washer i { width: 56%; aspect-ratio: 1; border: 7px solid #536176; border-radius: 50%; background: radial-gradient(circle,#9bc9ec,#284f7b 67%,#152b46 68%); }
+.device-washer b { position: absolute; width: 38%; height: 4px; top: 14%; right: 9%; border-radius: 99px; background: #aeb7c5; }
+.device-washer small { position: absolute; width: 28%; height: 8px; bottom: 0; border-radius: 99px; background: rgba(32,45,68,.16); filter: blur(4px); }
+.device-kitchen > span { position: relative; width: 62%; height: 72%; display: grid; place-items: end center; border-radius: 13px 13px 18px 18px; background: linear-gradient(145deg,#fff,#cfd6df); box-shadow: 0 17px 30px rgba(32,45,68,.18); }
+.device-kitchen > span::before { content: ""; position: absolute; width: 74%; height: 22%; top: 8%; border-radius: 9px; background: #303a49; }
+.device-kitchen i { width: 42%; height: 38%; margin-bottom: 14%; border-radius: 8px 8px 16px 16px; background: linear-gradient(135deg,#9fd8ff,#1c5a95); }
+.device-kitchen i:last-child { position: absolute; width: 30%; height: 8px; top: 16%; background: #7c899a; }
+.device-kitchen > b { position: absolute; width: 22%; height: 9px; bottom: 0; border-radius: 99px; background: rgba(32,45,68,.14); filter: blur(4px); }
+.device-home-appliance { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.device-home-appliance > span { width: 36%; height: 70%; border-radius: 16px 16px 8px 8px; background: linear-gradient(155deg,#fff,#cbd3de); box-shadow: 0 14px 25px rgba(32,45,68,.17); }
+.device-home-appliance i { width: 12%; height: 78%; border-radius: 99px; background: linear-gradient(#173a92,#6ba8ff); }
+.device-home-appliance b { width: 32%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle,#fff 12%,#7db3f7 13% 34%,#1e5ba8 35% 52%,#d8e7fa 53%); }
+
+.full-footer-support { width: min(1320px, calc(100% - 34px)); min-height: 82px; margin: 0 auto; display: grid; grid-template-columns: repeat(4,1fr); overflow: hidden; border-bottom: 1px solid rgba(255,255,255,.12); background: #0a1834; }
+.full-footer-support article { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-right: 1px solid rgba(255,255,255,.1); }
+.full-footer-support article:last-child { border-right: 0; }
+.full-footer-support article > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; background: rgba(255,255,255,.08); color: #9dc0ff; }
+.full-footer-support article div { display: flex; flex-direction: column; gap: 2px; }
+.full-footer-support strong { color: #fff; font-size: 9px; }
+.full-footer-support small { color: #98a7bd; font-size: 8px; }
+
+@media (max-width: 1100px) {
+  .full-market-hero { grid-template-columns: 220px minmax(0,1fr); }
+  .full-market-hero .hero-side-offers { grid-column: 1 / -1; grid-template-columns: repeat(2,1fr); grid-template-rows: none; }
+  .full-brand-grid { grid-template-columns: repeat(4,1fr); }
+  .full-confidence-section { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 900px) {
+  .full-market-search { grid-template-columns: minmax(0,1fr) 46px; }
+  .full-market-search select { display: none; }
+  .full-market-search input { grid-column: 1; }
+  .full-market-search button { grid-column: 2; }
+  .full-market-hero { grid-template-columns: 1fr; }
+  .full-market-hero .hero-departments { display: none; }
+  .full-category-grid { grid-template-columns: repeat(2,1fr); }
+  .full-footer-support { grid-template-columns: repeat(2,1fr); }
+  .full-mobile-nav { grid-template-columns: repeat(5,1fr); }
+}
+
+@media (max-width: 680px) {
+  .full-market-header .commerce-header-main { grid-template-columns: auto minmax(0,1fr) auto; }
+  .full-market-search { grid-column: 1 / -1; margin-bottom: 10px; }
+  .full-market-hero .hero-side-offers { grid-template-columns: 1fr; }
+  .full-category-grid, .full-confidence-section { grid-template-columns: 1fr; }
+  .full-brand-grid { grid-template-columns: repeat(3,1fr); }
+  .full-listing-banner { align-items: flex-start; flex-direction: column; padding: 22px; }
+  .full-footer-support { grid-template-columns: 1fr; }
+  .full-footer-support article { justify-content: flex-start; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+}
