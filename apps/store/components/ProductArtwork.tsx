@@ -1,50 +1,30 @@
 import type { Product } from "@bje/database";
+import { inferMarketplaceCategory } from "@/lib/marketplace";
 
 export function inferCategory(product: Pick<Product, "name" | "description">): string {
-  const text = `${product.name} ${product.description}`.toLowerCase();
-  if (/laptop|notebook|macbook|chromebook/.test(text)) return "laptop";
-  if (/earbud|earphone|airpod/.test(text)) return "earphones";
-  if (/headphone|headset/.test(text)) return "headphones";
-  if (/watch|wearable/.test(text)) return "watch";
-  if (/speaker|soundbar/.test(text)) return "speaker";
-  if (/monitor|display/.test(text)) return "monitor";
-  if (/power bank|powerbank|charger|cable|adapter/.test(text)) return "accessory";
-  if (/phone|mobile|smartphone/.test(text)) return "phone";
-  return "electronics";
+  return inferMarketplaceCategory(product);
 }
 
-function DeviceIllustration({ category }: { category: string }) {
-  if (category === "laptop" || category === "monitor") {
-    return <div className={`device-art device-${category}`}><span className="device-screen"><i /><i /><i /></span><span className="device-base" /></div>;
-  }
-  if (category === "headphones") {
-    return <div className="device-art device-headphones"><span /><span /><i /></div>;
-  }
-  if (category === "earphones") {
-    return <div className="device-art device-earphones"><span /><span /></div>;
-  }
-  if (category === "watch") {
-    return <div className="device-art device-watch"><span><i /></span></div>;
-  }
-  if (category === "speaker") {
-    return <div className="device-art device-speaker"><span /><i /><i /></div>;
-  }
-  if (category === "phone") {
-    return <div className="device-art device-phone"><span><i /></span></div>;
-  }
-  return <div className="device-art device-accessory"><span /><i /></div>;
+function ApplianceIllustration({ category }: { category: string }) {
+  if (category === "television") return <div className="market-art market-tv"><span className="market-screen"><i /><i /><i /></span><span className="market-stand" /></div>;
+  if (category === "refrigerator") return <div className="market-art market-fridge"><span><i /><b /></span><em /></div>;
+  if (category === "air-conditioner") return <div className="market-art market-ac"><span><i /><i /><i /></span><em>❄</em></div>;
+  if (category === "washing-machine") return <div className="market-art market-washer"><span><i /><b /></span><em /></div>;
+  if (category === "kitchen") return <div className="market-art market-kitchen"><span><i /><i /></span><em /></div>;
+  if (category === "mobile") return <div className="market-art market-mobile"><span><i /></span><em /></div>;
+  if (category === "computing") return <div className="market-art market-laptop"><span className="market-screen"><i /><i /><i /></span><span className="market-base" /></div>;
+  if (category === "audio") return <div className="market-art market-audio"><span /><span /><i /></div>;
+  return <div className="market-art market-small"><span><i /></span><em /></div>;
 }
 
 export function ProductArtwork({ product, priority = false }: { product: Pick<Product, "name" | "description" | "imageUrl">; priority?: boolean }) {
-  const category = inferCategory(product);
+  const category = inferMarketplaceCategory(product);
   return (
     <div className={`product-artwork artwork-${category}`}>
       {product.imageUrl ? (
         // Native img keeps admin-managed external media compatible without coupling the store to a fixed image host.
         <img src={product.imageUrl} alt={product.name} loading={priority ? "eager" : "lazy"} decoding="async" />
-      ) : (
-        <DeviceIllustration category={category} />
-      )}
+      ) : <ApplianceIllustration category={category} />}
     </div>
   );
 }
