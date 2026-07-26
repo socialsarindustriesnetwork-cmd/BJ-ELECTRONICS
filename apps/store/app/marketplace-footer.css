@@ -1,0 +1,79 @@
+.marketplace-footer {
+  margin-top: 0;
+  background: #0a1b3c;
+}
+.marketplace-footer .newsletter-band {
+  width: min(1440px, calc(100% - 32px));
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(120deg, #123a84, #0b2356 72%, #e30613 150%);
+}
+.marketplace-footer-assurance {
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.marketplace-footer-assurance > div {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 2px 12px;
+  align-items: center;
+  min-height: 100px;
+  padding: 18px 22px;
+  border-right: 1px solid rgba(255,255,255,.09);
+}
+.marketplace-footer-assurance > div:last-child { border-right: 0; }
+.marketplace-footer-assurance > div > span {
+  grid-row: 1 / span 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+}
+.marketplace-footer-assurance strong { color: #fff; font-size: 12px; }
+.marketplace-footer-assurance small { color: #93a5c9; font-size: 9px; line-height: 1.4; }
+.marketplace-footer .footer-main {
+  width: min(1440px, calc(100% - 32px));
+  grid-template-columns: 1.35fr repeat(4, minmax(0, 1fr));
+  padding-top: 44px;
+}
+.marketplace-footer .footer-brand > a {
+  display: inline-flex;
+  margin-top: 8px;
+  color: #cbd7f2;
+  font-size: 11px;
+  text-decoration: none;
+}
+.marketplace-footer .payment-chips { flex-wrap: wrap; }
+.marketplace-footer .payment-chips span { padding: 8px 10px; }
+.marketplace-footer .footer-secondary-title { margin-top: 24px; }
+.marketplace-footer .footer-bottom { width: min(1440px, calc(100% - 32px)); }
+
+@media (max-width: 980px) {
+  .marketplace-footer-assurance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .marketplace-footer-assurance > div:nth-child(2) { border-right: 0; }
+  .marketplace-footer-assurance > div:nth-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,.09); }
+  .marketplace-footer .footer-main { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .marketplace-footer .footer-brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 680px) {
+  .marketplace-footer .newsletter-band,
+  .marketplace-footer-assurance,
+  .marketplace-footer .footer-main,
+  .marketplace-footer .footer-bottom { width: min(100% - 20px, 1440px); }
+  .marketplace-footer .newsletter-band { border-radius: 16px 16px 0 0; }
+  .marketplace-footer-assurance { grid-template-columns: 1fr; }
+  .marketplace-footer-assurance > div { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.09); }
+  .marketplace-footer-assurance > div:last-child { border-bottom: 0; }
+  .marketplace-footer .footer-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .marketplace-footer .footer-brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 430px) {
+  .marketplace-footer .footer-main { grid-template-columns: 1fr; }
+}
