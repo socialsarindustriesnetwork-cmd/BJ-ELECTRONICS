@@ -21,7 +21,7 @@
     "validate:store": "node scripts/validate-env.mjs --service=store",
     "validate:admin": "node scripts/validate-env.mjs --service=admin",
     "production:check": "node scripts/check-production.mjs",
-    "audit": "node scripts/audit-platform.mjs",
+    "audit": "node scripts/audit-platform.mjs && node scripts/audit-reference-storefront.mjs",
     "test": "npm run audit",
     "quality": "npm run audit && npm run db:validate && npm run typecheck && npm run lint && npm run build"
   },
