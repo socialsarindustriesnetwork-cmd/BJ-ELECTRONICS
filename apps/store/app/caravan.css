@@ -1,0 +1,179 @@
+/* Category-led marketplace treatment built with original BJ Electronics assets and content. */
+.caravan-storefront { background: #f7f8fb; }
+.caravan-storefront main { padding-bottom: 64px; }
+
+.caravan-utility { background: #12265b; border: 0; color: rgba(255,255,255,.86); }
+.caravan-utility .utility-inner { min-height: 34px; }
+.caravan-utility a { color: inherit; }
+.utility-contact, .utility-links { display: flex; align-items: center; gap: 20px; }
+.utility-contact a, .utility-links a { text-decoration: none; }
+.utility-links a:hover, .utility-contact a:hover { color: #fff; }
+
+.caravan-header { background: #fff; }
+.caravan-header .commerce-header-main { min-height: 84px; }
+.caravan-search { border-radius: 8px; background: #fff; border-color: #d8dde8; }
+.caravan-search:focus-within { border-color: var(--brand-bright); }
+.caravan-cart-action { min-width: 88px; }
+.caravan-cart-action small { font-size: 9px; }
+.caravan-cart-action em { color: var(--brand); font-size: 9px; font-style: normal; font-weight: 850; }
+
+.primary-store-nav { background: #fff; border-top: 1px solid var(--line); }
+.primary-store-nav-inner { width: min(1320px, calc(100% - 34px)); min-height: 42px; margin: 0 auto; display: flex; align-items: stretch; }
+.primary-store-nav a { display: flex; align-items: center; padding: 0 18px; color: #344054; font-size: 10px; font-weight: 800; text-decoration: none; }
+.primary-store-nav a:hover { color: var(--brand-bright); background: #f7f9ff; }
+.primary-store-nav .primary-nav-deal { margin-left: auto; color: var(--accent); }
+.caravan-category-nav { background: #173a92; }
+.caravan-category-nav .all-category-link { background: #0f2d78; padding-left: 18px !important; }
+
+.caravan-hero-shell { width: min(1320px, calc(100% - 34px)); margin: 20px auto 0; display: grid; grid-template-columns: 230px minmax(0, 1fr) 230px; gap: 14px; }
+.hero-departments, .caravan-main-hero, .hero-side-card { border: 1px solid #e1e5ec; border-radius: 12px; background: #fff; box-shadow: var(--shadow-sm); }
+.hero-departments { overflow: hidden; }
+.hero-departments h2 { margin: 0; padding: 17px 18px; background: #173a92; color: #fff; font-size: 13px; }
+.hero-departments > a { min-height: 52px; display: grid; grid-template-columns: 28px minmax(0,1fr) auto; align-items: center; gap: 9px; padding: 7px 13px; border-bottom: 1px solid #edf0f5; color: #344054; text-decoration: none; }
+.hero-departments > a:last-child { border-bottom: 0; }
+.hero-departments > a:hover { background: #f3f6ff; color: var(--brand); }
+.hero-departments > a > span { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--soft-blue); color: var(--brand); font-size: 14px; }
+.hero-departments > a div { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.hero-departments strong { font-size: 9px; }
+.hero-departments small { overflow: hidden; color: var(--subtle); font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.hero-departments b { color: #a5adba; font-size: 18px; }
+
+.caravan-main-hero { min-height: 430px; display: grid; grid-template-columns: 1.03fr .97fr; overflow: hidden; background: linear-gradient(118deg, #fefeff 0%, #f6f8ff 53%, #eaf0ff 100%); }
+.caravan-hero-copy { z-index: 2; padding: 50px 22px 45px 44px; }
+.caravan-hero-copy h1 { max-width: 620px; margin: 0; color: #182033; font-size: clamp(36px, 4.5vw, 60px); line-height: 1.02; letter-spacing: -.05em; }
+.caravan-hero-copy > p:not(.hero-kicker) { max-width: 560px; margin: 18px 0 0; color: #5f6878; font-size: 13px; line-height: 1.7; }
+.caravan-hero-product { position: relative; min-height: 100%; display: grid; place-items: center; padding: 28px; overflow: hidden; }
+.caravan-hero-product .hero-laptop { width: min(440px, 95%); }
+.caravan-hero-product .hero-glow { width: 390px; height: 270px; }
+.caravan-hero-product .hero-product-label { right: 18px; bottom: 18px; }
+.hero-side-offers { display: grid; grid-template-rows: 1fr 1fr; gap: 14px; }
+.hero-side-card { position: relative; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; padding: 23px; }
+.hero-side-card::before { content: ""; position: absolute; right: -25px; top: -30px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,.16); }
+.hero-side-card span, .split-campaign > span, .wide-campaign-banner > div:first-child > span { position: relative; z-index: 1; font-size: 8px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.hero-side-card h2 { position: relative; z-index: 1; margin: 8px 0 14px; font-size: 25px; line-height: 1.05; letter-spacing: -.04em; }
+.hero-side-card a { position: relative; z-index: 1; align-self: flex-start; padding: 8px 11px; border-radius: 6px; background: rgba(255,255,255,.93); color: #17284f; font-size: 8px; font-weight: 850; text-decoration: none; }
+.side-card-blue { background: linear-gradient(145deg, #163889, #4670dd); color: #fff; }
+.side-card-red { background: linear-gradient(145deg, #c51020, #ef4752); color: #fff; }
+
+.caravan-trust { margin-top: 18px; }
+.caravan-category-grid { gap: 12px; }
+.caravan-category-grid .category-tile { border-radius: 10px; box-shadow: none; }
+.caravan-products-section { padding-top: 38px; }
+.caravan-product-grid { gap: 13px; }
+.caravan-product-grid .catalog-card { border-radius: 10px; box-shadow: 0 4px 16px rgba(19,33,65,.06); }
+
+.wide-campaign-banner { width: min(1320px, calc(100% - 34px)); min-height: 240px; margin: 40px auto 0; display: grid; grid-template-columns: 1fr 440px; overflow: hidden; border-radius: 14px; background: linear-gradient(112deg, #12265b 0%, #173d9a 56%, #ec1c2b 150%); color: #fff; box-shadow: var(--shadow); }
+.wide-campaign-banner > div:first-child { align-self: center; padding: 44px 50px; }
+.wide-campaign-banner h2 { margin: 10px 0 9px; font-size: clamp(32px, 4vw, 48px); letter-spacing: -.05em; }
+.wide-campaign-banner p { max-width: 570px; margin: 0 0 22px; color: rgba(255,255,255,.8); font-size: 12px; line-height: 1.7; }
+.wide-campaign-banner a { display: inline-flex; min-height: 39px; align-items: center; padding: 0 15px; border-radius: 7px; background: #fff; color: #173a92; font-size: 9px; font-weight: 850; text-decoration: none; }
+.campaign-device-art { position: relative; min-height: 240px; overflow: hidden; }
+.campaign-device-art::before { content: ""; position: absolute; inset: 28px 60px 44px 30px; border: 8px solid #141922; border-bottom-width: 14px; border-radius: 12px; background: linear-gradient(140deg, #081535, #1a5bd2 40%, #c1d9ff 60%, #193b88); transform: perspective(700px) rotateY(-13deg); box-shadow: 0 22px 45px rgba(0,0,0,.35); }
+.campaign-device-art::after { content: ""; position: absolute; left: 8px; right: 30px; bottom: 30px; height: 16px; border-radius: 3px 3px 14px 14px; background: linear-gradient(#dde2ea,#737b88); transform: rotate(-2deg); }
+.campaign-device-art i, .campaign-device-art span, .campaign-device-art b { position: absolute; z-index: 2; border-radius: 999px; border: 5px solid rgba(255,255,255,.82); transform: rotate(-25deg); }
+.campaign-device-art i { width: 280px; height: 45px; top: 70px; right: 20px; }
+.campaign-device-art span { width: 330px; height: 50px; top: 120px; right: 5px; }
+.campaign-device-art b { width: 240px; height: 38px; top: 160px; right: 55px; }
+
+.split-campaigns { width: min(1320px, calc(100% - 34px)); margin: 40px auto 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.split-campaign { min-height: 250px; display: flex; flex-direction: column; justify-content: center; overflow: hidden; padding: 38px; border-radius: 14px; color: #fff; box-shadow: var(--shadow-sm); }
+.split-campaign h2 { max-width: 520px; margin: 9px 0 9px; font-size: clamp(29px, 3vw, 42px); line-height: 1.04; letter-spacing: -.045em; }
+.split-campaign p { max-width: 520px; margin: 0 0 20px; color: rgba(255,255,255,.82); font-size: 11px; line-height: 1.65; }
+.split-campaign a { align-self: flex-start; padding: 9px 13px; border-radius: 6px; background: #fff; color: #1b347a; font-size: 8px; font-weight: 850; text-decoration: none; }
+.campaign-computing { background: radial-gradient(circle at 88% 15%, rgba(255,255,255,.24), transparent 24%), linear-gradient(135deg,#0f2d78,#3161c9); }
+.campaign-lifestyle { background: radial-gradient(circle at 85% 20%, rgba(255,255,255,.25), transparent 24%), linear-gradient(135deg,#b11120,#eb3948); }
+
+.brand-showcase { width: min(1320px, calc(100% - 34px)); margin: 42px auto 0; padding: 30px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.brand-logo-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+.brand-logo-grid a { min-height: 70px; display: grid; place-items: center; border: 1px solid #e6e9ef; border-radius: 8px; color: #3d485b; font-size: 13px; font-weight: 900; text-decoration: none; }
+.brand-logo-grid a:hover { border-color: #a9baf0; color: var(--brand); background: #f6f8ff; }
+
+.store-confidence-section { width: min(1320px, calc(100% - 34px)); margin: 38px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.store-confidence-section article { padding: 28px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.store-confidence-section article > span { color: var(--accent); font-size: 10px; font-weight: 900; }
+.store-confidence-section h3 { margin: 12px 0 8px; font-size: 18px; }
+.store-confidence-section p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
+
+.caravan-footer { margin-top: 0; }
+.caravan-newsletter { background: linear-gradient(90deg,#173a92,#2459ca); }
+.caravan-footer-main { grid-template-columns: 1.3fr repeat(4, 1fr); }
+.footer-contact-list { display: flex; flex-direction: column; gap: 7px; margin-top: 16px; color: #b7c1d6; font-size: 9px; }
+.footer-contact-list a { color: inherit; text-decoration: none; }
+.footer-security-note { margin-top: 13px; color: #cbd6eb; font-size: 8px; }
+
+.content-page { width: min(1120px, calc(100% - 34px)); margin: 0 auto; padding: 52px 0 78px; }
+.content-hero { padding: 48px; border-radius: 14px; background: linear-gradient(135deg,#102c78,#275ccb); color: #fff; }
+.content-hero .eyebrow { color: rgba(255,255,255,.74); }
+.content-hero h1 { max-width: 760px; margin: 0; font-size: clamp(40px,6vw,66px); line-height: 1; letter-spacing: -.055em; }
+.content-hero p { max-width: 760px; margin: 18px 0 0; color: rgba(255,255,255,.82); line-height: 1.75; }
+.content-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 15px; margin-top: 22px; }
+.content-card { padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.content-card h2, .content-card h3 { margin: 0 0 10px; }
+.content-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.75; }
+.contact-layout { display: grid; grid-template-columns: .85fr 1.15fr; gap: 18px; margin-top: 22px; }
+.contact-panel, .contact-form { padding: 28px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.contact-list { display: flex; flex-direction: column; gap: 13px; margin-top: 20px; }
+.contact-list a, .contact-list span { padding: 13px; border-radius: 8px; background: #f6f8fc; color: #344054; text-decoration: none; font-size: 10px; }
+.contact-form { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+.contact-form label { display: flex; flex-direction: column; gap: 6px; color: #344054; font-size: 9px; font-weight: 750; }
+.contact-form label.full { grid-column: 1 / -1; }
+.contact-form input, .contact-form textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 11px; outline: none; }
+.contact-form input { height: 43px; }
+.contact-form input:focus, .contact-form textarea:focus { border-color: var(--brand-bright); box-shadow: 0 0 0 4px rgba(30,58,138,.08); }
+.contact-form button { grid-column: 1 / -1; min-height: 45px; border: 0; border-radius: 8px; background: var(--brand); color: #fff; font-size: 10px; font-weight: 850; }
+
+@media (max-width: 1120px) {
+  .caravan-hero-shell { grid-template-columns: 210px minmax(0,1fr); }
+  .hero-side-offers { grid-column: 1 / -1; grid-template-columns: repeat(2,1fr); grid-template-rows: none; }
+  .hero-side-card { min-height: 180px; }
+  .brand-logo-grid { grid-template-columns: repeat(4,1fr); }
+  .caravan-footer-main { grid-template-columns: repeat(3,1fr); }
+}
+
+@media (max-width: 900px) {
+  .primary-store-nav { display: none; }
+  .primary-store-nav.open { display: block; }
+  .primary-store-nav-inner { flex-wrap: wrap; padding: 8px 0; }
+  .primary-store-nav a { min-height: 34px; }
+  .caravan-hero-shell { grid-template-columns: 1fr; }
+  .hero-departments { display: none; }
+  .caravan-main-hero { grid-template-columns: 1fr; min-height: 650px; }
+  .caravan-hero-copy { padding: 42px 42px 0; text-align: center; }
+  .caravan-hero-copy > p { margin-left: auto !important; margin-right: auto !important; }
+  .caravan-hero-copy .retail-hero-actions, .caravan-hero-copy .hero-mini-proof { justify-content: center; }
+  .caravan-hero-product { min-height: 320px; }
+  .wide-campaign-banner { grid-template-columns: 1fr; }
+  .campaign-device-art { display: none; }
+  .split-campaigns { grid-template-columns: 1fr; }
+  .store-confidence-section { grid-template-columns: 1fr; }
+  .content-grid { grid-template-columns: 1fr; }
+  .contact-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 680px) {
+  .caravan-utility { display: none; }
+  .caravan-header .commerce-header-main { min-height: 72px; }
+  .caravan-cart-action em, .caravan-cart-action small { display: none; }
+  .caravan-hero-shell { width: min(100% - 18px,1320px); margin-top: 10px; }
+  .caravan-main-hero { min-height: 570px; }
+  .caravan-hero-copy { padding: 32px 20px 0; }
+  .caravan-hero-copy h1 { font-size: 37px; }
+  .caravan-hero-copy > p:not(.hero-kicker) { font-size: 11px; }
+  .caravan-hero-product { min-height: 250px; padding: 15px; }
+  .hero-side-offers { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hero-side-card { min-height: 145px; padding: 16px; }
+  .hero-side-card h2 { font-size: 19px; }
+  .caravan-trust { width: min(100% - 22px,1260px); }
+  .wide-campaign-banner, .split-campaigns, .brand-showcase, .store-confidence-section { width: min(100% - 22px,1320px); }
+  .wide-campaign-banner > div:first-child { padding: 31px 22px; }
+  .wide-campaign-banner h2 { font-size: 31px; }
+  .split-campaign { min-height: 220px; padding: 28px 22px; }
+  .brand-showcase { padding: 20px 14px; }
+  .brand-logo-grid { grid-template-columns: repeat(2,1fr); }
+  .brand-logo-grid a { min-height: 58px; font-size: 11px; }
+  .content-page { width: min(100% - 22px,1120px); padding-top: 24px; }
+  .content-hero { padding: 31px 22px; }
+  .contact-form { grid-template-columns: 1fr; }
+  .contact-form label.full, .contact-form button { grid-column: auto; }
+  .caravan-footer-main { grid-template-columns: repeat(2,1fr); }
+}
