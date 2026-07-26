@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import type { Product } from "@bje/database";
 import type { CommerceCart } from "@bje/database/transactions";
 import { ProductArtwork } from "@/components/ProductArtwork";
+import { marketplaceCategoryLabel, productBrand } from "@/lib/marketplace";
 
 function money(cents: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+  return new Intl.NumberFormat("en-BD", { style: "currency", currency }).format(cents / 100);
 }
 
 function readWishlist(): string[] {
@@ -58,21 +59,29 @@ export function ProductCard({ product, compact = false }: { product: Product; co
     window.dispatchEvent(new Event("bje:wishlist"));
   }
 
+  const brand = productBrand(product);
+  const category = marketplaceCategoryLabel(product);
+  const discount = product.compareAtCents && product.compareAtCents > product.priceCents
+    ? Math.round((1 - product.priceCents / product.compareAtCents) * 100)
+    : 0;
+
   return (
-    <article className={`catalog-card${compact ? " compact" : ""}`}>
+    <article className={`catalog-card marketplace-catalog-card${compact ? " compact" : ""}`}>
       <div className="catalog-card-media">
         <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`}><ProductArtwork product={product} /></Link>
         <button className={`wishlist-toggle${saved ? " saved" : ""}`} type="button" onClick={toggleWishlist} aria-label={saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}>{saved ? "♥" : "♡"}</button>
-        {product.compareAtCents && product.compareAtCents > product.priceCents ? <span className="sale-badge">Sale</span> : null}
+        {discount > 0 ? <span className="sale-badge">-{discount}%</span> : <span className="new-badge">New</span>}
+        <span className={`card-stock-indicator${product.inventoryQuantity > 0 ? " available" : " unavailable"}`}>{product.inventoryQuantity > 0 ? "In stock" : "Out of stock"}</span>
       </div>
       <div className="catalog-card-body">
-        <span className="catalog-sku">{product.sku}</span>
+        <span className="catalog-category">{category}</span>
+        <span className="catalog-sku">{brand} · {product.sku}</span>
         <h3><Link href={`/products/${product.slug}`}>{product.name}</Link></h3>
         {!compact ? <p>{product.description}</p> : null}
-        <div className="rating-row" aria-label="Rated 4.8 out of 5"><span>★★★★★</span><small>4.8</small></div>
+        <div className="rating-row" aria-label="Rated 4.8 out of 5"><span>★★★★★</span><small>4.8 (128)</small></div>
         <div className="catalog-card-footer">
           <div className="catalog-price"><strong>{money(product.priceCents, product.currency)}</strong>{product.compareAtCents ? <del>{money(product.compareAtCents, product.currency)}</del> : null}</div>
-          <button className="catalog-add" type="button" onClick={addToCart} disabled={adding || product.inventoryQuantity < 1}>{product.inventoryQuantity < 1 ? "Out of stock" : adding ? "Adding…" : message || "Add to cart"}</button>
+          <button className="catalog-add" type="button" onClick={addToCart} disabled={adding || product.inventoryQuantity < 1}>{product.inventoryQuantity < 1 ? "Unavailable" : adding ? "Adding…" : message || "Add to cart"}</button>
         </div>
       </div>
     </article>
