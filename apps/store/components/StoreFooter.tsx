@@ -9,13 +9,13 @@ export function StoreFooter() {
         <form action="mailto:support@bjelectronics.shop" method="post" encType="text/plain"><input type="email" name="email" placeholder="Enter your email" aria-label="Email address" required /><button type="submit">Subscribe</button></form>
       </section>
       <div className="footer-main">
-        <div className="footer-brand"><BrandLogo /><p>Your trusted destination for dependable electronics, secure shopping and responsive customer care.</p></div>
-        <div><h3>Shop</h3><Link href="/categories?category=Laptops">Laptops</Link><Link href="/categories?category=Earphones">Earphones</Link><Link href="/categories?category=Headphones">Headphones</Link><Link href="/categories?category=Smart%20Watches">Smart watches</Link><Link href="/categories?category=Speakers">Speakers</Link></div>
-        <div><h3>Customer service</h3><a href="mailto:support@bjelectronics.shop">Contact us</a><Link href="/cart">Cart</Link><Link href="/checkout">Checkout</Link><a href="mailto:support@bjelectronics.shop?subject=Returns%20and%20refunds">Returns & refunds</a><a href="mailto:support@bjelectronics.shop?subject=Shipping">Shipping information</a></div>
-        <div><h3>Company</h3><a href="mailto:support@bjelectronics.shop?subject=About%20BJ%20Electronics">About us</a><a href="mailto:support@bjelectronics.shop?subject=Careers">Careers</a><a href="mailto:support@bjelectronics.shop?subject=Business%20sales">Business sales</a><span>Privacy policy</span><span>Terms & conditions</span></div>
-        <div><h3>Payment methods</h3><div className="payment-chips"><span>VISA</span><span>MC</span><span>PayPal</span><span>Apple Pay</span></div><p>Payments are confirmed securely before fulfilment.</p></div>
+        <div className="footer-brand"><BrandLogo /><p>Your trusted destination for dependable electronics, secure shopping and responsive customer care.</p><Link href="/about">Learn about BJ Electronics</Link></div>
+        <div><h3>Shop</h3><Link href="/shop">All products</Link><Link href="/shop?category=Laptops">Laptops</Link><Link href="/shop?category=Earphones">Earphones</Link><Link href="/shop?category=Headphones">Headphones</Link><Link href="/shop?category=Smart%20Watches">Smart watches</Link><Link href="/shop?category=Accessories">Accessories</Link></div>
+        <div><h3>Customer service</h3><Link href="/contact">Contact us</Link><Link href="/cart">Cart</Link><Link href="/checkout">Checkout</Link><Link href="/policies/shipping">Shipping & delivery</Link><Link href="/policies/returns">Return policy</Link><Link href="/policies/refunds">Refund policy</Link></div>
+        <div><h3>Company information</h3><Link href="/about">About us</Link><a href="mailto:sales@bjelectronics.shop?subject=Careers">Join our team</a><Link href="/policies/privacy">Privacy policy</Link><Link href="/policies/terms">Terms & conditions</Link><a href="mailto:sales@bjelectronics.shop">Business sales</a></div>
+        <div><h3>Contact & payment</h3><a href="mailto:support@bjelectronics.shop">support@bjelectronics.shop</a><p>Nationwide delivery coordination across Bangladesh.</p><div className="payment-chips"><span>COD</span><span>Bank</span><span>Secure</span><span>Verified</span></div><p>Only use payment instructions confirmed through the official order process.</p></div>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} BJ Electronics. All rights reserved.</span><span>Smart tech, better life.</span></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} BJ Electronics. All rights reserved.</span><span>Developed and operated through the BJ Electronics commerce platform.</span></div>
     </footer>
   );
 }
