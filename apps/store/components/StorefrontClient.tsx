@@ -3,20 +3,37 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product } from "@bje/database";
-import { StoreHeader } from "@/components/StoreHeader";
-import { StoreFooter } from "@/components/StoreFooter";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductArtwork } from "@/components/ProductArtwork";
+import { StoreFooter } from "@/components/StoreFooter";
+import { StoreHeader } from "@/components/StoreHeader";
 
 const categories = [
-  { name: "Laptops", icon: "▰", description: "Powerful mobile computing" },
-  { name: "Earphones", icon: "◖", description: "Compact wireless audio" },
-  { name: "Headphones", icon: "◉", description: "Immersive personal sound" },
-  { name: "Smart Watches", icon: "▣", description: "Connected daily wellness" },
-  { name: "Speakers", icon: "◼", description: "Room-filling entertainment" },
-  { name: "Accessories", icon: "⌁", description: "Cables, chargers and more" },
-  { name: "Monitors", icon: "▤", description: "Clear productive displays" },
-  { name: "Power Banks", icon: "▥", description: "Power wherever you go" },
-];
+  { name: "Laptops", icon: "▰", description: "Portable performance" },
+  { name: "Earphones", icon: "◖", description: "Wireless everyday audio" },
+  { name: "Headphones", icon: "◉", description: "Immersive listening" },
+  { name: "Smart Watches", icon: "▣", description: "Connected wellness" },
+  { name: "Speakers", icon: "◼", description: "Powerful home sound" },
+  { name: "Accessories", icon: "⌁", description: "Chargers, hubs and cables" },
+  { name: "Monitors", icon: "▤", description: "Productive displays" },
+  { name: "Power Banks", icon: "▥", description: "Reliable mobile power" },
+] as const;
+
+const collectionDefinitions = [
+  { title: "Laptops & Computing", query: "Laptops", keywords: ["laptop", "macbook", "notebook", "computer", "monitor"] },
+  { title: "Audio Essentials", query: "Headphones", keywords: ["headphone", "earphone", "airpod", "speaker", "audio", "sound"] },
+  { title: "Smart Lifestyle", query: "Smart Watches", keywords: ["watch", "wearable", "smart", "fitness"] },
+  { title: "Power & Accessories", query: "Accessories", keywords: ["charger", "power", "cable", "adapter", "accessory", "hub"] },
+] as const;
+
+function money(product: Product): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.priceCents / 100);
+}
+
+function matches(product: Product, keywords: readonly string[]): boolean {
+  const source = `${product.name} ${product.sku} ${product.description}`.toLowerCase();
+  return keywords.some((keyword) => source.includes(keyword));
+}
 
 export function StorefrontClient({
   initialProducts,
@@ -29,6 +46,8 @@ export function StorefrontClient({
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [live, setLive] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [visibleDemand, setVisibleDemand] = useState(8);
   const cursor = useRef(latestEventId);
 
   useEffect(() => {
@@ -40,7 +59,7 @@ export function StorefrontClient({
         const payload = JSON.parse((event as MessageEvent<string>).data) as { id?: number };
         if (typeof payload.id === "number") cursor.current = payload.id;
       } catch {
-        // The authoritative catalog request below remains safe when an event is malformed.
+        // The authoritative catalog refresh remains safe when an event is malformed.
       }
       void fetch("/api/catalog", { cache: "no-store" })
         .then((response) => response.json())
@@ -53,65 +72,137 @@ export function StorefrontClient({
     return () => source.close();
   }, []);
 
-  const newArrivals = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5), [products]);
-  const featured = useMemo(() => products.slice(0, 10), [products]);
-  const heroProduct = products[0];
+  useEffect(() => {
+    const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % 3), 6500);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const newest = useMemo(
+    () => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [products],
+  );
+  const topDemand = useMemo(
+    () => [...products].sort((a, b) => (b.inventoryQuantity + (b.compareAtCents ? 4 : 0)) - (a.inventoryQuantity + (a.compareAtCents ? 4 : 0))),
+    [products],
+  );
+  const heroProducts = products.slice(0, 3);
+  const activeProduct = heroProducts[activeSlide] ?? products[0];
+  const collections = useMemo(
+    () => collectionDefinitions.map((definition, index) => {
+      const exact = products.filter((product) => matches(product, definition.keywords));
+      const fallback = products.slice(index * 4, index * 4 + 4);
+      return { ...definition, products: (exact.length ? exact : fallback).slice(0, 4) };
+    }),
+    [products],
+  );
+
+  const slides = [
+    {
+      kicker: "Official BJ Electronics online store",
+      title: "Smarter technology. Better everyday living.",
+      description: "Shop dependable computing, audio, wearables and accessories with live inventory and secure order processing.",
+      action: "Shop technology",
+      href: "/categories",
+    },
+    {
+      kicker: "Performance collection",
+      title: activeProduct ? activeProduct.name : "Premium performance, made accessible.",
+      description: activeProduct?.description || "Carefully selected devices for study, work, entertainment and connected living.",
+      action: activeProduct ? "View featured product" : "Explore new arrivals",
+      href: activeProduct ? `/products/${activeProduct.slug}` : "/categories?sort=newest",
+    },
+    {
+      kicker: "Service you can trust",
+      title: "Genuine products with responsive local support.",
+      description: "Transparent pricing, official warranty guidance, straightforward returns and nationwide delivery coordination.",
+      action: "Browse top demand",
+      href: "#top-demand",
+    },
+  ];
+  const slide = slides[activeSlide];
 
   return (
-    <div className="store-shell reference-storefront">
+    <div className="store-shell caravan-reference-storefront">
       <StoreHeader adminUrl={adminUrl} />
       <main>
-        <section className="retail-hero" aria-labelledby="hero-title">
-          <div className="retail-hero-copy">
-            <p className="hero-kicker">Powerful performance. Dependable service.</p>
-            <h1 id="hero-title">Smart technology for a <span>better everyday life.</span></h1>
-            <p>Discover carefully selected laptops, audio, wearables and accessories with live inventory, secure checkout and responsive support.</p>
-            <div className="retail-hero-actions"><Link className="shop-primary" href="/categories">Shop now</Link><a className="shop-secondary" href="mailto:support@bjelectronics.shop">Talk to an expert</a></div>
-            <div className="hero-mini-proof"><span>✓ Live stock</span><span>✓ Secure checkout</span><span>✓ Fast support</span></div>
-          </div>
-          <div className="retail-hero-visual" aria-label={heroProduct ? `Featured product: ${heroProduct.name}` : "Featured laptop collection"}>
-            <div className="hero-glow" />
-            <div className="hero-laptop">
-              <div className="hero-laptop-screen"><i /><i /><i /><span>BJ</span></div>
-              <div className="hero-laptop-base" />
+        <section className="caravan-hero" aria-labelledby="caravan-hero-title">
+          <div className="caravan-hero-copy">
+            <p className="caravan-kicker">{slide.kicker}</p>
+            <h1 id="caravan-hero-title">{slide.title}</h1>
+            <p>{slide.description}</p>
+            <div className="caravan-hero-actions">
+              <Link className="shop-primary" href={slide.href}>{slide.action}</Link>
+              <a className="shop-secondary" href="mailto:support@bjelectronics.shop">Contact support</a>
             </div>
-            <div className="hero-product-label"><small>Featured technology</small><strong>{heroProduct?.name ?? "Premium performance collection"}</strong><Link href={heroProduct ? `/products/${heroProduct.slug}` : "/categories"}>Explore product →</Link></div>
+            <div className="caravan-proof-row">
+              <span>✓ Genuine products</span><span>✓ Secure checkout</span><span>✓ Nationwide support</span>
+            </div>
           </div>
-          <div className="hero-dots" aria-hidden="true"><span className="active" /><span /><span /><span /></div>
-        </section>
-
-        <section className="retail-trust" aria-label="Shopping benefits">
-          <article><span>▱</span><div><strong>Free delivery</strong><small>On qualifying orders</small></div></article>
-          <article><span>♢</span><div><strong>1 year warranty</strong><small>Official product coverage</small></div></article>
-          <article><span>↻</span><div><strong>Easy returns</strong><small>Clear return assistance</small></div></article>
-          <article><span>▣</span><div><strong>Secure payment</strong><small>Protected checkout</small></div></article>
-        </section>
-
-        <section className="retail-section category-section">
-          <div className="retail-section-heading"><div><span>Explore the store</span><h2>Shop by category</h2></div><Link href="/categories">View all</Link></div>
-          <div className="category-tile-grid">
-            {categories.map((category) => (
-              <Link className="category-tile" href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
-                <span className="category-tile-icon">{category.icon}</span><strong>{category.name}</strong><small>{category.description}</small>
-              </Link>
-            ))}
+          <div className="caravan-hero-stage">
+            <div className="hero-stage-ring" />
+            {activeProduct ? (
+              <div className="hero-stage-product">
+                <ProductArtwork product={activeProduct} />
+                <div><small>Featured now</small><strong>{activeProduct.name}</strong><span>{money(activeProduct)}</span></div>
+              </div>
+            ) : (
+              <div className="hero-stage-placeholder"><strong>BJ</strong><span>Smart tech, better life.</span></div>
+            )}
+          </div>
+          <div className="caravan-slider-controls" aria-label="Hero slides">
+            <button type="button" onClick={() => setActiveSlide((activeSlide + 2) % 3)} aria-label="Previous slide">←</button>
+            <div>{slides.map((item, index) => <button className={index === activeSlide ? "active" : ""} type="button" key={item.kicker} onClick={() => setActiveSlide(index)} aria-label={`Show slide ${index + 1}`} />)}</div>
+            <button type="button" onClick={() => setActiveSlide((activeSlide + 1) % 3)} aria-label="Next slide">→</button>
           </div>
         </section>
 
-        <section className="retail-section">
-          <div className="retail-section-heading"><div><span>Fresh technology</span><h2>New arrivals</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/categories?sort=newest">View all</Link></div></div>
-          {newArrivals.length ? <div className="horizontal-product-grid">{newArrivals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Products will appear here as soon as the catalog is published.</div>}
+        <section className="caravan-category-strip" aria-label="Featured categories">
+          {categories.slice(0, 5).map((category) => (
+            <Link href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
+              <span>{category.icon}</span><div><strong>{category.name}</strong><small>{category.description}</small></div>
+            </Link>
+          ))}
         </section>
 
-        <section className="retail-section featured-section">
-          <div className="retail-section-heading"><div><span>Customer favourites</span><h2>Featured products</h2></div><Link href="/categories">View all</Link></div>
-          {featured.length ? <div className="featured-product-grid">{featured.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">No featured products are currently available.</div>}
+        <section className="caravan-trust-strip" aria-label="Shopping benefits">
+          <article><span>▱</span><div><strong>Nationwide delivery</strong><small>Coordinated across Bangladesh</small></div></article>
+          <article><span>♢</span><div><strong>Warranty support</strong><small>Clear official coverage guidance</small></div></article>
+          <article><span>↻</span><div><strong>Easy assistance</strong><small>Responsive order and return support</small></div></article>
+          <article><span>▣</span><div><strong>Secure ordering</strong><small>Inventory checked at checkout</small></div></article>
         </section>
 
-        <section className="promotion-grid">
-          <article className="promotion-card promo-a"><div><span>Up to 25% off</span><h2>Premium headphones</h2><p>Focused sound for work, travel and everyday listening.</p><Link href="/categories?category=Headphones">Shop headphones</Link></div><div className="promo-headphones" aria-hidden="true"><span /><i /><i /></div></article>
-          <article className="promotion-card promo-b"><div><span>Connected lifestyle</span><h2>Smart watches</h2><p>Track, connect and achieve more throughout your day.</p><Link href="/categories?category=Smart%20Watches">Shop smart watches</Link></div><div className="promo-watch" aria-hidden="true"><span><i /></span></div></article>
-          <article className="promotion-card promo-c"><div><span>Power anywhere</span><h2>Essential accessories</h2><p>Reliable charging, connectivity and protection.</p><Link href="/categories?category=Accessories">Shop accessories</Link></div><div className="promo-power" aria-hidden="true"><span /><i /></div></article>
+        <section className="caravan-section" id="top-demand">
+          <div className="caravan-section-heading">
+            <div><span>Popular right now</span><h2>Top Demand</h2><p>High-interest products selected from the live BJ Electronics catalog.</p></div>
+            <div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/categories">View all</Link></div>
+          </div>
+          {topDemand.length ? (
+            <>
+              <div className="caravan-product-grid">{topDemand.slice(0, visibleDemand).map((product) => <ProductCard compact product={product} key={product.id} />)}</div>
+              {visibleDemand < topDemand.length ? <button className="load-more-button" type="button" onClick={() => setVisibleDemand((count) => count + 4)}>Load more products</button> : null}
+            </>
+          ) : <div className="empty-state">Products will appear here as soon as the catalog is published.</div>}
+        </section>
+
+        <section className="caravan-feature-banner">
+          <div><span>Smart tech, better life.</span><h2>Technology selected for real daily needs.</h2><p>From dependable workstations to personal audio and everyday charging, BJ Electronics keeps the catalog focused, useful and supported.</p><Link href="/categories?sort=newest">Discover what is new</Link></div>
+          <div className="feature-banner-visual" aria-hidden="true"><span>BJ</span><i /><i /></div>
+        </section>
+
+        {collections.map((collection) => (
+          <section className="caravan-section collection-shelf" key={collection.title}>
+            <div className="caravan-section-heading compact-heading"><div><span>Curated collection</span><h2>{collection.title}</h2></div><Link href={`/categories?category=${encodeURIComponent(collection.query)}`}>View all</Link></div>
+            {collection.products.length ? <div className="caravan-product-grid shelf-grid">{collection.products.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">This collection is being prepared.</div>}
+          </section>
+        ))}
+
+        <section className="caravan-service-panel">
+          <div><span>Why BJ Electronics</span><h2>Quality, trust and practical service.</h2><p>Our storefront connects directly to operational inventory and order workflows so product availability, pricing and fulfilment remain coordinated.</p></div>
+          <div className="service-panel-grid">
+            <article><b>01</b><strong>Controlled catalog</strong><p>Products are published and maintained through the secure administration application.</p></article>
+            <article><b>02</b><strong>Transactional checkout</strong><p>Stock and price are revalidated before every order is accepted.</p></article>
+            <article><b>03</b><strong>Responsive support</strong><p>Customers can reach the team for delivery, warranty and order assistance.</p></article>
+          </div>
         </section>
       </main>
       <StoreFooter />
