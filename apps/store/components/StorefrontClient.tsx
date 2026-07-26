@@ -26,16 +26,18 @@ const serviceHighlights = [
 ];
 
 const brands = ["Apple", "Samsung", "Dell", "HP", "Lenovo", "Sony", "JBL", "Anker"];
+const shelfDefinitions = [
+  { title: "Laptops & computing", category: "Laptops", terms: ["laptop", "notebook", "macbook", "monitor", "display"] },
+  { title: "Audio", category: "Headphones", terms: ["earphone", "earbud", "airpod", "headphone", "speaker", "audio"] },
+  { title: "Smart watches", category: "Smart Watches", terms: ["watch", "wearable", "fitness", "tracker"] },
+  { title: "Power & accessories", category: "Accessories", terms: ["power", "charger", "cable", "adapter", "accessory", "bank", "hub"] },
+];
 
-export function StorefrontClient({
-  initialProducts,
-  latestEventId,
-  adminUrl,
-}: {
-  initialProducts: Product[];
-  latestEventId: number;
-  adminUrl: string;
-}) {
+function searchText(product: Product): string {
+  return `${product.name} ${product.sku} ${product.description}`.toLowerCase();
+}
+
+export function StorefrontClient({ initialProducts, latestEventId, adminUrl }: { initialProducts: Product[]; latestEventId: number; adminUrl: string }) {
   const [products, setProducts] = useState(initialProducts);
   const [live, setLive] = useState(false);
   const cursor = useRef(latestEventId);
@@ -51,13 +53,10 @@ export function StorefrontClient({
       } catch {
         // Catalog refresh below remains authoritative.
       }
-      void fetch("/api/catalog", { cache: "no-store" })
-        .then((response) => response.json())
-        .then((payload: { products?: Product[]; latestEventId?: number }) => {
-          if (payload.products) setProducts(payload.products);
-          if (typeof payload.latestEventId === "number") cursor.current = payload.latestEventId;
-        })
-        .catch(() => undefined);
+      void fetch("/api/catalog", { cache: "no-store" }).then((response) => response.json()).then((payload: { products?: Product[]; latestEventId?: number }) => {
+        if (payload.products) setProducts(payload.products);
+        if (typeof payload.latestEventId === "number") cursor.current = payload.latestEventId;
+      }).catch(() => undefined);
     });
     return () => source.close();
   }, []);
@@ -65,98 +64,41 @@ export function StorefrontClient({
   const newArrivals = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 6), [products]);
   const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
   const deals = useMemo(() => products.filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents).slice(0, 6), [products]);
-  const heroProduct = products[0];
+  const topDemand = useMemo(() => [...products].sort((a, b) => {
+    const aDiscount = a.compareAtCents ? a.compareAtCents - a.priceCents : 0;
+    const bDiscount = b.compareAtCents ? b.compareAtCents - b.priceCents : 0;
+    if (bDiscount !== aDiscount) return bDiscount - aDiscount;
+    return b.inventoryQuantity - a.inventoryQuantity;
+  }).slice(0, 8), [products]);
+  const shelves = useMemo(() => shelfDefinitions.map((definition, index) => {
+    const matched = products.filter((product) => definition.terms.some((term) => searchText(product).includes(term)));
+    const fallback = products.slice(index * 4, index * 4 + 6);
+    return { ...definition, products: (matched.length ? matched : fallback).slice(0, 6) };
+  }), [products]);
+  const heroProduct = topDemand[0] ?? products[0];
 
   return (
     <div className="store-shell caravan-storefront">
       <StoreHeader adminUrl={adminUrl} />
       <main>
         <section className="caravan-hero-shell">
-          <aside className="hero-departments" aria-label="Shop departments">
-            <h2>Shop by category</h2>
-            {categories.map((category) => (
-              <Link key={category.name} href={`/categories?category=${encodeURIComponent(category.name)}`}>
-                <span>{category.icon}</span>
-                <div><strong>{category.name}</strong><small>{category.description}</small></div>
-                <b>›</b>
-              </Link>
-            ))}
-          </aside>
-
-          <section className="retail-hero caravan-main-hero" aria-labelledby="caravan-hero-title">
-            <div className="caravan-hero-copy">
-              <p className="hero-kicker">Original products. Dependable service.</p>
-              <h1 id="caravan-hero-title">Technology for every part of your day.</h1>
-              <p>Explore trusted electronics, live inventory, secure ordering and responsive support—all in one modern BJ Electronics storefront.</p>
-              <div className="retail-hero-actions">
-                <Link className="shop-primary" href="/categories">Shop all products</Link>
-                <Link className="shop-secondary" href="/categories?sort=discount">View special offers</Link>
-              </div>
-              <div className="hero-mini-proof"><span>✓ Live stock</span><span>✓ Secure checkout</span><span>✓ Fast support</span></div>
-            </div>
-            <div className="caravan-hero-product">
-              <div className="hero-glow" />
-              <div className="hero-laptop"><div className="hero-laptop-screen"><i /><i /><i /><span>BJ</span></div><div className="hero-laptop-base" /></div>
-              <div className="hero-product-label"><small>Featured technology</small><strong>{heroProduct?.name ?? "Premium electronics collection"}</strong><Link href={heroProduct ? `/products/${heroProduct.slug}` : "/categories"}>View product →</Link></div>
-            </div>
-          </section>
-
-          <aside className="hero-side-offers" aria-label="Featured store offers">
-            <article className="hero-side-card side-card-blue"><span>Audio collection</span><h2>Clear sound, anywhere.</h2><Link href="/categories?category=Headphones">Shop audio</Link></article>
-            <article className="hero-side-card side-card-red"><span>Mobile essentials</span><h2>Power your day.</h2><Link href="/categories?category=Power%20Banks">Shop power</Link></article>
-          </aside>
+          <aside className="hero-departments" aria-label="Shop departments"><h2>Shop by category</h2>{categories.map((category) => <Link key={category.name} href={`/shop?category=${encodeURIComponent(category.name)}`}><span>{category.icon}</span><div><strong>{category.name}</strong><small>{category.description}</small></div><b>›</b></Link>)}</aside>
+          <section className="retail-hero caravan-main-hero" aria-labelledby="caravan-hero-title"><div className="caravan-hero-copy"><p className="hero-kicker">Original products. Dependable service.</p><h1 id="caravan-hero-title">Technology for every part of your day.</h1><p>Explore trusted electronics, live inventory, secure ordering and responsive support—all in one modern BJ Electronics storefront.</p><div className="retail-hero-actions"><Link className="shop-primary" href="/shop">Shop all products</Link><Link className="shop-secondary" href="/shop?sort=discount">View special offers</Link></div><div className="hero-mini-proof"><span>✓ Live stock</span><span>✓ Secure checkout</span><span>✓ Fast support</span></div></div><div className="caravan-hero-product"><div className="hero-glow" /><div className="hero-laptop"><div className="hero-laptop-screen"><i /><i /><i /><span>BJ</span></div><div className="hero-laptop-base" /></div><div className="hero-product-label"><small>Featured technology</small><strong>{heroProduct?.name ?? "Premium electronics collection"}</strong><Link href={heroProduct ? `/products/${heroProduct.slug}` : "/shop"}>View product →</Link></div></div></section>
+          <aside className="hero-side-offers" aria-label="Featured store offers"><article className="hero-side-card side-card-blue"><span>Audio collection</span><h2>Clear sound, anywhere.</h2><Link href="/shop?category=Headphones">Shop audio</Link></article><article className="hero-side-card side-card-red"><span>Mobile essentials</span><h2>Power your day.</h2><Link href="/shop?category=Power%20Banks">Shop power</Link></article></aside>
         </section>
 
-        <section className="retail-trust caravan-trust" aria-label="Shopping benefits">
-          {serviceHighlights.map(([icon, title, copy]) => <article key={title}><span>{icon}</span><div><strong>{title}</strong><small>{copy}</small></div></article>)}
-        </section>
+        <section className="retail-trust caravan-trust" aria-label="Shopping benefits">{serviceHighlights.map(([icon, title, copy]) => <article key={title}><span>{icon}</span><div><strong>{title}</strong><small>{copy}</small></div></article>)}</section>
+        <section className="retail-section category-section"><div className="retail-section-heading"><div><span>Browse faster</span><h2>Popular categories</h2></div><Link href="/shop">View all categories</Link></div><div className="category-tile-grid caravan-category-grid">{categories.map((category) => <Link className="category-tile" href={`/shop?category=${encodeURIComponent(category.name)}`} key={category.name}><span className="category-tile-icon">{category.icon}</span><strong>{category.name}</strong><small>{category.description}</small></Link>)}</div></section>
 
-        <section className="retail-section category-section">
-          <div className="retail-section-heading"><div><span>Browse faster</span><h2>Popular categories</h2></div><Link href="/categories">View all categories</Link></div>
-          <div className="category-tile-grid caravan-category-grid">
-            {categories.map((category) => (
-              <Link className="category-tile" href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
-                <span className="category-tile-icon">{category.icon}</span><strong>{category.name}</strong><small>{category.description}</small>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="retail-section caravan-products-section">
-          <div className="retail-section-heading"><div><span>Recently added</span><h2>New arrivals</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/categories?sort=newest">View all</Link></div></div>
-          {newArrivals.length ? <div className="horizontal-product-grid caravan-product-grid">{newArrivals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">New products will appear here as soon as they are published.</div>}
-        </section>
-
-        <section className="wide-campaign-banner">
-          <div><span>Performance week</span><h2>Build your complete setup.</h2><p>Pair laptops, monitors, audio and accessories from one trusted store.</p><Link href="/categories">Explore the collection</Link></div>
-          <div className="campaign-device-art" aria-hidden="true"><i /><span /><b /></div>
-        </section>
-
-        <section className="retail-section caravan-products-section">
-          <div className="retail-section-heading"><div><span>Customer favourites</span><h2>Featured products</h2></div><Link href="/categories?sort=popular">View all</Link></div>
-          {featuredProducts.length ? <div className="featured-product-grid caravan-product-grid">{featuredProducts.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Featured products will appear here.</div>}
-        </section>
-
-        <section className="split-campaigns">
-          <article className="split-campaign campaign-computing"><span>Computing essentials</span><h2>Work smarter with a complete setup.</h2><p>Discover laptops, monitors and accessories selected for productivity.</p><Link href="/categories?category=Laptops">Shop computing</Link></article>
-          <article className="split-campaign campaign-lifestyle"><span>Connected lifestyle</span><h2>Audio and wearables for every day.</h2><p>Stay connected with dependable sound, smart watches and mobile power.</p><Link href="/categories?category=Smart%20Watches">Shop lifestyle tech</Link></article>
-        </section>
-
-        <section className="retail-section caravan-products-section">
-          <div className="retail-section-heading"><div><span>Limited-time value</span><h2>Special offers</h2></div><Link href="/categories?sort=discount">Shop all deals</Link></div>
-          {deals.length ? <div className="horizontal-product-grid caravan-product-grid">{deals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Current promotional products will appear here when discounts are active.</div>}
-        </section>
-
-        <section className="brand-showcase">
-          <div className="retail-section-heading"><div><span>Trusted names</span><h2>Shop leading brands</h2></div><Link href="/categories">Browse products</Link></div>
-          <div className="brand-logo-grid">{brands.map((brand) => <Link href={`/categories?q=${encodeURIComponent(brand)}`} key={brand}>{brand}</Link>)}</div>
-        </section>
-
-        <section className="store-confidence-section">
-          <article><span>01</span><h3>Curated catalog</h3><p>Products are controlled from the secure administration platform with live pricing and inventory.</p></article>
-          <article><span>02</span><h3>Transactional checkout</h3><p>Cart totals and stock are verified again before an order is accepted.</p></article>
-          <article><span>03</span><h3>Responsive assistance</h3><p>Support is available for product selection, delivery questions and after-sales service.</p></article>
-        </section>
+        <section className="retail-section caravan-products-section demand-section"><div className="retail-section-heading"><div><span>Popular right now</span><h2>Top Demand</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/shop">View all</Link></div></div>{topDemand.length ? <div className="featured-product-grid caravan-product-grid">{topDemand.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Top-demand products will appear when the catalog is published.</div>}</section>
+        <section className="retail-section caravan-products-section"><div className="retail-section-heading"><div><span>Recently added</span><h2>New arrivals</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/shop?sort=newest">View all</Link></div></div>{newArrivals.length ? <div className="horizontal-product-grid caravan-product-grid">{newArrivals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">New products will appear here as soon as they are published.</div>}</section>
+        <section className="wide-campaign-banner"><div><span>Performance week</span><h2>Build your complete setup.</h2><p>Pair laptops, monitors, audio and accessories from one trusted store.</p><Link href="/shop">Explore the collection</Link></div><div className="campaign-device-art" aria-hidden="true"><i /><span /><b /></div></section>
+        <section className="retail-section caravan-products-section"><div className="retail-section-heading"><div><span>Customer favourites</span><h2>Featured products</h2></div><Link href="/shop">View all</Link></div>{featuredProducts.length ? <div className="featured-product-grid caravan-product-grid">{featuredProducts.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Featured products will appear here.</div>}</section>
+        {shelves.map((shelf) => <section className="retail-section caravan-products-section category-product-shelf" key={shelf.title}><div className="retail-section-heading"><div><span>Shop collection</span><h2>{shelf.title}</h2></div><Link href={`/shop?category=${encodeURIComponent(shelf.category)}`}>View all</Link></div>{shelf.products.length ? <div className="horizontal-product-grid caravan-product-grid">{shelf.products.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Matching products will appear here when published.</div>}</section>)}
+        <section className="split-campaigns"><article className="split-campaign campaign-computing"><span>Computing essentials</span><h2>Work smarter with a complete setup.</h2><p>Discover laptops, monitors and accessories selected for productivity.</p><Link href="/shop?category=Laptops">Shop computing</Link></article><article className="split-campaign campaign-lifestyle"><span>Connected lifestyle</span><h2>Audio and wearables for every day.</h2><p>Stay connected with dependable sound, smart watches and mobile power.</p><Link href="/shop?category=Smart%20Watches">Shop lifestyle tech</Link></article></section>
+        <section className="retail-section caravan-products-section"><div className="retail-section-heading"><div><span>Limited-time value</span><h2>Special offers</h2></div><Link href="/shop?sort=discount">Shop all deals</Link></div>{deals.length ? <div className="horizontal-product-grid caravan-product-grid">{deals.map((product) => <ProductCard compact product={product} key={product.id} />)}</div> : <div className="empty-state">Current promotional products will appear here when discounts are active.</div>}</section>
+        <section className="brand-showcase"><div className="retail-section-heading"><div><span>Trusted names</span><h2>Shop leading brands</h2></div><Link href="/shop">Browse products</Link></div><div className="brand-logo-grid">{brands.map((brand) => <Link href={`/shop?q=${encodeURIComponent(brand)}`} key={brand}>{brand}</Link>)}</div></section>
+        <section className="store-confidence-section"><article><span>01</span><h3>Curated catalog</h3><p>Products are controlled from the secure administration platform with live pricing and inventory.</p></article><article><span>02</span><h3>Transactional checkout</h3><p>Cart totals and stock are verified again before an order is accepted.</p></article><article><span>03</span><h3>Responsive assistance</h3><p>Support is available for product selection, delivery questions and after-sales service.</p></article></section>
       </main>
       <StoreFooter />
     </div>
