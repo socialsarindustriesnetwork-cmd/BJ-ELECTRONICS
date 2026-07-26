@@ -6,6 +6,7 @@ import type { Product } from "@bje/database";
 import { StoreHeader } from "@/components/StoreHeader";
 import { StoreFooter } from "@/components/StoreFooter";
 import { ProductCard } from "@/components/ProductCard";
+import { CollectionSection } from "@/components/CollectionSection";
 
 const categories = [
   { name: "Laptops", icon: "▰", description: "Work, study and performance" },
@@ -26,6 +27,16 @@ const serviceHighlights = [
 ];
 
 const brands = ["Apple", "Samsung", "Dell", "HP", "Lenovo", "Sony", "JBL", "Anker"];
+
+function productText(product: Product): string {
+  return `${product.name} ${product.sku} ${product.description}`.toLowerCase();
+}
+
+function selectCollection(products: Product[], keywords: string[], fallbackOffset: number): Product[] {
+  const matching = products.filter((product) => keywords.some((keyword) => productText(product).includes(keyword)));
+  const fallback = [...products.slice(fallbackOffset), ...products.slice(0, fallbackOffset)];
+  return [...matching, ...fallback.filter((product) => !matching.some((item) => item.id === product.id))].slice(0, 15);
+}
 
 export function StorefrontClient({
   initialProducts,
@@ -65,6 +76,15 @@ export function StorefrontClient({
   const newArrivals = useMemo(() => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 6), [products]);
   const featuredProducts = useMemo(() => products.slice(0, 8), [products]);
   const deals = useMemo(() => products.filter((product) => product.compareAtCents && product.compareAtCents > product.priceCents).slice(0, 6), [products]);
+  const topDemand = useMemo(() => [...products].sort((a, b) => {
+    const aDiscount = (a.compareAtCents ?? a.priceCents) - a.priceCents;
+    const bDiscount = (b.compareAtCents ?? b.priceCents) - b.priceCents;
+    return bDiscount - aDiscount || b.inventoryQuantity - a.inventoryQuantity;
+  }).slice(0, 15), [products]);
+  const laptopCollection = useMemo(() => selectCollection(products, ["laptop", "notebook", "macbook", "chromebook"], 0), [products]);
+  const audioCollection = useMemo(() => selectCollection(products, ["headphone", "earphone", "earbud", "speaker", "audio"], 3), [products]);
+  const smartCollection = useMemo(() => selectCollection(products, ["watch", "smart", "wearable", "monitor"], 6), [products]);
+  const powerCollection = useMemo(() => selectCollection(products, ["power", "charger", "cable", "adapter", "accessor"], 9), [products]);
   const heroProduct = products[0];
 
   return (
@@ -121,6 +141,12 @@ export function StorefrontClient({
             ))}
           </div>
         </section>
+
+        <CollectionSection eyebrow="Popular now" title="Top Demand" products={topDemand} viewAllHref="/categories?sort=discount" />
+        <CollectionSection title="Laptops" products={laptopCollection} viewAllHref="/categories?category=Laptops" />
+        <CollectionSection title="Audio & Headphones" products={audioCollection} viewAllHref="/categories?category=Headphones" />
+        <CollectionSection title="Smart Watches & Displays" products={smartCollection} viewAllHref="/categories?category=Smart%20Watches" />
+        <CollectionSection title="Power & Accessories" products={powerCollection} viewAllHref="/categories?category=Accessories" />
 
         <section className="retail-section caravan-products-section">
           <div className="retail-section-heading"><div><span>Recently added</span><h2>New arrivals</h2></div><div className="heading-actions"><span className={`catalog-live${live ? " connected" : ""}`}>{live ? "Live inventory" : "Connecting"}</span><Link href="/categories?sort=newest">View all</Link></div></div>
