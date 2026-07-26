@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { getStoreUrl } from "@bje/config";
 import "./globals.css";
+import "./caravan.css";
 
 const storeUrl = getStoreUrl();
 
@@ -37,7 +38,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e3a8a" },
+    { media: "(prefers-color-scheme: dark)", color: "#153a8a" },
   ],
 };
 
