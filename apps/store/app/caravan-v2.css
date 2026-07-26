@@ -1,0 +1,23 @@
+/* Completion layer for the Caravan-style BJ Electronics storefront. */
+
+.category-product-shelf { position: relative; }
+.category-product-shelf::before { content: ""; position: absolute; inset: 22px -14px 0; z-index: -1; border-radius: 16px; background: linear-gradient(90deg, transparent, rgba(234,240,255,.72), transparent); }
+.demand-section { padding-top: 46px; }
+
+.policy-page .breadcrumbs { margin-bottom: 18px; }
+.policy-content { margin-top: 22px; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow-sm); }
+.policy-content article { padding: 28px 32px; border-bottom: 1px solid var(--line); }
+.policy-content article:last-of-type { border-bottom: 0; }
+.policy-content h2 { margin: 0 0 12px; font-size: 24px; letter-spacing: -.035em; }
+.policy-content p, .policy-content li { color: var(--muted); font-size: 11px; line-height: 1.8; }
+.policy-content ul { margin: 0; padding-left: 20px; }
+.policy-support { padding: 20px 32px; border-top: 1px solid var(--line); background: var(--soft-blue); color: #44506a; font-size: 11px; line-height: 1.7; }
+.policy-support a { color: var(--brand); font-weight: 800; text-decoration: none; }
+
+.payment-chips { flex-wrap: wrap; }
+.payment-chips span { min-width: max-content; padding: 0 9px; }
+
+@media (max-width: 680px) {
+  .category-product-shelf::before { inset-left: -4px; inset-right: -4px; }
+  .policy-content article, .policy-support { padding: 22px; }
+}
