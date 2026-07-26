@@ -13,7 +13,7 @@ This application is prepared for deployment through Hostinger managed Node.js We
 - Build command: `npm run build`
 - Start command: `npm run start`
 - Health endpoint: `/health`
-- Store domain: `bjelectronics.shop`
+- Store domain: `www.bjelectronics.shop`
 - Protected admin route: `/admin`
 
 ## hPanel connection
@@ -28,17 +28,17 @@ This application is prepared for deployment through Hostinger managed Node.js We
 8. Add the production environment variables.
 9. Deploy to the temporary Hostinger hostname.
 10. Verify `/health` returns `status: healthy`.
-11. Bind `bjelectronics.shop` and `www.bjelectronics.shop`.
-12. Set `bjelectronics.shop` as the primary hostname.
-13. Configure `www.bjelectronics.shop` to redirect to the apex domain.
+11. Bind `www.bjelectronics.shop` and `bjelectronics.shop`.
+12. Set `www.bjelectronics.shop` as the primary hostname.
+13. Configure `bjelectronics.shop` to redirect to `https://www.bjelectronics.shop`.
 14. Enable SSL for both hostnames.
-15. Verify `https://bjelectronics.shop/` renders the public storefront.
+15. Verify `https://www.bjelectronics.shop/` renders the public storefront.
 16. Verify an unauthenticated `/admin` request redirects to `/sign-in`.
 
 ## Production environment variables
 
 ```env
-NEXT_PUBLIC_APP_URL=https://bjelectronics.shop
+NEXT_PUBLIC_APP_URL=https://www.bjelectronics.shop
 NODE_ENV=production
 NEXT_TELEMETRY_DISABLED=1
 AUTH_SECRET=<generated-secret>
@@ -61,7 +61,7 @@ After creating the first owner account, set `ALLOW_PUBLIC_SIGNUP=false` and rest
 - Light and dark logos load from `/brand/`.
 - Mobile storefront and admin navigation work at narrow widths.
 - HTTPS works without certificate warnings.
-- `www.bjelectronics.shop` redirects to `bjelectronics.shop`.
+- `bjelectronics.shop` redirects to `www.bjelectronics.shop`.
 - Hostinger automatic deployment is enabled for updates to `main`.
 
 ## Security note
