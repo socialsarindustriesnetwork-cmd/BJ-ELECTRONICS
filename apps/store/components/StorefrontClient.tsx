@@ -130,7 +130,7 @@ export function StorefrontClient({
             ))}
           </aside>
 
-          <section className="reference-main-banner">
+          <section className="reference-main-banner retail-hero">
             <div className="reference-banner-copy">
               <p className="hero-kicker">BJ Electronics official online store</p>
               <h1 id="hero-title">Quality technology.<br /><span>Trusted shopping.</span></h1>
@@ -166,7 +166,7 @@ export function StorefrontClient({
         </section>
 
         <section className="retail-section reference-featured-categories">
-          <div className="retail-section-heading"><div><span>Browse faster</span><h2>Featured categories</h2></div><Link href="/categories">All categories</Link></div>
+          <div className="retail-section-heading"><div><span>Browse faster</span><h2>Shop by category</h2></div><Link href="/categories">All categories</Link></div>
           <div className="reference-category-card-grid">
             {categories.map((category) => (
               <Link href={`/categories?category=${encodeURIComponent(category.name)}`} key={category.name}>
@@ -176,7 +176,7 @@ export function StorefrontClient({
           </div>
         </section>
 
-        <ProductShelf title="Best deals" eyebrow="Limited-time value" products={deals} href="/categories?sort=discount" />
+        <ProductShelf title="Featured products" eyebrow="Limited-time value" products={deals} href="/categories?sort=discount" />
         <ProductShelf title="New arrivals" eyebrow="Fresh technology" products={newest} href="/categories?sort=newest" />
 
         {categoryShelves.map(({ category, products: shelfProducts }) => (
