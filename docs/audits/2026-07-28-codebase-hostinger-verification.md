@@ -22,6 +22,19 @@
 - apex-to-www redirect verification;
 - Hostinger deployment runbook and environment contract.
 
+## Fresh codebase quality result
+
+GitHub Actions CI run `30297107125` completed successfully. The audit passed:
+
+1. locked workspace dependency installation;
+2. platform and storefront configuration audits;
+3. immutable migration validation;
+4. store production-environment validation;
+5. admin production-environment validation;
+6. TypeScript checks for store and admin;
+7. ESLint checks for store and admin;
+8. production builds for store and admin.
+
 ## Live verification result
 
 The public deployment could not be approved during this audit:
@@ -46,6 +59,6 @@ The public deployment could not be approved during this audit:
 
 ## Approval status
 
-- Repository quality gate: pending fresh pull-request CI for this audit branch.
+- Repository quality gate: **passed**.
 - Hostinger public deployment: **failed / not verifiable**.
 - Production approval: **blocked until live verification passes**.
